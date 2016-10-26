@@ -597,6 +597,18 @@ public class StellarTest {
   }
 
   @Test
+  public void testIsEmpty_advanced() throws Exception {
+    final Map<String, Object> variableMap = new HashMap<String, Object>() {{
+      put("empty", "");
+      put("emptyZero", 0);
+      put("emptyNonZeroInt", 2);
+    }};
+    Assert.assertTrue("empty string",runPredicate("IS_EMPTY(empty)", v -> variableMap.get(v)));
+    Assert.assertTrue("0 is empty",runPredicate("IS_EMPTY(emptyZero)", v -> variableMap.get(v)));
+    Assert.assertFalse("2 is not empty",runPredicate("IS_EMPTY(emptyNonZeroInt)", v -> variableMap.get(v)));
+  }
+
+  @Test
   public void testMapFunctions_advanced() throws Exception {
     final Map<String, Object> variableMap = new HashMap<String, Object>() {{
       put("foo", "casey");
