@@ -62,10 +62,16 @@ public class ConfigUploadComponent implements InMemoryComponent {
    */
   private void upload() throws Exception {
     final String zookeeperUrl = topologyProperties.getProperty(KafkaWithZKComponent.ZOOKEEPER_PROPERTY);
-    try(CuratorFramework client = getClient(zookeeperUrl)) {
+    CuratorFramework client = null;
+    try{
+      client = getClient(zookeeperUrl);
       client.start();
       uploadGlobalConfig(client);
       uploadProfilerConfig(client);
+    }
+    finally
+    {
+      client.close();
     }
   }
 

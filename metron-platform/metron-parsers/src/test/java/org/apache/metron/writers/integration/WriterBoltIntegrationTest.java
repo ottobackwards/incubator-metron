@@ -108,7 +108,7 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
             .withTopologyProperties(topologyProperties)
             .withBrokerUrl(kafkaComponent.getBrokerList()).build();
 
-    UnitTestHelper.verboseLogging();
+    //UnitTestHelper.verboseLogging();
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)

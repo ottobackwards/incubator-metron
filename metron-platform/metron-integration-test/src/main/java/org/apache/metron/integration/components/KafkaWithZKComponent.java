@@ -167,6 +167,9 @@ public class KafkaWithZKComponent implements InMemoryComponent {
 
   @Override
   public void stop() {
+    if(consumer != null){
+      consumer.shutdown();
+    }
     if(kafkaServer != null) {
       kafkaServer.shutdown();
     }
@@ -179,12 +182,12 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   }
 
   public List<byte[]> readMessages(String topic) {
-    SimpleConsumer consumer = new SimpleConsumer("localhost", 6667, 100000, 64 * 1024, "consumer");
+    SimpleConsumer simpleConsumer = new SimpleConsumer("localhost", 6667, 100000, 64 * 1024, "consumer");
     FetchRequest req = new FetchRequestBuilder()
             .clientId("consumer")
             .addFetch(topic, 0, 0, 100000)
             .build();
-    FetchResponse fetchResponse = consumer.fetch(req);
+    FetchResponse fetchResponse = simpleConsumer.fetch(req);
     Iterator<MessageAndOffset> results = fetchResponse.messageSet(topic, 0).iterator();
     List<byte[]> messages = new ArrayList<>();
     while(results.hasNext()) {
@@ -193,7 +196,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
       payload.get(bytes);
       messages.add(bytes);
     }
-    consumer.close();
+    simpleConsumer.close();
     return messages;
   }
 

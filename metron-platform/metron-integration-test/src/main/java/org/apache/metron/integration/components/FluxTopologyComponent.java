@@ -107,10 +107,12 @@ public class FluxTopologyComponent implements InMemoryComponent {
   }
 
   public void start() throws UnableToStartException {
+    CuratorFramework client = null;
     try {
       stormCluster = new LocalCluster();
       RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-      try(CuratorFramework client = CuratorFrameworkFactory.newClient(getZookeeperConnectString(), retryPolicy)){
+      try{
+        client = CuratorFrameworkFactory.newClient(getZookeeperConnectString(), retryPolicy);
         client.start();
         String root = "/storm/leader-lock";
         Stat exists = client.checkExists().forPath(root);
@@ -122,7 +124,9 @@ public class FluxTopologyComponent implements InMemoryComponent {
         LOG.error("Unable to create leaderlock", e);
       }
       finally {
-
+        if(client != null){
+          client.close();
+        }
       }
     } catch (Exception e) {
       throw new UnableToStartException("Unable to start flux topology: " + getTopologyLocation(), e);
