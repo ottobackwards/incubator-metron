@@ -124,6 +124,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   public <K,V> KafkaProducer<K,V> createProducer(Map<String, Object> properties, Class<K> keyClass, Class<V> valueClass)
   {
     Map<String, Object> producerConfig = new HashMap<>();
+    producerConfig.put("zookeeper.connect",zookeeperConnectString);
     producerConfig.put("bootstrap.servers", getBrokerList());
     producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
