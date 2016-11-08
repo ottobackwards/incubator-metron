@@ -148,6 +148,7 @@ public abstract class IndexingIntegrationTest extends BaseIntegrationTest {
             .build();
 
 
+    String[] shutdown = {"search","storm","config","kafka"};
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)
@@ -155,6 +156,7 @@ public abstract class IndexingIntegrationTest extends BaseIntegrationTest {
             .withComponent("search", getSearchComponent(topologyProperties))
             .withMillisecondsBetweenAttempts(15000)
             .withNumRetries(10)
+            .withCustomShutdownOrder(shutdown)
             .build();
     runner.start();
 

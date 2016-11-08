@@ -30,4 +30,8 @@ object AdminUtilsWrapper {
                   topicConfig: Properties = new Properties) {
     AdminUtils.createTopic(zkUtils, topic, partitions, replicationFactor, topicConfig)
   }
+  def deleteTopic(zkUtils: ZkUtils,
+                  topic: String){
+    AdminUtils.deleteTopic(zkUtils,topic)
+  }
 }

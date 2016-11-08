@@ -145,13 +145,15 @@ public class EnrichmentIntegrationTest extends BaseIntegrationTest {
             .build();
 
 
-    UnitTestHelper.verboseLogging();
+    //UnitTestHelper.verboseLogging();
+    String[] shutdown = {"storm","config","kafka"};
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)
             .withComponent("storm", fluxComponent)
             .withMillisecondsBetweenAttempts(15000)
             .withNumRetries(10)
+            .withCustomShutdownOrder(shutdown)
             .build();
     runner.start();
 

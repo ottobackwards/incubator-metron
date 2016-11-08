@@ -56,12 +56,14 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
             .withBrokerUrl(kafkaComponent.getBrokerList()).build();
 
     //UnitTestHelper.verboseLogging();
+    String[] shutdown = {"org/apache/storm","config","kafka"};
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)
             .withComponent("org/apache/storm", parserTopologyComponent)
             .withMillisecondsBetweenAttempts(5000)
             .withNumRetries(10)
+            .withCustomShutdownOrder(shutdown)
             .build();
     runner.start();
     try {

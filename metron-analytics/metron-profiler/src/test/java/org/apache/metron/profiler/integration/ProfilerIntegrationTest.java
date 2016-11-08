@@ -286,15 +286,18 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
             .withTopologyProperties(topologyProperties)
             .build();
 
-    // start all components
-    runner = new ComponentRunner.Builder()
-            .withComponent("kafka", kafkaComponent)
-            .withComponent("config", configUploadComponent)
-            .withComponent("storm", fluxComponent)
-            .withMillisecondsBetweenAttempts(15000)
-            .withNumRetries(10)
-            .build();
-    runner.start();
+      // start all components and be sure to shut them down
+      // in the right order
+      String[] shutdown = {"storm","config","kafka"};
+      runner = new ComponentRunner.Builder()
+              .withComponent("kafka", kafkaComponent)
+              .withComponent("config", configUploadComponent)
+              .withComponent("storm", fluxComponent)
+              .withMillisecondsBetweenAttempts(15000)
+              .withNumRetries(10)
+              .withCustomShutdownOrder(shutdown)
+              .build();
+      runner.start();
   }
 
   @After

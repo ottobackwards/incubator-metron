@@ -49,9 +49,12 @@ public class ConfigurationsUtils {
   }
 
   public static void writeGlobalConfigToZookeeper(Map<String, Object> globalConfig, String zookeeperUrl) throws Exception {
-    try(CuratorFramework client = getClient(zookeeperUrl)) {
+    CuratorFramework client = getClient(zookeeperUrl);
+    try{
      client.start();
       writeGlobalConfigToZookeeper(globalConfig, client);
+    }finally {
+      client.close();
     }
   }
   public static void writeGlobalConfigToZookeeper(Map<String, Object> globalConfig, CuratorFramework client) throws Exception {
@@ -203,9 +206,12 @@ public class ConfigurationsUtils {
                                               String enrichmentsConfigPath,
                                               String profilerConfigPath,
                                               String zookeeperUrl) throws Exception {
-    try(CuratorFramework client = getClient(zookeeperUrl)) {
+    CuratorFramework client = getClient(zookeeperUrl);
+    try{
       client.start();
       uploadConfigsToZookeeper(globalConfigPath, parsersConfigPath, enrichmentsConfigPath, profilerConfigPath, client);
+    }finally {
+      client.close();
     }
   }
 

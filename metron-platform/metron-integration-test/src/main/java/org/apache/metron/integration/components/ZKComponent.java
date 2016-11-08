@@ -170,9 +170,6 @@ public class KafkaWithZKComponent implements InMemoryComponent {
     if(consumer != null){
       shutdownConsumer();
     }
-    if(zkClient != null) {
-      zkClient.close();
-    }
     for(Topic topic : getTopics()) {
       try {
            deleteTopic(topic.name);
@@ -180,6 +177,9 @@ public class KafkaWithZKComponent implements InMemoryComponent {
     }
     if(kafkaServer != null) {
       kafkaServer.shutdown();
+    }
+    if(zkClient != null) {
+      zkClient.close();
     }
     if(zkServer != null) {
       zkServer.shutdown();

@@ -20,12 +20,10 @@ package org.apache.metron.integration.components;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.imps.CuratorFrameworkImpl;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.generated.TopologyInfo;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.storm.flux.FluxBuilder;
@@ -42,8 +40,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+
 
 public class FluxTopologyComponent implements InMemoryComponent {
 
@@ -103,13 +102,15 @@ public class FluxTopologyComponent implements InMemoryComponent {
   }
 
   public String getZookeeperConnectString() {
-    return "localhost:2000";
+    String configured = topologyProperties.getProperty(KafkaWithZKComponent.ZOOKEEPER_PROPERTY);
+    return configured == null ? "localhost:2000":configured;
   }
 
   public void start() throws UnableToStartException {
     CuratorFramework client = null;
     try {
-      stormCluster = new LocalCluster();
+      String[] split = getZookeeperConnectString().split(":");
+      stormCluster = new LocalCluster(split[0],Long.parseLong(split[1]));
       RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
       try{
         client = CuratorFrameworkFactory.newClient(getZookeeperConnectString(), retryPolicy);
@@ -135,6 +136,9 @@ public class FluxTopologyComponent implements InMemoryComponent {
 
   public void stop() {
     if (stormCluster != null) {
+      try{
+        stormCluster.killTopology(topologyName);
+      }catch(Exception e){}
       stormCluster.shutdown();
     }
   }
@@ -151,6 +155,11 @@ public class FluxTopologyComponent implements InMemoryComponent {
     Assert.assertNotNull(topology);
     topology.validate();
     try {
+      String[] split = getZookeeperConnectString().split(":");
+      ArrayList servers = new ArrayList();
+      servers.add(split[0]);
+      conf.put(Config.STORM_ZOOKEEPER_SERVERS,servers);
+      conf.put(Config.STORM_ZOOKEEPER_PORT,Integer.valueOf(split[1]));
       stormCluster.submitTopology(topologyName, conf, topology);
     }
     catch(Exception nne) {

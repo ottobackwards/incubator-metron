@@ -25,6 +25,7 @@ import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.parsers.topology.ParserTopologyBuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -63,11 +64,15 @@ public class ParserTopologyComponent implements InMemoryComponent {
     this.brokerUrl = brokerUrl;
     this.sensorType = sensorType;
   }
-
+  public String getZookeeperConnectString() {
+    String configured = topologyProperties.getProperty("kafka.zk");
+    return configured == null ? "localhost:2000":configured;
+  }
   @Override
   public void start() throws UnableToStartException {
+    String zookeeperConnectionString = getZookeeperConnectString();
     try {
-      TopologyBuilder topologyBuilder = ParserTopologyBuilder.build(topologyProperties.getProperty("kafka.zk")
+      TopologyBuilder topologyBuilder = ParserTopologyBuilder.build( zookeeperConnectionString
                                                                    , brokerUrl
                                                                    , sensorType
                                                                    , SpoutConfig.Offset.BEGINNING
@@ -82,8 +87,13 @@ public class ParserTopologyComponent implements InMemoryComponent {
                                                                    , null
                                                                    );
       Map<String, Object> stormConf = new HashMap<>();
-      stormConf.put(Config.TOPOLOGY_DEBUG, true);
-      stormCluster = new LocalCluster();
+      String[] split = zookeeperConnectionString.split(":");
+      ArrayList servers = new ArrayList();
+      servers.add(split[0]);
+     // stormConf.put(Config.TOPOLOGY_DEBUG, true);
+      stormCluster = new LocalCluster(split[0],Long.parseLong(split[1]));
+      stormConf.put(Config.STORM_ZOOKEEPER_SERVERS,servers);
+      stormConf.put(Config.STORM_ZOOKEEPER_PORT,Integer.valueOf(split[1]));
       stormCluster.submitTopology(sensorType, stormConf, topologyBuilder.createTopology());
     } catch (Exception e) {
       throw new UnableToStartException("Unable to start parser topology for sensorType: " + sensorType, e);
@@ -92,7 +102,10 @@ public class ParserTopologyComponent implements InMemoryComponent {
 
   @Override
   public void stop() {
-    if(stormCluster != null) {
+    if (stormCluster != null) {
+      try{
+        stormCluster.killTopology(sensorType);
+      }catch(Exception e){}
       stormCluster.shutdown();
     }
   }
