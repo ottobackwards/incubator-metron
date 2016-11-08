@@ -22,7 +22,9 @@ import org.apache.metron.TestConstants;
 import org.apache.metron.common.Constants;
 import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
 import org.apache.metron.integration.*;
+import org.apache.metron.integration.components.KafkaComponent;
 import org.apache.metron.integration.components.KafkaWithZKComponent;
+import org.apache.metron.integration.components.ZKComponent;
 import org.apache.metron.integration.utils.TestUtils;
 import org.apache.metron.parsers.integration.components.ParserTopologyComponent;
 import org.apache.metron.test.TestDataType;
@@ -40,8 +42,11 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
     final List<byte[]> inputMessages = TestUtils.readSampleData(SampleDataUtils.getSampleDataPath(sensorType, TestDataType.RAW));
 
     final Properties topologyProperties = new Properties();
-    final KafkaWithZKComponent kafkaComponent = getKafkaComponent(topologyProperties, new ArrayList<KafkaWithZKComponent.Topic>() {{
-      add(new KafkaWithZKComponent.Topic(sensorType, 1));
+
+    ZKComponent zkComponent = getZkComponent(topologyProperties);
+
+    final KafkaComponent kafkaComponent = getTestKafkaComponent(topologyProperties,new ArrayList<KafkaComponent.Topic>() {{
+      add(new KafkaComponent.Topic(sensorType, 1));
     }});
     topologyProperties.setProperty("kafka.broker", kafkaComponent.getBrokerList());
 
@@ -56,8 +61,9 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
             .withBrokerUrl(kafkaComponent.getBrokerList()).build();
 
     //UnitTestHelper.verboseLogging();
-    String[] shutdown = {"org/apache/storm","config","kafka"};
+    String[] shutdown = {"org/apache/storm","config","kafka","zk"};
     ComponentRunner runner = new ComponentRunner.Builder()
+            .withComponent("zk", zkComponent)
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)
             .withComponent("org/apache/storm", parserTopologyComponent)
@@ -66,6 +72,9 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
             .withCustomShutdownOrder(shutdown)
             .build();
     runner.start();
+
+    zkComponent.test();
+
     try {
       kafkaComponent.writeMessages(sensorType, inputMessages);
       ProcessorResult<List<byte[]>> result =
@@ -75,14 +84,14 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
                 List<byte[]> invalids = null;
 
                 public ReadinessState process(ComponentRunner runner) {
-                  KafkaWithZKComponent kafkaWithZKComponent = runner.getComponent("kafka", KafkaWithZKComponent.class);
-                  List<byte[]> outputMessages = kafkaWithZKComponent.readMessages(Constants.ENRICHMENT_TOPIC);
+                  KafkaComponent kafkaComponent = runner.getComponent("kafka", KafkaComponent.class);
+                  List<byte[]> outputMessages = kafkaComponent.readMessages(Constants.ENRICHMENT_TOPIC);
                   if (outputMessages.size() == inputMessages.size()) {
                     messages = outputMessages;
                     return ReadinessState.READY;
                   } else {
-                    errors = kafkaWithZKComponent.readMessages(Constants.ERROR_STREAM);
-                    invalids = kafkaWithZKComponent.readMessages(Constants.INVALID_STREAM);
+                    errors = kafkaComponent.readMessages(Constants.ERROR_STREAM);
+                    invalids = kafkaComponent.readMessages(Constants.INVALID_STREAM);
                     if(errors.size() > 0 || invalids.size() > 0) {
                       messages = outputMessages;
                       return ReadinessState.READY;

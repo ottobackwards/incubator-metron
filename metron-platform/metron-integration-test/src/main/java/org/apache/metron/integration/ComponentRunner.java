@@ -113,6 +113,9 @@ public class ComponentRunner {
     public void start() throws UnableToStartException {
         for(String componentName : startupOrder) {
             components.get(componentName).start();
+            try {
+                Thread.sleep(500);
+            }catch(InterruptedException ie){}
         }
     }
     public void stop() {

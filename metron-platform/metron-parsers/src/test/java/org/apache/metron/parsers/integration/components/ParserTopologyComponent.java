@@ -17,6 +17,7 @@
  */
 package org.apache.metron.parsers.integration.components;
 
+import org.apache.metron.integration.components.ZKComponent;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
@@ -65,8 +66,7 @@ public class ParserTopologyComponent implements InMemoryComponent {
     this.sensorType = sensorType;
   }
   public String getZookeeperConnectString() {
-    String configured = topologyProperties.getProperty("kafka.zk");
-    return configured == null ? "localhost:2000":configured;
+     return topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY);
   }
   @Override
   public void start() throws UnableToStartException {
@@ -92,8 +92,8 @@ public class ParserTopologyComponent implements InMemoryComponent {
       servers.add(split[0]);
      // stormConf.put(Config.TOPOLOGY_DEBUG, true);
       stormCluster = new LocalCluster(split[0],Long.parseLong(split[1]));
-      stormConf.put(Config.STORM_ZOOKEEPER_SERVERS,servers);
-      stormConf.put(Config.STORM_ZOOKEEPER_PORT,Integer.valueOf(split[1]));
+      //stormConf.put(Config.STORM_ZOOKEEPER_SERVERS,servers);
+      //stormConf.put(Config.STORM_ZOOKEEPER_PORT,Integer.valueOf(split[1]));
       stormCluster.submitTopology(sensorType, stormConf, topologyBuilder.createTopology());
     } catch (Exception e) {
       throw new UnableToStartException("Unable to start parser topology for sensorType: " + sensorType, e);

@@ -19,8 +19,6 @@ package org.apache.metron.integration.components;
 
 
 import com.google.common.base.Function;
-import kafka.admin.AdminUtils;
-import kafka.admin.RackAwareMode;
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.common.TopicExistsException;
@@ -31,30 +29,21 @@ import kafka.javaapi.FetchResponse;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.message.MessageAndOffset;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServer;
 import kafka.utils.*;
-import kafka.zk.EmbeddedZookeeper;
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.wrapper.AdminUtilsWrapper;
 import org.apache.metron.integration.wrapper.TestUtilsWrapper;
-import org.apache.zookeeper.server.NIOServerCnxnFactory;
-import org.apache.zookeeper.server.ServerCnxnFactory;
-import org.apache.zookeeper.server.ZooKeeperServer;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
 
 
-public class KafkaWithZKComponent implements InMemoryComponent {
-
-  public static final String ZOOKEEPER_PROPERTY = "kafka.zk";
+public class KafkaComponent implements InMemoryComponent {
 
   public static class Topic {
     public int numPartitions;
@@ -65,27 +54,25 @@ public class KafkaWithZKComponent implements InMemoryComponent {
       this.name = name;
     }
   }
+  private Properties topologyProperties;
   private transient KafkaServer kafkaServer;
-  private transient EmbeddedZookeeper zkServer;
   private transient ZkClient zkClient;
   private transient ConsumerConnector consumer;
-  private String zookeeperConnectString;
 
   private int brokerPort = 6667;
   private List<Topic> topics = Collections.emptyList();
-  private Function<KafkaWithZKComponent, Void> postStartCallback;
+  private Function<KafkaComponent, Void> postStartCallback;
 
-  public KafkaWithZKComponent withPostStartCallback(Function<KafkaWithZKComponent, Void> f) {
+  public KafkaComponent withTopologyProperties(Properties topologyProperties) {
+    this.topologyProperties = topologyProperties;
+    return this;
+  }
+  public KafkaComponent withPostStartCallback(Function<KafkaComponent, Void> f) {
     postStartCallback = f;
     return this;
   }
 
-  public KafkaWithZKComponent withExistingZookeeper(String zookeeperConnectString) {
-    this.zookeeperConnectString = zookeeperConnectString;
-    return this;
-  }
-
-  public KafkaWithZKComponent withBrokerPort(int brokerPort) {
+  public KafkaComponent withBrokerPort(int brokerPort) {
     if(brokerPort <= 0)
     {
       brokerPort = TestUtils.RandomPort();
@@ -95,7 +82,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
     return this;
   }
 
-  public KafkaWithZKComponent withTopics(List<Topic> topics) {
+  public KafkaComponent withTopics(List<Topic> topics) {
     this.topics = topics;
     return this;
   }
@@ -124,7 +111,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   public <K,V> KafkaProducer<K,V> createProducer(Map<String, Object> properties, Class<K> keyClass, Class<V> valueClass)
   {
     Map<String, Object> producerConfig = new HashMap<>();
-    producerConfig.put("zookeeper.connect",zookeeperConnectString);
+    producerConfig.put("zookeeper.connect",topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY));
     producerConfig.put("bootstrap.servers", getBrokerList());
     producerConfig.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
     producerConfig.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
@@ -139,11 +126,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
 
   @Override
   public void start() {
-    // setup an EmbeddedZookeeper if no external connection string was provided
-    if(zookeeperConnectString == null) {
-      zkServer = new EmbeddedZookeeper();
-      zookeeperConnectString = "127.0.0.1:" + zkServer.port();
-    }
+    String zookeeperConnectString = topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY);
     zkClient = new ZkClient(zookeeperConnectString, 30000, 30000, ZKStringSerializer$.MODULE$);
 
     Properties props = TestUtilsWrapper.createBrokerConfig(0, zookeeperConnectString, brokerPort);
@@ -158,15 +141,16 @@ public class KafkaWithZKComponent implements InMemoryComponent {
         throw new RuntimeException("Unable to create topic", e);
       }
     }
-    postStartCallback.apply(this);
-  }
-
-  public String getZookeeperConnect() {
-    return zookeeperConnectString;
+    if(postStartCallback != null){
+      postStartCallback.apply(this);
+    }
   }
 
   @Override
   public void stop() {
+    if(zkClient != null) {
+      zkClient.close();
+    }
     if(consumer != null){
       shutdownConsumer();
     }
@@ -177,12 +161,6 @@ public class KafkaWithZKComponent implements InMemoryComponent {
     }
     if(kafkaServer != null) {
       kafkaServer.shutdown();
-    }
-    if(zkClient != null) {
-      zkClient.close();
-    }
-    if(zkServer != null) {
-      zkServer.shutdown();
     }
   }
 
@@ -210,8 +188,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   }
   public ConsumerIterator<byte[], byte[]> getStreamIterator(String topic, String group, String consumerName) {
     // setup simple consumer
-//    Properties consumerProperties = TestUtils.createConsumerProperties(zkServer.connectString(), group, consumerName, -1);
-    Properties consumerProperties = TestUtils.createConsumerProperties(zookeeperConnectString, group, consumerName, -1);
+    Properties consumerProperties = TestUtils.createConsumerProperties(topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY), group, consumerName, -1);
     consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(consumerProperties));
     Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
     topicCountMap.put(topic, 1);
@@ -240,7 +217,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   public void createTopic(String name, int numPartitions, boolean waitUntilMetadataIsPropagated) throws InterruptedException {
     ZkUtils zkUtils = null;
     try {
-      zkUtils = ZkUtils.apply(zookeeperConnectString, 30000, 30000, false);
+      zkUtils = ZkUtils.apply(topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY), 30000, 30000, false);
       AdminUtilsWrapper.createTopic(zkUtils, name, numPartitions, 1, new Properties());
       if (waitUntilMetadataIsPropagated) {
         waitUntilMetadataIsPropagated(name, numPartitions);
@@ -258,7 +235,7 @@ public class KafkaWithZKComponent implements InMemoryComponent {
   public void deleteTopic(String name){
     ZkUtils zkUtils = null;
     try {
-      zkUtils = ZkUtils.apply(zookeeperConnectString, 30000, 30000, false);
+      zkUtils = ZkUtils.apply(topologyProperties.getProperty(ZKComponent.ZOOKEEPER_PROPERTY), 30000, 30000, false);
       AdminUtilsWrapper.deleteTopic(zkUtils, name);
     }
     catch(TopicExistsException tee) {

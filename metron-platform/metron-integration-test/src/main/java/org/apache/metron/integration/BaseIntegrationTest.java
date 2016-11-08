@@ -19,24 +19,42 @@ package org.apache.metron.integration;
 
 import com.google.common.base.Function;
 import org.apache.metron.TestConstants;
+import org.apache.metron.integration.components.KafkaComponent;
 import org.apache.metron.integration.components.KafkaWithZKComponent;
+import org.apache.metron.integration.components.ZKComponent;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Properties;
 
 public abstract class BaseIntegrationTest {
-
-  protected KafkaWithZKComponent getKafkaComponent(final Properties topologyProperties, List<KafkaWithZKComponent.Topic> topics) {
-    return new KafkaWithZKComponent().withTopics(topics)
-            .withPostStartCallback(new Function<KafkaWithZKComponent, Void>() {
-              @Nullable
-              @Override
-              public Void apply(@Nullable KafkaWithZKComponent kafkaWithZKComponent) {
-                topologyProperties.setProperty(KafkaWithZKComponent.ZOOKEEPER_PROPERTY, kafkaWithZKComponent.getZookeeperConnect());
-                return null;
-              }
-            });
+    protected KafkaWithZKComponent getKafkaComponent(final Properties topologyProperties, List<KafkaWithZKComponent.Topic> topics){
+        return new KafkaWithZKComponent()
+                .withPostStartCallback(new Function<KafkaWithZKComponent, Void>() {
+                    @Nullable
+                    @Override
+                    public Void apply(@Nullable KafkaWithZKComponent kafkaComponent) {
+                        topologyProperties.setProperty(KafkaWithZKComponent.ZOOKEEPER_PROPERTY, kafkaComponent.getZookeeperConnect());
+                        return null;
+                    }
+                });
+    }
+  protected KafkaComponent getTestKafkaComponent(final Properties topologyProperties, List<KafkaComponent.Topic> topics) {
+    return new KafkaComponent()
+            .withTopologyProperties(topologyProperties)
+            .withTopics(topics);
   }
+
+  protected ZKComponent getZkComponent(final Properties topologyProperties){
+      return new ZKComponent()
+              .withPostStartCallback(new Function<ZKComponent, Void>() {
+                  @Nullable
+                  @Override
+                  public Void apply(@Nullable ZKComponent zKComponent) {
+                      topologyProperties.setProperty(ZKComponent.ZOOKEEPER_PROPERTY, zKComponent.getZookeeperConnect());
+                      return null;
+                  }
+              });
+   }
 
 }
