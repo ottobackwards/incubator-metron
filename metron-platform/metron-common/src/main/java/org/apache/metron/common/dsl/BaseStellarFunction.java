@@ -23,6 +23,9 @@ import java.util.List;
 
 import static java.lang.String.format;
 
+/**
+ * Functions that do not require initialization can extend this class rather than directly implement StellarFunction
+ */
 public abstract class BaseStellarFunction implements StellarFunction {
 
   public abstract Object apply(List<Object> args);

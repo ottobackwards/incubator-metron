@@ -17,12 +17,12 @@
  */
 package org.apache.metron.parsers.bolt;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.bolt.ConfiguredParserBolt;
 import org.apache.metron.common.configuration.FieldValidator;
@@ -119,13 +119,13 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
         List<FieldValidator> fieldValidations = getConfigurations().getFieldValidations();
         Optional<List<JSONObject>> messages = parser.parseOptional(originalMessage);
         for (JSONObject message : messages.orElse(Collections.emptyList())) {
-          if (parser.validate(message) && filter != null && filter.emitTuple(message, stellarContext)) {
-            message.put(Constants.SENSOR_TYPE, getSensorType());
-            for (FieldTransformer handler : sensorParserConfig.getFieldTransformations()) {
-              if (handler != null) {
-                handler.transformAndUpdate(message, sensorParserConfig.getParserConfig(), stellarContext);
-              }
+          message.put(Constants.SENSOR_TYPE, getSensorType());
+          for (FieldTransformer handler : sensorParserConfig.getFieldTransformations()) {
+            if (handler != null) {
+              handler.transformAndUpdate(message, sensorParserConfig.getParserConfig(), stellarContext);
             }
+          }
+          if (parser.validate(message) && filter != null && filter.emitTuple(message, stellarContext)) {
             numWritten++;
             if(!isGloballyValid(message, fieldValidations)) {
               message.put(Constants.SENSOR_TYPE, getSensorType()+ ".invalid");

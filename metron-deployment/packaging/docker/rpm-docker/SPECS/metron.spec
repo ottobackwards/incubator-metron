@@ -127,6 +127,7 @@ This package installs the Metron Parser files
 %{metron_home}/config/zookeeper/parsers/squid.json
 %{metron_home}/config/zookeeper/parsers/websphere.json
 %{metron_home}/config/zookeeper/parsers/yaf.json
+%{metron_home}/config/zookeeper/parsers/asa.json
 %{metron_home}/patterns/asa
 %{metron_home}/patterns/common
 %{metron_home}/patterns/fireeye
@@ -134,7 +135,7 @@ This package installs the Metron Parser files
 %{metron_home}/patterns/squid
 %{metron_home}/patterns/websphere
 %{metron_home}/patterns/yaf
-%attr(0644,root,root) %{metron_home}/lib/metron-parsers-%{full_version}.jar
+%attr(0644,root,root) %{metron_home}/lib/metron-parsers-%{full_version}-uber.jar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -155,7 +156,7 @@ This package installs the Metron Elasticsearch files
 %dir %{metron_home}/lib
 %{metron_home}/bin/start_elasticsearch_topology.sh
 %{metron_home}/config/elasticsearch.properties
-%attr(0644,root,root) %{metron_home}/lib/metron-elasticsearch-%{full_version}.jar
+%attr(0644,root,root) %{metron_home}/lib/metron-elasticsearch-%{full_version}-uber.jar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -201,7 +202,7 @@ This package installs the Metron Solr files
 %dir %{metron_home}/lib
 %{metron_home}/bin/start_solr_topology.sh
 %{metron_home}/config/solr.properties
-%attr(0644,root,root) %{metron_home}/lib/metron-solr-%{full_version}.jar
+%attr(0644,root,root) %{metron_home}/lib/metron-solr-%{full_version}-uber.jar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 
@@ -231,6 +232,7 @@ This package installs the Metron Enrichment files
 %{metron_home}/config/zookeeper/enrichments/snort.json
 %{metron_home}/config/zookeeper/enrichments/websphere.json
 %{metron_home}/config/zookeeper/enrichments/yaf.json
+%{metron_home}/config/zookeeper/enrichments/asa.json
 %{metron_home}/ddl/geoip_ddl.sql
 %{metron_home}/flux/enrichment/remote.yaml
 %exclude %{metron_home}/flux/enrichment/test.yaml
@@ -283,6 +285,8 @@ This package installs the Metron PCAP files %{metron_home}
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %changelog
+* Thu Nov 03 2016 David Lyle <dlyle65535@gmail.com> - 0.2.1
+- Add ASA parser/enrichment configuration files 
 * Thu Jul 21 2016 Michael Miklavcic <michael.miklavcic@gmail.com> - 0.2.1
 - Remove parser flux files
 - Add new enrichment files

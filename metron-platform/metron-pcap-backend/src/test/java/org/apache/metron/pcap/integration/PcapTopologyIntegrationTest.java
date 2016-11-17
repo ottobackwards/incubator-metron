@@ -35,6 +35,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.metron.common.Constants;
 import org.apache.metron.integration.ComponentRunner;
 import org.apache.metron.integration.Processor;
+import org.apache.metron.integration.ProcessorResult;
 import org.apache.metron.integration.ReadinessState;
 import org.apache.metron.integration.components.FluxTopologyComponent;
 import org.apache.metron.integration.components.KafkaWithZKComponent;
@@ -109,7 +110,6 @@ public class PcapTopologyIntegrationTest {
       byte[] pcapWithHeader = value.copyBytes();
       long calculatedTs = PcapHelper.getTimestamp(pcapWithHeader);
       {
-
         List<PacketInfo> info = PcapHelper.toPacketInfo(pcapWithHeader);
         for(PacketInfo pi : info) {
           Assert.assertEquals(calculatedTs, pi.getPacketTimeInNanos());
@@ -247,7 +247,6 @@ public class PcapTopologyIntegrationTest {
             .build();
     try {
       runner.start();
-      System.out.println("Components started...");
 
       fluxComponent.submitTopology();
       sendPcapEntriesCallback.send(kafkaComponent, pcapEntries);
@@ -264,7 +263,7 @@ public class PcapTopologyIntegrationTest {
         }
 
         @Override
-        public Void getResult() {
+        public ProcessorResult<Void> getResult() {
           return null;
         }
       });
@@ -443,7 +442,67 @@ public class PcapTopologyIntegrationTest {
                         , getTimestamp(0, pcapEntries)
                         , getTimestamp(pcapEntries.size()-1, pcapEntries) + 1
                         , 10
-                        , "ip_dst_port == '22'"
+                        , "ip_dst_port == 22"
+                        , new Configuration()
+                        , FileSystem.get(new Configuration())
+                        , new QueryPcapFilter.Configurator()
+                );
+        assertInOrder(results);
+        Assert.assertTrue(Iterables.size(results) > 0);
+        Assert.assertEquals(Iterables.size(results)
+                , Iterables.size(filterPcaps(pcapEntries, new Predicate<JSONObject>() {
+                          @Override
+                          public boolean apply(@Nullable JSONObject input) {
+                            Object prt = input.get(Constants.Fields.DST_PORT.getName());
+                            return prt != null && (Long) prt == 22;
+                          }
+                        }, withHeaders)
+                )
+        );
+        assertInOrder(results);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PcapMerger.merge(baos, Iterables.partition(results, 1).iterator().next());
+        Assert.assertTrue(baos.toByteArray().length > 0);
+      }
+      {
+        //test with query filter
+        Iterable<byte[]> results =
+                job.query(new Path(outDir.getAbsolutePath())
+                        , new Path(queryDir.getAbsolutePath())
+                        , getTimestamp(0, pcapEntries)
+                        , getTimestamp(pcapEntries.size()-1, pcapEntries) + 1
+                        , 10
+                        , "ip_dst_port > 20 and ip_dst_port < 55792"
+                        , new Configuration()
+                        , FileSystem.get(new Configuration())
+                        , new QueryPcapFilter.Configurator()
+                );
+        assertInOrder(results);
+        Assert.assertTrue(Iterables.size(results) > 0);
+        Assert.assertEquals(Iterables.size(results)
+                , Iterables.size(filterPcaps(pcapEntries, new Predicate<JSONObject>() {
+                          @Override
+                          public boolean apply(@Nullable JSONObject input) {
+                            Object prt = input.get(Constants.Fields.DST_PORT.getName());
+                            return prt != null && ((Long) prt > 20 && (Long) prt < 55792);
+                          }
+                        }, withHeaders)
+                )
+        );
+        assertInOrder(results);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PcapMerger.merge(baos, Iterables.partition(results, 1).iterator().next());
+        Assert.assertTrue(baos.toByteArray().length > 0);
+      }
+      {
+        //test with query filter
+        Iterable<byte[]> results =
+                job.query(new Path(outDir.getAbsolutePath())
+                        , new Path(queryDir.getAbsolutePath())
+                        , getTimestamp(0, pcapEntries)
+                        , getTimestamp(pcapEntries.size()-1, pcapEntries) + 1
+                        , 10
+                        , "ip_dst_port > 55790"
                         , new Configuration()
                         , FileSystem.get(new Configuration())
                         , new QueryPcapFilter.Configurator()
@@ -455,7 +514,7 @@ public class PcapTopologyIntegrationTest {
                   @Override
                   public boolean apply(@Nullable JSONObject input) {
                     Object prt = input.get(Constants.Fields.DST_PORT.getName());
-                    return prt != null && prt.toString().equals("22");
+                    return prt != null && (Long) prt > 55790;
                   }
                 }, withHeaders)
                 )

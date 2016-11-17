@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.apache.metron</groupId>
 		<artifactId>Metron</artifactId>
-		<version>0.2.1BETA</version>
+		<version>0.3.0</version>
 	</parent>
 	<description>Stream analytics for Metron</description>
 	<url>https://metron.incubator.apache.org/</url>
@@ -60,9 +60,19 @@
 	</modules>
 	<dependencies>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${global_slf4j_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${global_slf4j_version}</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>${global_junit_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -117,17 +127,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<repositories>
-		<repository>
-			<id>clojars.org</id>
-			<url>http://clojars.org/repo</url>
-		</repository>
-		<repository>
-			<id>multiline-release-repo</id>
-			<url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-    </repositories>
 </project>

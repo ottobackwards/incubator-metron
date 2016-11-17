@@ -29,6 +29,7 @@ import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
 import org.apache.metron.integration.*;
 import org.apache.metron.integration.components.KafkaWithZKComponent;
+import org.apache.metron.parsers.csv.CSVParser;
 import org.apache.metron.parsers.integration.components.ParserTopologyComponent;
 import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
@@ -83,6 +84,7 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void test() throws UnableToStartException, IOException {
+    UnitTestHelper.setLog4jLevel(CSVParser.class, org.apache.log4j.Level.FATAL);
     final String sensorType = "dummy";
     final List<byte[]> inputMessages = new ArrayList<byte[]>() {{
       add(Bytes.toBytes("valid,foo"));
@@ -112,14 +114,14 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("kafka", kafkaComponent)
             .withComponent("config", configUploadComponent)
-            .withComponent("storm", parserTopologyComponent)
+            .withComponent("org/apache/storm", parserTopologyComponent)
             .withMillisecondsBetweenAttempts(5000)
             .withNumRetries(10)
             .build();
     try {
       runner.start();
       kafkaComponent.writeMessages(sensorType, inputMessages);
-      Map<String, List<JSONObject>> outputMessages =
+      ProcessorResult<Map<String, List<JSONObject>>> result =
               runner.process(new Processor<Map<String, List<JSONObject>>>() {
                 Map<String, List<JSONObject>> messages = null;
 
@@ -139,10 +141,12 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
                   return ReadinessState.NOT_READY;
                 }
 
-                public Map<String, List<JSONObject>> getResult() {
-                  return messages;
+                public ProcessorResult<Map<String, List<JSONObject>>> getResult() {
+                  ProcessorResult.Builder<Map<String,List<JSONObject>>> builder = new ProcessorResult.Builder();
+                  return builder.withResult(messages).build();
                 }
               });
+      Map<String,List<JSONObject>> outputMessages = result.getResult();
       Assert.assertEquals(3, outputMessages.size());
       Assert.assertEquals(1, outputMessages.get(Constants.ENRICHMENT_TOPIC).size());
       Assert.assertEquals("valid", outputMessages.get(Constants.ENRICHMENT_TOPIC).get(0).get("action"));
