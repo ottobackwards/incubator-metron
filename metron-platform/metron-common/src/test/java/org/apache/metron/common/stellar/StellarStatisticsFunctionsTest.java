@@ -31,6 +31,7 @@ import org.apache.metron.common.dsl.ParseException;
 import org.apache.metron.common.dsl.StellarFunctions;
 import org.apache.metron.common.math.stats.OnlineStatisticsProviderTest;
 import org.apache.metron.common.math.stats.StatisticsProvider;
+import org.apache.metron.common.utils.ConversionUtils;
 import org.apache.metron.common.utils.SerDeUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -226,7 +227,7 @@ public class StellarStatisticsFunctionsTest {
   @Test
   public void testAddManyIntegers() throws Exception {
     statsInit(windowSize);
-    long countAtStart = (long) run("STATS_COUNT(stats)", variables);
+    double countAtStart = (double) run("STATS_COUNT(stats)", variables);
 
     run("STATS_ADD(stats, 10, 20, 30, 40, 50)", variables);
 
@@ -237,7 +238,7 @@ public class StellarStatisticsFunctionsTest {
   @Test
   public void testAddManyFloats() throws Exception {
     statsInit(windowSize);
-    long countAtStart = (long) run("STATS_COUNT(stats)", variables);
+    double countAtStart = (double) run("STATS_COUNT(stats)", variables);
 
     run("STATS_ADD(stats, 10.0, 20.0, 30.0, 40.0, 50.0)", variables);
 
@@ -249,7 +250,7 @@ public class StellarStatisticsFunctionsTest {
   public void testCount() throws Exception {
     statsInit(windowSize);
     Object actual = run("STATS_COUNT(stats)", variables);
-    assertEquals(stats.getN(), actual);
+    assertEquals((long)stats.getN(), (long)ConversionUtils.convert(actual,Long.class));
   }
 
   @Test
@@ -378,8 +379,8 @@ public class StellarStatisticsFunctionsTest {
       assertTrue(((Double) actual).isNaN());
     }
     {
-      long actual = (long) run("STATS_COUNT(null)", variables);
-      assertEquals(-1L, actual);
+      double actual = (double) run("STATS_COUNT(null)", variables);
+      assertTrue(((Double)actual).isNaN());
     }
     {
       Object actual = run("STATS_VARIANCE(null)", variables);
