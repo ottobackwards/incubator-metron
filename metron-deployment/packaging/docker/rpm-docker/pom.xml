@@ -176,7 +176,13 @@
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>${metron_dir}/metron-platform/metron-parsers/target/</directory>
+                                    <directory>${metron_dir}/metron-platform/metron-parsers-common/target/</directory>
+                                    <includes>
+                                        <include>*.tar.gz</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${metron_dir}/metron-platform/metron-parser-asa/target/</directory>
                                     <includes>
                                         <include>*.tar.gz</include>
                                     </includes>

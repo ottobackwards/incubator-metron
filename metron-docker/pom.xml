@@ -62,7 +62,13 @@
                             <outputDirectory>${project.basedir}/compose/kafkazk/parser</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../metron-platform/metron-parsers/target/</directory>
+                                    <directory>../metron-platform/metron-parsers-common/target/</directory>
+                                    <includes>
+                                        <include>*.tar.gz</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>../metron-platform/metron-parser-asa/target/</directory>
                                     <includes>
                                         <include>*.tar.gz</include>
                                     </includes>
@@ -116,7 +122,13 @@
                             <outputDirectory>${project.basedir}/compose/storm/parser</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/../metron-platform/metron-parsers/target/</directory>
+                                    <directory>${project.basedir}/../metron-platform/metron-parsers-common/target/</directory>
+                                    <includes>
+                                        <include>*.tar.gz</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/../metron-platform/metron-parser-asa/target/</directory>
                                     <includes>
                                         <include>*.tar.gz</include>
                                     </includes>

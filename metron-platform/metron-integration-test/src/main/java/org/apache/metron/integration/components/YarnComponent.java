@@ -69,6 +69,7 @@ public class YarnComponent implements InMemoryComponent{
         conf.setBoolean(YarnConfiguration.TIMELINE_SERVICE_ENABLED, true);
         conf.set(YarnConfiguration.RM_SCHEDULER, CapacityScheduler.class.getName());
         conf.setBoolean(YarnConfiguration.NODE_LABELS_ENABLED, true);
+        conf.set(YarnConfiguration.TIMELINE_SERVICE_ADDRESS,YarnConfiguration.DEFAULT_TIMELINE_SERVICE_ADDRESS);
 
         try {
             yarnCluster =
