@@ -72,7 +72,7 @@ public class ConfiguredEnrichmentBoltTest extends BaseConfiguredBoltTest {
       ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensorType, sensorEnrichmentConfigs.get(sensorType), zookeeperUrl);
       enrichmentConfigurationTypes.add(sensorType);
     }
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.BASE_PARSER_CONFIGS_PATH);
     for (String sensorType : sensorParserConfigs.keySet()) {
       ConfigurationsUtils.writeSensorParserConfigToZookeeper(sensorType, sensorParserConfigs.get(sensorType), zookeeperUrl);
     }

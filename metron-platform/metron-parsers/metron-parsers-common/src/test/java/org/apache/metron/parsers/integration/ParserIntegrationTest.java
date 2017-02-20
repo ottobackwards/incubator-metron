@@ -57,7 +57,7 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
             .withGlobalConfigsPath("../" + TestConstants.SAMPLE_CONFIG_PATH)
-            .withParserConfigsPath("../" + TestConstants.PARSER_CONFIGS_PATH);
+            .withParserConfigsPath(TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
             .withSensorType(sensorType)

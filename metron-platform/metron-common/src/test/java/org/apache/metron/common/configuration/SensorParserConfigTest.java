@@ -28,7 +28,7 @@ public class SensorParserConfigTest {
 
   @Test
   public void testSerDe() throws IOException {
-    for(File parserConfig : new File(new File(TestConstants.PARSER_CONFIGS_PATH), "parsers").listFiles()) {
+    for(File parserConfig : new File(new File(TestConstants.BASE_PARSER_CONFIGS_PATH), "parsers").listFiles()) {
       SensorParserConfig config = null;
       try (BufferedReader br = new BufferedReader(new FileReader(parserConfig))) {
         String parserStr = IOUtils.toString(br);

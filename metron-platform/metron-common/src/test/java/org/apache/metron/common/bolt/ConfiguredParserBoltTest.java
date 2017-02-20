@@ -72,7 +72,7 @@ public class ConfiguredParserBoltTest extends BaseConfiguredBoltTest {
     for (String sensorType : sensorEnrichmentConfigs.keySet()) {
       ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensorType, sensorEnrichmentConfigs.get(sensorType), zookeeperUrl);
     }
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.BASE_PARSER_CONFIGS_PATH);
     for (String sensorType : sensorParserConfigs.keySet()) {
       ConfigurationsUtils.writeSensorParserConfigToZookeeper(sensorType, sensorParserConfigs.get(sensorType), zookeeperUrl);
       parserConfigurationTypes.add(sensorType);
@@ -92,7 +92,7 @@ public class ConfiguredParserBoltTest extends BaseConfiguredBoltTest {
 
     configsUpdated = new HashSet<>();
     sampleConfigurations.updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH));
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.BASE_PARSER_CONFIGS_PATH);
     for (String sensorType : sensorParserConfigs.keySet()) {
       sampleConfigurations.updateSensorParserConfig(sensorType, sensorParserConfigs.get(sensorType));
     }

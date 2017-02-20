@@ -33,16 +33,15 @@ import org.apache.metron.integration.components.KafkaComponent;
 import org.apache.metron.integration.processors.KafkaMessageSet;
 import org.apache.metron.integration.components.ZKServerComponent;
 import org.apache.metron.integration.processors.KafkaProcessor;
-import org.apache.metron.parsers.csv.CSVParser;
 import org.apache.metron.parsers.integration.components.ParserTopologyComponent;
 import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
-
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
+
 
 public class WriterBoltIntegrationTest extends BaseIntegrationTest {
   public static class MockValidator implements FieldValidation{
@@ -74,7 +73,7 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
 
   /**
    {
-    "parserClassName" : "org.apache.metron.parsers.csv.CSVParser"
+    "parserClassName" : "org.apache.metron.writers.integration.WriterTestCsvParser"
    ,"sensorTopic":"dummy"
    ,"parserConfig":
    {
@@ -90,7 +89,7 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void test() throws UnableToStartException, IOException {
-    UnitTestHelper.setLog4jLevel(CSVParser.class, org.apache.log4j.Level.FATAL);
+    UnitTestHelper.setLog4jLevel(WriterTestCsvParser.class, org.apache.log4j.Level.FATAL);
     final String sensorType = "dummy";
     final List<byte[]> inputMessages = new ArrayList<byte[]>() {{
       add(Bytes.toBytes("valid,foo"));

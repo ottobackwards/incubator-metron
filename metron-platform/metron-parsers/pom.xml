@@ -41,7 +41,17 @@
 	</licenses>
 	<modules>
 		<module>metron-parsers-common</module>
+		<module>metron-parsers-base</module>
 		<module>metron-parser-asa</module>
+		<module>metron-parser-bro</module>
+		<module>metron-parser-fireeye</module>
+		<module>metron-parser-ise</module>
+		<module>metron-parser-lancope</module>
+		<module>metron-parser-logstash</module>
+		<module>metron-parser-paloalto</module>
+		<module>metron-parser-snort</module>
+		<module>metron-parser-sourcefire</module>
+		<module>metron-parser-websphere</module>
     </modules>
 	<build>
 		<plugins>

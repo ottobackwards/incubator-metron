@@ -35,7 +35,6 @@ import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.common.utils.ErrorUtils;
 import org.apache.metron.common.writer.BulkWriterResponse;
 import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.parsers.csv.CSVParser;
 import org.apache.metron.test.bolt.BaseBoltTest;
 import org.apache.metron.parsers.interfaces.MessageFilter;
 import org.apache.metron.parsers.interfaces.MessageParser;

@@ -20,7 +20,6 @@ package org.apache.metron.parsers.asa;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.metron.parsers.sourcefire.BasicSourcefireParser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
