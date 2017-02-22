@@ -45,6 +45,6 @@ fi
 
 METRON_VERSION=${project.version}
 METRON_HOME=/usr/metron/$METRON_VERSION
-METRON_TOPOLOGY_LIB=$METRON_HOME/topology/$SENSOR/lib
-TOPOLOGY_JAR=metron-parser-$SENSOR-$METRON_VERSION-uber.jar
-storm jar $METRON_TOPOLOGY_LIB/$TOPOLOGY_JAR org.apache.metron.parsers.topology.ParserTopologyCLI $ORIGINAL_ARGS
+METRON_TELEMETRY_LIB=$METRON_HOME/telemetry/$SENSOR/lib
+TELEMETRY_JAR=metron-parser-$SENSOR-$METRON_VERSION-uber.jar
+storm jar $METRON_TELEMETRY_LIB/$TELEMETRY_JAR org.apache.metron.parsers.topology.ParserTopologyCLI $ORIGINAL_ARGS
