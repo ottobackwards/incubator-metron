@@ -23,9 +23,9 @@
     - "{{telemetry}}"
 
 - name: Unbundle Metron bundles
-  shell: "tar xzvf telemetry/{{ item }}/*.tar.gz"
+  shell: "tar xzvf metron-parser-{{item}}-{{metron_version}}-archive.tar.gz"
   args:
-    chdir: "{{ metron_directory }}"
+    chdir: "{{ metron_directory }}/telemetry/{{ item }}"
   with_items:
     - "{{telemetry}}"
 

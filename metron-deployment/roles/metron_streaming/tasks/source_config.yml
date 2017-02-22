@@ -30,10 +30,12 @@
     mode: 0644
   when: install_solr | default(False) == True
 
-- name: Load Config
+- name: Load Metron Config
   shell: "{{ metron_directory }}/bin/zk_load_configs.sh --mode PUSH -i {{ zookeeper_config_path }} -z {{ zookeeper_url }} && touch {{ zookeeper_config_path }}/configured"
 
-
-
+- name: Load Telemetry Configs
+  shell: "{{ metron_directory }}/bin/zk_load_configs.sh --mode PUSH -i {{metron_directory}}/telemetry/{{item}}/config/zookeeper -z {{ zookeeper_url }} && touch {{metron_directory}}/telemetry/{{item}}/config/zookeeper/configured"
+  with_items:
+    - "{{telemetry}}"
 
 
