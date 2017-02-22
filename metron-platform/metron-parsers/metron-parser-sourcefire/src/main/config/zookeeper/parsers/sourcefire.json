@@ -1,0 +1,4 @@
+{
+  "parserClassName": "org.apache.metron.parsers.sourcefire.BasicSourcefireParser",
+  "sensorTopic": "sourcefire"
+}
