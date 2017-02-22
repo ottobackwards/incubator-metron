@@ -50,7 +50,7 @@ public class ConfigurationsUtilsTest {
     client.start();
     expectedGlobalConfig = ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH);
     expectedSensorParserConfigMap = ConfigurationsUtils.readSensorParserConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT, TEST_SENSOR_TYPE));
-    expectedSensorEnrichmentConfigMap = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(TestConstants.ENRICHMENTS_CONFIGS_PATH);
+    expectedSensorEnrichmentConfigMap = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,TEST_SENSOR_TYPE));
   }
 
   @Test
