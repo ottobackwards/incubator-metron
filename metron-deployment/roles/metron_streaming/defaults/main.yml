@@ -31,7 +31,7 @@ metron_enrichment_bundle_name: metron-enrichment-{{ metron_version }}-archive.ta
 metron_indexing_bundle_name: metron-indexing-{{ metron_version }}-archive.tar.gz
 metron_solr_bundle_name: metron-solr-{{ metron_version }}-archive.tar.gz
 metron_elasticsearch_bundle_name: metron-elasticsearch-{{ metron_version }}-archive.tar.gz
-metron_parsers_bundle_name: metron-parsers-{{ metron_version }}-archive.tar.gz
+metron_parsers_common_bundle_name: metron-parsers-common-{{ metron_version }}-archive.tar.gz
 metron_maas_bundle_name: metron-maas-service-{{ metron_version }}-archive.tar.gz
 metron_profiler_bundle_name: metron-profiler-{{ metron_version }}-archive.tar.gz
 metron_profiler_client_bundle_name: metron-profiler-client-{{ metron_version }}-archive.tar.gz
@@ -44,7 +44,7 @@ metron_enrichment_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-
 metron_indexing_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-indexing/target/{{ metron_indexing_bundle_name }}"
 metron_solr_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-solr/target/{{ metron_solr_bundle_name }}"
 metron_elasticsearch_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-elasticsearch/target/{{ metron_elasticsearch_bundle_name }}"
-metron_parsers_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-parsers/target/{{ metron_parsers_bundle_name }}"
+metron_parsers_common_bundle_path: "{{ playbook_dir }}/../../metron-platform/metron-parsers/metron-parsers-common/target/{{ metron_parsers_common_bundle_name }}"
 metron_maas_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-maas-service/target/{{ metron_maas_bundle_name }}"
 metron_profiler_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-profiler/target/{{ metron_profiler_bundle_name }}"
 metron_profiler_client_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-profiler-client/target/{{ metron_profiler_client_bundle_name }}"
@@ -58,7 +58,7 @@ metron_pcap_properties_config_path: "{{ metron_directory }}/config/pcap.properti
 metron_solr_properties_config_path: "{{ metron_directory }}/config/solr.properties"
 metron_elasticsearch_properties_config_path: "{{ metron_directory }}/config/elasticsearch.properties"
 metron_enrichment_properties_config_path: "{{ metron_directory }}/config/enrichment.properties"
-metron_parsers_properties_config_path: "{{ metron_directory }}/config/parsers.properties"
+metron_parsers_common_properties_config_path: "{{ metron_directory }}/config/parsers.properties"
 metron_profiler_properties_config_path: "{{ metron_directory }}/config/profiler.properties"
 
 hbase_config_path: "/etc/hbase/conf"
@@ -71,6 +71,9 @@ threat_intel_bin: "{{ metron_directory }}/bin/flatfile_loader.sh"
 threat_intel_work_dir: /tmp/ti_bulk
 threat_intel_csv_filename: "threat_ip.csv"
 threat_intel_csv_filepath: "{{ threat_intel_csv_filename }}"
+
+# telemetry - this could be gathered
+telemetry: ["asa","base","bro","fireeye","ise","lancope","logstash","paloalto","snort","squid","websphere","yaf","sourcefire"]
 
 pycapa_topic: pcap
 bro_topic: bro

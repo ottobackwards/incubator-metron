@@ -21,6 +21,7 @@
       - lib
       - bin
       - config
+      - telemetry
 
 - name: Create Source Config Directory
   file:
@@ -28,7 +29,13 @@
     state: directory
     mode: 0755
 
+- name: Create Telemetry Directories
+  file: path={{ metron_directory}}/telemetry/{{item}} state=directory mode=0755
+  with_items: "{{telemetry}}"
+
 - include: copy_bundles.yml
+
+- include: copy_telemetry_bundles.yml
 
 - include: hdfs_filesystem.yml
   run_once: true

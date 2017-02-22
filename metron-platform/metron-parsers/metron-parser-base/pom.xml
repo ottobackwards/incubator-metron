@@ -20,7 +20,7 @@
         <artifactId>metron-parsers</artifactId>
         <version>0.3.1</version>
     </parent>
-    <artifactId>metron-parsers-base</artifactId>
+    <artifactId>metron-parser-base</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
