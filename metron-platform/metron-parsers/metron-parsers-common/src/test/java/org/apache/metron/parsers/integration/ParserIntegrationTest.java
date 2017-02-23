@@ -21,6 +21,7 @@ import com.google.common.base.Function;
 import junit.framework.Assert;
 import org.apache.metron.TestConstants;
 import org.apache.metron.common.Constants;
+import org.apache.metron.enrichment.adapters.threatintel.ThreatIntelAdapterTest;
 import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
 import org.apache.metron.integration.*;
 import org.apache.metron.integration.components.KafkaComponent;
@@ -38,10 +39,12 @@ import java.util.*;
 
 public abstract class ParserIntegrationTest extends BaseIntegrationTest {
   protected List<byte[]> inputMessages;
+  protected String sensorType;
   @Test
   public void test() throws Exception {
-    final String sensorType = getSensorType();
-    inputMessages = TestUtils.readSampleData(SampleDataUtils.getSampleDataPath(1,sensorType, TestDataType.RAW));
+    sensorType = getSensorType();
+    final String dataPath = getSampleDataPath();
+    inputMessages = TestUtils.readSampleData(dataPath);
 
     final Properties topologyProperties = new Properties();
     final KafkaComponent kafkaComponent = getKafkaComponent(topologyProperties, new ArrayList<KafkaComponent.Topic>() {{
@@ -56,7 +59,7 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
 
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
-            .withGlobalConfigsPath("../" + TestConstants.SAMPLE_CONFIG_PATH)
+            .withGlobalConfigsPath(getGlobalConfigPath())
             .withParserConfigsPath(TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
@@ -131,6 +134,14 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
                   return messageSet.getMessages();
               }
             });
+  }
+
+  protected String getGlobalConfigPath() throws Exception{
+    return "../" + TestConstants.SAMPLE_CONFIG_PATH;
+  }
+
+  protected String getSampleDataPath() throws Exception{
+    return SampleDataUtils.getSampleDataPath(1,sensorType, TestDataType.RAW);
   }
   public abstract String getSensorType();
   protected abstract List<ParserValidation> getValidations();
