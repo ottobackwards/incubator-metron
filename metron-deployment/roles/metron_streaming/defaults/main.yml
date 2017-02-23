@@ -73,7 +73,7 @@ threat_intel_csv_filename: "threat_ip.csv"
 threat_intel_csv_filepath: "{{ threat_intel_csv_filename }}"
 
 # telemetry - this could be gathered
-telemetry: ["asa","base","bro","fireeye","ise","lancope","logstash","paloalto","snort","squid","websphere","yaf","sourcefire"]
+telemetry: ["asa","base","bro","cef","fireeye","ise","lancope","logstash","paloalto","snort","squid","websphere","yaf","sourcefire"]
 
 pycapa_topic: pcap
 bro_topic: bro
