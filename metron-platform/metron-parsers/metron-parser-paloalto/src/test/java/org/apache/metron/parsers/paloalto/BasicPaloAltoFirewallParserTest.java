@@ -91,7 +91,7 @@ public class BasicPaloAltoFirewallParserTest extends AbstractConfigTest {
 
 		/**
 		 * Test method for
-		 * {@link BasicSourcefireParser#parse(byte[])}.
+		 * {@link BasicPaloAltoFirewallParser#parse(byte[])}.
 		 */
 		@SuppressWarnings({ "rawtypes" })
 		public void testParse() {

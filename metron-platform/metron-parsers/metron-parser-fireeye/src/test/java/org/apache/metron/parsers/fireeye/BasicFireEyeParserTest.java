@@ -31,7 +31,7 @@ import org.junit.Assert;
 
 /**
  * <ul>
- * <li>Title: Test For SourceFireParser</li>
+ * <li>Title: Test For FireeyeParser</li>
  * <li>Description: </li>
  * <li>Created: July 8, 2014</li>
  * </ul>
@@ -138,7 +138,7 @@ public class BasicFireEyeParserTest extends AbstractConfigTest
 	}
 		
 	/**
-	 * Sets SourceFire Input String
+	 * Sets Fireeye Input String
 	 */	
 	public static void setInputStrings(String[] strings) {
 		BasicFireEyeParserTest.inputStrings = strings;
