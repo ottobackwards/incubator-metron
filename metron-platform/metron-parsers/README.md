@@ -233,6 +233,9 @@ are defined in the Parser Config (defined above) JSON file in Zookeeper.
 ###Java Parser Adapters
 Java parser adapters are indended for higher-velocity topologies and are not easily changed or extended.  As the adoption of Metron continues we plan on extending our library of Java adapters to process more log formats.  As of this moment the Java adapters included with Metron are:
 
+* org.apache.metron.parsers.csv.CSVParser : Parse CSV Messages
+* org.apache.metron.parsers.json.JSONMapParser : Parse and flatten JSON Messages
+* org.apache.metron.parsers.grok.GrokParser : Parse messages using Grok
 * org.apache.metron.parsers.ise.BasicIseParser : Parse ISE messages
 * org.apache.metron.parsers.bro.BasicBroParser : Parse Bro messages
 * org.apache.metron.parsers.sourcefire.BasicSourcefireParser : Parse Sourcefire messages
@@ -371,3 +374,23 @@ be customized by modifying the arguments sent to this utility.
  
 Finally, if workers and executors are new to you, the following might be of use to you:
 * [Understanding the Parallelism of a Storm Topology](http://www.michael-noll.com/blog/2012/10/16/understanding-the-parallelism-of-a-storm-topology/)
+
+## Parser Libraries
+
+The parser system is broken up into several libraries
+
+### metron-parsers-common
+
+This library contains the base classes, interfaces, and common functionality of parsers and their tests
+
+### metron-parser-base
+
+This library contains parsers for base formats and their tests
+ 
+ - csv
+ - grok
+ - json
+ 
+ ### metron-parser-XXXXXX
+ 
+ These libraries are the implementations of specific parsers for specific formats
