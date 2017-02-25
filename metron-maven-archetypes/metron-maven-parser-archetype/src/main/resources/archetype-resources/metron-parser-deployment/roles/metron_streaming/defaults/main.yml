@@ -1,0 +1,47 @@
+#
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+---
+metron_directory: /usr/metron/{{ metron_version }}
+# configuration paths
+config_path: "{{ metron_directory }}/config"
+zookeeper_config_path: "{{ config_path }}/zookeeper"
+zookeeper_global_config_path: "{{ zookeeper_config_path }}/global.json"
+hbase_config_path: "/etc/hbase/conf"
+hdfs_config_path: "/etc/hadoop/conf"
+pcap_hdfs_path: "/apps/metron/pcap"
+geo_hdfs_path: "/apps/metron/geo/default"
+
+# telemetry - this could be gathered
+telemetry: ["${parserName}"]
+
+enrichments_topic: enrichments
+
+hdfs_retention_days: 30
+hdfs_${parserName}_purge_cronjob: "{{ metron_directory }}/bin/prune_hdfs_files.sh -f {{ hdfs_url }} -g '/apps/metron/indexing/indexed/${parserName}_doc/*enrichment-*' -s $(date -d '{{ hdfs_retention_days }} days ago' +%m/%d/%Y) -n 1 >> /var/log/${parserName}-purge/cron-hdfs-${parserName}-purge.log 2>&1"
+
+
+elasticsearch_config_path: /etc/elasticsearch
+elasticsearch_cluster_name: metron
+elasticsearch_transport_port: 9300
+
+es_retention_days: 30
+es_${parserName}_purge_cronjob: "{{ metron_directory }}/bin/prune_elasticsearch_indices.sh -z {{ zookeeper_url }} -p ${parserName}_index_ -s $(date -d '{{ es_retention_days }} days ago' +%m/%d/%Y) -n 1 >> /var/log/${parserName}-purge/cron-es-${parserName}-purge.log 2>&1"
+
+metron_hdfs_output_dir: "/apps/metron"
+metron_hdfs_rotation_policy: org.apache.storm.hdfs.bolt.rotation.TimedRotationPolicy
+metron_hdfs_rotation_policy_count: 1
+metron_hdfs_rotation_policy_units: DAYS

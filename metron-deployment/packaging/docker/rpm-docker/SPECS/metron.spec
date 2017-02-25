@@ -42,7 +42,7 @@ License:        ASL 2.0
 Group:          Applications/Internet
 URL:            %{url}
 Source0:        metron-common-%{full_version}-archive.tar.gz
-Source1:        metron-parsers-%{full_version}-archive.tar.gz
+Source1:        metron-parsers-common-%{full_version}-archive.tar.gz
 Source2:        metron-elasticsearch-%{full_version}-archive.tar.gz
 Source3:        metron-data-management-%{full_version}-archive.tar.gz
 Source4:        metron-solr-%{full_version}-archive.tar.gz
@@ -50,6 +50,7 @@ Source5:        metron-enrichment-%{full_version}-archive.tar.gz
 Source6:        metron-indexing-%{full_version}-archive.tar.gz
 Source7:        metron-pcap-backend-%{full_version}-archive.tar.gz
 Source8:        metron-profiler-%{full_version}-archive.tar.gz
+#  these are the parser instances, they go in the telemetry directory
 
 %description
 Apache Metron provides a scalable advanced security analytics framework
@@ -137,7 +138,7 @@ This package installs the Metron Parser files
 %{metron_home}/patterns/squid
 %{metron_home}/patterns/websphere
 %{metron_home}/patterns/yaf
-%attr(0644,root,root) %{metron_home}/lib/metron-parsers-%{full_version}-uber.jar
+%attr(0644,root,root) %{metron_home}/lib/metron-parsers-common-%{full_version}-uber.jar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

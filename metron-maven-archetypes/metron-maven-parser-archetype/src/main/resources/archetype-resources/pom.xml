@@ -13,24 +13,13 @@
 	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
 	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
   the specific language governing permissions and limitations under the License.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.apache.metron</groupId>
-    <artifactId>Metron</artifactId>
-    <version>0.3.1</version>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
     <packaging>pom</packaging>
-    <name>Metron</name>
-    <description>Metron Top Level Project</description>
-    <url>https://metron.incubator.apache.org/</url>
-    <modules>
-            <module>metron-analytics</module>
-            <module>metron-platform</module>
-            <module>metron-deployment</module>
-            <module>metron-docker</module>
-            <module>metron-maven-archetypes</module>
-    </modules>
+    <name>${artifactId}</name>
 
     <repositories>
         <repository>
@@ -39,7 +28,6 @@
         </repository>
         <repository>
             <releases>
-                <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
                 <checksumPolicy>warn</checksumPolicy>
             </releases>
@@ -63,7 +51,7 @@
     </repositories>
 
     <properties>
-        <twitter>@ApacheMetron</twitter>
+        <metron_version>0.3.1</metron_version>
         <!-- base project versions -->
         <base_storm_version>1.0.1</base_storm_version>
         <base_flux_version>1.0.1</base_flux_version>

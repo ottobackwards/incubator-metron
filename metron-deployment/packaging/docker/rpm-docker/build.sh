@@ -17,7 +17,7 @@
 #
 
 # To avoid needing an epoch tag to update, BETA (or other prerelease tags) need to be in
-# Spec's release, not in the version.  Make sure this is split out based on the acutal version.
+# Spec's release, not in the version.  Make sure this is split out based on the actual version.
 # E.g. 0.2.0BETA becomes 0.2.0 version and BETA prerelease.
 # Empty string is acceptable when there is no prerelease tag.
 FULL_VERSION=$1
