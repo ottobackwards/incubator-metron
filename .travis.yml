@@ -9,7 +9,7 @@ before_install:
   - export PATH=$M2_HOME/bin:$PATH
 script:
   - |
-    time mvn -T 2C -DskipTests install && time mvn -T 2C surefire:test@unit-tests && mvn surefire:test@integration-tests  && time build_utils/verify_licenses.sh
+    time mvn -T 2C -DskipTests install && time build_utils/verify_licenses.sh
 cache:
   directories:
   - $HOME/.m2
