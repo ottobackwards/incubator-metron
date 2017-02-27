@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software
+	Foundation (ASF) under one or more contributor license agreements. See the
+	NOTICE file distributed with this work for additional information regarding
+	copyright ownership. The ASF licenses this file to You under the Apache License,
+	Version 2.0 (the "License"); you may not use this file except in compliance
+	with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software distributed
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+  the specific language governing permissions and limitations under the License.
+  -->
+<archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" name="Metron-Parsers"
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <requiredProperties>
+	  <requiredProperty key="parserName">
+      <validationRegex>^[a-z]*$</validationRegex>
+	  </requiredProperty>
+    <requiredProperty key="parserClassName">
+      <validationRegex>^[A-Z].*$</validationRegex>
+    </requiredProperty>
+  </requiredProperties>
+  <fileSets>
+    <fileSet encoding="UTF-8">
+      <directory></directory>
+      <includes>
+        <include>.gitignore</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <modules>
+    <module id="metron-parser-platform" dir="metron-parser-platform" name="metron-parser-platform">
+      <fileSets>
+        <fileSet encoding="UTF-8">
+          <directory></directory>
+          <includes>
+            <include>README.md</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+      <modules>
+        <module id="metron-parsers" dir="metron-parsers" name="metron-parsers">
+          <modules>
+            <module id="metron-parser-__parserName__" dir="metron-parser-__parserName__" name="metron-parser-__parserName__">
+              <fileSets>
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
+                  <directory>src/main/java</directory>
+                  <includes>
+                    <include>**/*.java</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory>src/main/assembly</directory>
+                  <includes>
+                    <include>**/*.xml</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory>src/main/config</directory>
+                  <includes>
+                    <include>**/*.json</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory>src/main/resources</directory>
+                  <includes>
+                    <include>**/*.</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
+                  <directory>src/test/java</directory>
+                  <includes>
+                    <include>**/*.java</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory>src/test/resources</directory>
+                  <includes>
+                    <include>**/*.properties</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory>src/test/resources</directory>
+                  <includes>
+                    <include>**/*.gz</include>
+                    <include>**/*.json</include>
+                    <include>**/*.raw</include>
+                    <include>**/*.parsed</include>
+                  </includes>
+                </fileSet>
+                <fileSet filtered="true" encoding="UTF-8">
+                  <directory></directory>
+                  <includes>
+                    <include>README.md</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </module>
+          </modules>
+        </module>
+      </modules>
+    </module>
+    <module id="metron-parser-deployment" dir="metron-parser-deployment" name="metron-parser-deployment">
+      <fileSets>
+        <fileSet encoding="UTF-8">
+          <directory>roles/ambari_gather_facts</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>roles/python-pip</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>roles</directory>
+          <includes>
+            <include>**/*.md</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>playbooks</directory>
+          <includes>
+            <include>**/*.cfg</include>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true"  encoding="UTF-8">
+          <directory>roles/monit-start</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>roles/httplib2</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+          <directory>roles/metron_elasticsearch_templates</directory>
+          <includes>
+            <include>**/*.template</include>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+          <directory>roles/metron_streaming</directory>
+          <includes>
+            <include>**/*.yml</include>
+            <include>**/*.json</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>inventory/full-dev-platform</directory>
+          <includes>
+            <include>**/*</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>roles/epel</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+          <directory>roles/monit</directory>
+          <includes>
+            <include>**/*.monit</include>
+            <include>**/*.sh</include>
+            <include>**/*.md</include>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory>scripts</directory>
+          <includes>
+            <include>**/*.sh</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+          <directory>roles/metron_kafka_topics</directory>
+          <includes>
+            <include>**/*.yml</include>
+          </includes>
+        </fileSet>
+        <fileSet encoding="UTF-8">
+          <directory></directory>
+          <includes>
+            <include>.gitignore</include>
+            <include>ansible.cfg</include>
+            <include>README.md</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+  </modules>
+</archetype-descriptor>

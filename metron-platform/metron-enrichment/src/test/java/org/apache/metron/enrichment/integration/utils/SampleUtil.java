@@ -34,7 +34,7 @@ public class SampleUtil {
   public static ParserConfigurations getSampleParserConfigs() throws IOException {
     ParserConfigurations configurations = new ParserConfigurations();
     configurations.updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH));
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.BASE_PARSER_CONFIGS_PATH);
     for(String sensorType: sensorParserConfigs.keySet()) {
       configurations.updateSensorParserConfig(sensorType, sensorParserConfigs.get(sensorType));
     }

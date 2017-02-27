@@ -67,12 +67,12 @@ public class ConfiguredEnrichmentBoltTest extends BaseConfiguredBoltTest {
     byte[] globalConfig = ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH);
     ConfigurationsUtils.writeGlobalConfigToZookeeper(globalConfig, zookeeperUrl);
     enrichmentConfigurationTypes.add(ConfigurationType.GLOBAL.getName());
-    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(TestConstants.ENRICHMENTS_CONFIGS_PATH);
+    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorEnrichmentConfigs.keySet()) {
       ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensorType, sensorEnrichmentConfigs.get(sensorType), zookeeperUrl);
       enrichmentConfigurationTypes.add(sensorType);
     }
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorParserConfigs.keySet()) {
       ConfigurationsUtils.writeSensorParserConfigToZookeeper(sensorType, sensorParserConfigs.get(sensorType), zookeeperUrl);
     }
@@ -91,7 +91,7 @@ public class ConfiguredEnrichmentBoltTest extends BaseConfiguredBoltTest {
 
     configsUpdated = new HashSet<>();
     sampleConfigurations.updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH));
-    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(TestConstants.ENRICHMENTS_CONFIGS_PATH);
+    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorEnrichmentConfigs.keySet()) {
       sampleConfigurations.updateSensorEnrichmentConfig(sensorType, sensorEnrichmentConfigs.get(sensorType));
     }

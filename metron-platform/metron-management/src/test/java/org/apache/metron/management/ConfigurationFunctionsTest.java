@@ -36,7 +36,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-import static org.apache.metron.TestConstants.PARSER_CONFIGS_PATH;
+import static org.apache.metron.TestConstants.A_PARSER_CONFIGS_PATH_FMT;
 import static org.apache.metron.TestConstants.SAMPLE_CONFIG_PATH;
 import static org.apache.metron.management.utils.FileUtils.slurp;
 import static org.apache.metron.common.utils.StellarProcessorUtils.run;
@@ -45,9 +45,10 @@ public class ConfigurationFunctionsTest {
   private TestingServer testZkServer;
   private CuratorFramework client;
   private String zookeeperUrl;
+  private static final String sensorType = "bro";
   private Context context = new Context.Builder()
-            .with(Context.Capabilities.ZOOKEEPER_CLIENT, () -> client)
-            .build();
+          .with(Context.Capabilities.ZOOKEEPER_CLIENT, () -> client)
+          .build();
   @Before
   public void setup() throws Exception {
     testZkServer = new TestingServer(true);
@@ -56,7 +57,7 @@ public class ConfigurationFunctionsTest {
     client.start();
 
     pushConfigs(SAMPLE_CONFIG_PATH);
-    pushConfigs(PARSER_CONFIGS_PATH);
+    pushConfigs(String.format(A_PARSER_CONFIGS_PATH_FMT,sensorType));
 
 
   }
@@ -72,14 +73,14 @@ public class ConfigurationFunctionsTest {
   }
 
 
-  static String goodBroParserConfig = slurp(PARSER_CONFIGS_PATH + "/parsers/bro.json");
+  static String goodBroParserConfig = slurp(String.format(A_PARSER_CONFIGS_PATH_FMT,sensorType) + "/parsers/bro.json");
 
   /**
-    {
-      "sensorTopic" : "brop",
-      "parserConfig" : { },
-      "fieldTransformations" : [ ]
-    }
+   {
+   "sensorTopic" : "brop",
+   "parserConfig" : { },
+   "fieldTransformations" : [ ]
+   }
    */
   @Multiline
   static String defaultBropParserConfig;
@@ -120,24 +121,24 @@ public class ConfigurationFunctionsTest {
   static String goodTestEnrichmentConfig = slurp( SAMPLE_CONFIG_PATH + "/enrichments/test.json");
 
   /**
-    {
-      "enrichment" : {
-        "fieldMap" : { },
-        "fieldToTypeMap" : { },
-        "config" : { }
-      },
-      "threatIntel" : {
-        "fieldMap" : { },
-        "fieldToTypeMap" : { },
-        "config" : { },
-        "triageConfig" : {
-          "riskLevelRules" : [ ],
-          "aggregator" : "MAX",
-          "aggregationConfig" : { }
-        }
-      },
-      "configuration" : { }
-    }
+   {
+   "enrichment" : {
+   "fieldMap" : { },
+   "fieldToTypeMap" : { },
+   "config" : { }
+   },
+   "threatIntel" : {
+   "fieldMap" : { },
+   "fieldToTypeMap" : { },
+   "config" : { },
+   "triageConfig" : {
+   "riskLevelRules" : [ ],
+   "aggregator" : "MAX",
+   "aggregationConfig" : { }
+   }
+   },
+   "configuration" : { }
+   }
    */
   @Multiline
   static String defaultBropEnrichmentConfig;

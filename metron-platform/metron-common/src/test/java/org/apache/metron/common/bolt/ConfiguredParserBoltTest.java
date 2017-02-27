@@ -68,11 +68,11 @@ public class ConfiguredParserBoltTest extends BaseConfiguredBoltTest {
     byte[] globalConfig = ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH);
     ConfigurationsUtils.writeGlobalConfigToZookeeper(globalConfig, zookeeperUrl);
     parserConfigurationTypes.add(ConfigurationType.GLOBAL.getName());
-    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(TestConstants.ENRICHMENTS_CONFIGS_PATH);
+    Map<String, byte[]> sensorEnrichmentConfigs = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorEnrichmentConfigs.keySet()) {
       ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensorType, sensorEnrichmentConfigs.get(sensorType), zookeeperUrl);
     }
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorParserConfigs.keySet()) {
       ConfigurationsUtils.writeSensorParserConfigToZookeeper(sensorType, sensorParserConfigs.get(sensorType), zookeeperUrl);
       parserConfigurationTypes.add(sensorType);
@@ -92,7 +92,7 @@ public class ConfiguredParserBoltTest extends BaseConfiguredBoltTest {
 
     configsUpdated = new HashSet<>();
     sampleConfigurations.updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(TestConstants.SAMPLE_CONFIG_PATH));
-    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(TestConstants.PARSER_CONFIGS_PATH);
+    Map<String, byte[]> sensorParserConfigs = ConfigurationsUtils.readSensorParserConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"asa"));
     for (String sensorType : sensorParserConfigs.keySet()) {
       sampleConfigurations.updateSensorParserConfig(sensorType, sensorParserConfigs.get(sensorType));
     }
