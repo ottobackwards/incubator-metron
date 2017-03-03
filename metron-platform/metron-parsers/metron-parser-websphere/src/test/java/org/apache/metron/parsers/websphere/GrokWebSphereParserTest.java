@@ -40,7 +40,7 @@ public class GrokWebSphereParserTest {
 	@Before
 	public void setup() {
 		parserConfig = new HashMap<>();
-		parserConfig.put("grokPath", "../metron-parsers-common/src/main/resources/patterns/websphere");
+		parserConfig.put("grokPath", "src/main/resources/patterns/websphere");
 		parserConfig.put("patternLabel", "WEBSPHERE");
 		parserConfig.put("timestampField", "timestamp_string");
 		parserConfig.put("dateFormat", "yyyy MMM dd HH:mm:ss");
