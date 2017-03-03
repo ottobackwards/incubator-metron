@@ -29,6 +29,7 @@
 
 %define metron_root         %{_prefix}/%{base_name}
 %define metron_home         %{metron_root}/%{full_version}
+%define telemetry_home       %{metron_home}/telemetry
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -42,14 +43,28 @@ License:        ASL 2.0
 Group:          Applications/Internet
 URL:            %{url}
 Source0:        metron-common-%{full_version}-archive.tar.gz
-Source1:        metron-parsers-%{full_version}-archive.tar.gz
-Source2:        metron-elasticsearch-%{full_version}-archive.tar.gz
-Source3:        metron-data-management-%{full_version}-archive.tar.gz
-Source4:        metron-solr-%{full_version}-archive.tar.gz
-Source5:        metron-enrichment-%{full_version}-archive.tar.gz
-Source6:        metron-indexing-%{full_version}-archive.tar.gz
-Source7:        metron-pcap-backend-%{full_version}-archive.tar.gz
-Source8:        metron-profiler-%{full_version}-archive.tar.gz
+Source1:        metron-parsers-common-%{full_version}-archive.tar.gz
+Source2:        metron-parser-asa-%{full_version}-archive.tar.gz
+Source3:        metron-parser-base-%{full_version}-archive.tar.gz
+Source4:        metron-parser-bro-%{full_version}-archive.tar.gz
+Source5:        metron-parser-cef-%{full_version}-archive.tar.gz
+Source6:        metron-parser-fireeye-%{full_version}-archive.tar.gz
+Source7:        metron-parser-ise-%{full_version}-archive.tar.gz
+Source8:        metron-parser-lancope-%{full_version}-archive.tar.gz
+Source9:        metron-parser-logstash-%{full_version}-archive.tar.gz
+Source10:        metron-parser-paloalto-%{full_version}-archive.tar.gz
+Source11:        metron-parser-snort-%{full_version}-archive.tar.gz
+Source12:        metron-parser-sourcefire-%{full_version}-archive.tar.gz
+Source13:        metron-parser-squid-%{full_version}-archive.tar.gz
+Source14:        metron-parser-websphere-%{full_version}-archive.tar.gz
+Source15:        metron-parser-yaf-%{full_version}-archive.tar.gz
+Source16:        metron-elasticsearch-%{full_version}-archive.tar.gz
+Source17:        metron-data-management-%{full_version}-archive.tar.gz
+Source18:        metron-solr-%{full_version}-archive.tar.gz
+Source19:        metron-enrichment-%{full_version}-archive.tar.gz
+Source20:        metron-indexing-%{full_version}-archive.tar.gz
+Source21:        metron-pcap-backend-%{full_version}-archive.tar.gz
+Source22:        metron-profiler-%{full_version}-archive.tar.gz
 
 %description
 Apache Metron provides a scalable advanced security analytics framework
@@ -69,17 +84,46 @@ rm -rf %{_builddir}/*
 %install
 rm -rf %{buildroot}
 mkdir -p %{buildroot}%{metron_home}
+mkdir -p %{buildroot}%{telemetry_home}
+mkdir -p %{buildroot}%{telemetry_home}/asa
+mkdir -p %{buildroot}%{telemetry_home}/base
+mkdir -p %{buildroot}%{telemetry_home}/bro
+mkdir -p %{buildroot}%{telemetry_home}/cef
+mkdir -p %{buildroot}%{telemetry_home}/fireeye
+mkdir -p %{buildroot}%{telemetry_home}/ise
+mkdir -p %{buildroot}%{telemetry_home}/lancope
+mkdir -p %{buildroot}%{telemetry_home}/logstash
+mkdir -p %{buildroot}%{telemetry_home}/paloalto
+mkdir -p %{buildroot}%{telemetry_home}/snort
+mkdir -p %{buildroot}%{telemetry_home}/sourcefire
+mkdir -p %{buildroot}%{telemetry_home}/squid
+mkdir -p %{buildroot}%{telemetry_home}/websphere
+mkdir -p %{buildroot}%{telemetry_home}/yaf
 
 # copy source files and untar
 tar -xzf %{SOURCE0} -C %{buildroot}%{metron_home}
 tar -xzf %{SOURCE1} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE2} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE3} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE4} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE5} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE6} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE7} -C %{buildroot}%{metron_home}
-tar -xzf %{SOURCE8} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE2} -C %{buildroot}%{telemetry_home}/asa
+tar -xzf %{SOURCE3} -C %{buildroot}%{telemetry_home}/base
+tar -xzf %{SOURCE4} -C %{buildroot}%{telemetry_home}/bro
+tar -xzf %{SOURCE5} -C %{buildroot}%{telemetry_home}/cef
+tar -xzf %{SOURCE6} -C %{buildroot}%{telemetry_home}/fireeye
+tar -xzf %{SOURCE7} -C %{buildroot}%{telemetry_home}/ise
+tar -xzf %{SOURCE8} -C %{buildroot}%{telemetry_home}/lancope
+tar -xzf %{SOURCE9} -C %{buildroot}%{telemetry_home}/logstash
+tar -xzf %{SOURCE10} -C %{buildroot}%{telemetry_home}/paloalto
+tar -xzf %{SOURCE11} -C %{buildroot}%{telemetry_home}/snort
+tar -xzf %{SOURCE12} -C %{buildroot}%{telemetry_home}/sourcefire
+tar -xzf %{SOURCE13} -C %{buildroot}%{telemetry_home}/squid
+tar -xzf %{SOURCE14} -C %{buildroot}%{telemetry_home}/websphere
+tar -xzf %{SOURCE15} -C %{buildroot}%{telemetry_home}/yaf
+tar -xzf %{SOURCE16} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE17} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE18} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE19} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE20} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE21} -C %{buildroot}%{metron_home}
+tar -xzf %{SOURCE22} -C %{buildroot}%{metron_home}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -104,43 +148,438 @@ This package installs the Metron common files %{metron_home}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-%package        parsers
-Summary:        Metron Parser Files
+%package        parsers-common
+Summary:        Metron Common Parser Files
 Group:          Applications/Internet
-Provides:       parsers = %{version}
+Provides:       parsers-common = %{version}
 
-%description    parsers
+%description    parsers-common
 This package installs the Metron Parser files
 
-%files          parsers
+%files          parsers-common
 %defattr(-,root,root,755)
 %dir %{metron_root}
 %dir %{metron_home}
 %dir %{metron_home}/bin
 %dir %{metron_home}/config
-%dir %{metron_home}/config/zookeeper
-%dir %{metron_home}/config/zookeeper/parsers
 %dir %{metron_home}/patterns
 %dir %{metron_home}/lib
-%{metron_home}/bin/start_parser_topology.sh
-%{metron_home}/config/zookeeper/parsers/bro.json
-%{metron_home}/config/zookeeper/parsers/jsonMap.json
-%{metron_home}/config/zookeeper/parsers/snort.json
-%{metron_home}/config/zookeeper/parsers/squid.json
-%{metron_home}/config/zookeeper/parsers/websphere.json
-%{metron_home}/config/zookeeper/parsers/yaf.json
-%{metron_home}/config/zookeeper/parsers/asa.json
-%{metron_home}/patterns/asa
 %{metron_home}/patterns/common
-%{metron_home}/patterns/fireeye
-%{metron_home}/patterns/sourcefire
-%{metron_home}/patterns/squid
-%{metron_home}/patterns/websphere
-%{metron_home}/patterns/yaf
-%attr(0644,root,root) %{metron_home}/lib/metron-parsers-%{full_version}-uber.jar
+%{metron_home}/bin/start_parser_topology.sh
+%attr(0644,root,root) %{metron_home}/lib/metron-parsers-common-%{full_version}-uber.jar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+%package        parser-asa
+Summary:        Metron ASA Parser Files
+Group:          Applications/Internet
+Provides:       parser-asa = %{version}
+
+%description    parser-asa
+This package installs the Metron ASA Parser files
+
+%files          parser-asa
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/asa/config
+%dir %{telemetry_home}/asa/config/zookeeper
+%dir %{telemetry_home}/asa/config/zookeeper/parsers
+%dir %{telemetry_home}/asa/config/zookeeper/enrichments
+%dir %{telemetry_home}/asa/config/zookeeper/indexing
+%dir %{telemetry_home}/asa/patterns
+%dir %{telemetry_home}/asa/lib
+%{telemetry_home}/asa/config/zookeeper/parsers/asa.json
+%{telemetry_home}/asa/config/zookeeper/enrichments/asa.json
+%{telemetry_home}/asa/config/zookeeper/indexing/asa.json
+%{telemetry_home}/asa/patterns/asa
+%{telemetry_home}/asa/patterns/common
+%attr(0644,root,root) %{telemetry_home}/asa/lib/metron-parser-asa-%{full_version}-uber.jar
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-base
+Summary:        Metron Base Parser Files
+Group:          Applications/Internet
+Provides:       parser-base = %{version}
+
+%description    parser-base
+This package installs the Metron Base Parser files
+
+%files          parser-base
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/base/config/zookeeper
+%dir %{telemetry_home}/base/config/zookeeper/parsers
+%dir %{telemetry_home}/base/config/zookeeper/enrichments
+%dir %{telemetry_home}/base/config/zookeeper/indexing
+%dir %{telemetry_home}/base/patterns
+%dir %{telemetry_home}/base/lib
+%{telemetry_home}/base/config/zookeeper/parsers/csv.json
+%{telemetry_home}/base/config/zookeeper/parsers/grok.json
+%{telemetry_home}/base/config/zookeeper/parsers/jsonMap.json
+%{telemetry_home}/base/config/zookeeper/enrichments/csv.json
+%{telemetry_home}/base/config/zookeeper/enrichments/grok.json
+%{telemetry_home}/base/config/zookeeper/enrichments/jsonMap.json
+%{telemetry_home}/base/config/zookeeper/indexing/csv.json
+%{telemetry_home}/base/config/zookeeper/indexing/grok.json
+%{telemetry_home}/base/config/zookeeper/indexing/jsonMap.json
+%{telemetry_home}/base/patterns/common
+%attr(0644,root,root) %{telemetry_home}/base/lib/metron-parser-base-%{full_version}-uber.jar
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-bro
+Summary:        Metron Bro Parser Files
+Group:          Applications/Internet
+Provides:       parser-bro = %{version}
+
+%description    parser-bro
+This package installs the Metron Bro Parser files
+
+%files          parser-bro
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/bro/config
+%dir %{telemetry_home}/bro/config/zookeeper
+%dir %{telemetry_home}/bro/config/zookeeper/parsers
+%dir %{telemetry_home}/bro/config/zookeeper/enrichments
+%dir %{telemetry_home}/bro/config/zookeeper/indexing
+%dir %{telemetry_home}/bro/lib
+%{telemetry_home}/bro/config/zookeeper/parsers/bro.json
+%{telemetry_home}/bro/config/zookeeper/enrichments/bro.json
+%{telemetry_home}/bro/config/zookeeper/indexing/bro.json
+%attr(0644,root,root) %{telemetry_home}/bro/lib/metron-parser-bro-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-cef
+Summary:        Metron CEF Parser Files
+Group:          Applications/Internet
+Provides:       parser-cef = %{version}
+
+%description    parser-cef
+This package installs the Metron CEF Parser files
+
+%files          parser-cef
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/cef/config
+%dir %{telemetry_home}/cef/config/zookeeper
+%dir %{telemetry_home}/cef/config/zookeeper/parsers
+%dir %{telemetry_home}/cef/config/zookeeper/enrichments
+%dir %{telemetry_home}/cef/config/zookeeper/indexing
+%dir %{telemetry_home}/cef/lib
+%{telemetry_home}/cef/config/zookeeper/parsers/cef.json
+%{telemetry_home}/cef/config/zookeeper/enrichments/cef.json
+%{telemetry_home}/cef/config/zookeeper/indexing/cef.json
+%attr(0644,root,root) %{telemetry_home}/cef/lib/metron-parser-cef-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-fireeye
+Summary:        Metron Fireeye Parser Files
+Group:          Applications/Internet
+Provides:       parser-fireeye = %{version}
+
+%description    parser-fireeye
+This package installs the Metron Fireeye Parser files
+
+%files          parser-fireeye
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/fireeye/config
+%dir %{telemetry_home}/fireeye/config/zookeeper
+%dir %{telemetry_home}/fireeye/config/zookeeper/parsers
+%dir %{telemetry_home}/fireeye/config/zookeeper/enrichments
+%dir %{telemetry_home}/fireeye/config/zookeeper/indexing
+%dir %{telemetry_home}/fireeye/patterns
+%dir %{telemetry_home}/fireeye/lib
+%{telemetry_home}/fireeye/config/zookeeper/parsers/fireeye.json
+%{telemetry_home}/fireeye/config/zookeeper/enrichments/fireeye.json
+%{telemetry_home}/fireeye/config/zookeeper/indexing/fireeye.json
+%{telemetry_home}/fireeye/patterns/fireeye
+%{telemetry_home}/fireeye/patterns/common
+%attr(0644,root,root) %{telemetry_home}/fireeye/lib/metron-parser-fireeye-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-ise
+Summary:        Metron Ise Parser Files
+Group:          Applications/Internet
+Provides:       parser-ise = %{version}
+
+%description    parser-ise
+This package installs the Metron Ise Parser files
+
+%files          parser-ise
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/ise/config
+%dir %{telemetry_home}/ise/config/zookeeper
+%dir %{telemetry_home}/ise/config/zookeeper/parsers
+%dir %{telemetry_home}/ise/config/zookeeper/enrichments
+%dir %{telemetry_home}/ise/config/zookeeper/indexing
+%dir %{telemetry_home}/ise/patterns
+%dir %{telemetry_home}/ise/lib
+%{telemetry_home}/ise/config/zookeeper/parsers/ise.json
+%{telemetry_home}/ise/config/zookeeper/enrichments/ise.json
+%{telemetry_home}/ise/config/zookeeper/indexing/ise.json
+%{telemetry_home}/ise/patterns/common
+%attr(0644,root,root) %{telemetry_home}/ise/lib/metron-parser-ise-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-lancope
+Summary:        Metron Lancope Parser Files
+Group:          Applications/Internet
+Provides:       parser-lancope = %{version}
+
+%description    parser-lancope
+This package installs the Metron Lancope Parser files
+
+%files          parser-lancope
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/lancope/config
+%dir %{telemetry_home}/lancope/config/zookeeper
+%dir %{telemetry_home}/lancope/config/zookeeper/parsers
+%dir %{telemetry_home}/lancope/config/zookeeper/enrichments
+%dir %{telemetry_home}/lancope/config/zookeeper/indexing
+%dir %{telemetry_home}/lancope/patterns
+%dir %{telemetry_home}/lancope/lib
+%{telemetry_home}/lancope/config/zookeeper/parsers/lancope.json
+%{telemetry_home}/lancope/config/zookeeper/enrichments/lancope.json
+%{telemetry_home}/lancope/config/zookeeper/indexing/lancope.json
+%{telemetry_home}/lancope/patterns/common
+%attr(0644,root,root) %{telemetry_home}/lancope/lib/metron-parser-lancope-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-logstash
+Summary:        Metron Logstash Parser Files
+Group:          Applications/Internet
+Provides:       parser-logstash = %{version}
+
+%description    parser-logstash
+This package installs the Metron Logstash Parser files
+
+%files          parser-logstash
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/logstash/config
+%dir %{telemetry_home}/logstash/config/zookeeper
+%dir %{telemetry_home}/logstash/config/zookeeper/parsers
+%dir %{telemetry_home}/logstash/config/zookeeper/enrichments
+%dir %{telemetry_home}/logstash/config/zookeeper/indexing
+%dir %{telemetry_home}/logstash/patterns
+%dir %{telemetry_home}/logstash/lib
+%{telemetry_home}/logstash/config/zookeeper/parsers/logstash.json
+%{telemetry_home}/logstash/config/zookeeper/enrichments/logstash.json
+%{telemetry_home}/logstash/config/zookeeper/indexing/logstash.json
+%{telemetry_home}/logstash/patterns/common
+%attr(0644,root,root) %{telemetry_home}/logstash/lib/metron-parser-logstash-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-paloalto
+Summary:        Metron Aalo Alto Parser Files
+Group:          Applications/Internet
+Provides:       parser-paloalto = %{version}
+
+%description    parser-paloalto
+This package installs the Metron Palo Alto Parser files
+
+%files          parser-paloalto
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/paloalto/config
+%dir %{telemetry_home}/paloalto/config/zookeeper
+%dir %{telemetry_home}/paloalto/config/zookeeper/parsers
+%dir %{telemetry_home}/paloalto/config/zookeeper/enrichments
+%dir %{telemetry_home}/paloalto/config/zookeeper/indexing
+%dir %{telemetry_home}/paloalto/patterns
+%dir %{telemetry_home}/paloalto/lib
+%{telemetry_home}/paloalto/config/zookeeper/parsers/paloalto.json
+%{telemetry_home}/paloalto/config/zookeeper/enrichments/paloalto.json
+%{telemetry_home}/paloalto/config/zookeeper/indexing/paloalto.json
+%{telemetry_home}/paloalto/patterns/common
+%attr(0644,root,root) %{telemetry_home}/paloalto/lib/metron-parser-paloalto-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-snort
+Summary:        Metron Snort Parser Files
+Group:          Applications/Internet
+Provides:       parser-snort = %{version}
+
+%description    parser-snort
+This package installs the Metron Snort Parser files
+
+%files          parser-snort
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/snort/config
+%dir %{telemetry_home}/snort/config/zookeeper
+%dir %{telemetry_home}/snort/config/zookeeper/parsers
+%dir %{telemetry_home}/snort/config/zookeeper/enrichments
+%dir %{telemetry_home}/snort/config/zookeeper/indexing
+%dir %{telemetry_home}/snort/patterns
+%dir %{telemetry_home}/snort/lib
+%{telemetry_home}/snort/config/zookeeper/parsers/snort.json
+%{telemetry_home}/snort/config/zookeeper/enrichments/snort.json
+%{telemetry_home}/snort/config/zookeeper/indexing/snort.json
+%{telemetry_home}/snort/patterns/common
+%attr(0644,root,root) %{telemetry_home}/snort/lib/metron-parser-snort-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-sourcefire
+Summary:        Metron Sourcefire Parser Files
+Group:          Applications/Internet
+Provides:       parser-sourcefire = %{version}
+
+%description    parser-sourcefire
+This package installs the Metron sourcefire Parser files
+
+%files          parser-sourcefire
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/sourcefire/config
+%dir %{telemetry_home}/sourcefire/config/zookeeper
+%dir %{telemetry_home}/sourcefire/config/zookeeper/parsers
+%dir %{telemetry_home}/sourcefire/config/zookeeper/enrichments
+%dir %{telemetry_home}/sourcefire/config/zookeeper/indexing
+%dir %{telemetry_home}/sourcefire/patterns
+%dir %{telemetry_home}/sourcefire/lib
+%{telemetry_home}/sourcefire/config/zookeeper/parsers/sourcefire.json
+%{telemetry_home}/sourcefire/config/zookeeper/enrichments/sourcefire.json
+%{telemetry_home}/sourcefire/config/zookeeper/indexing/sourcefire.json
+%{telemetry_home}/sourcefire/patterns/sourcefire
+%{telemetry_home}/sourcefire/patterns/common
+%attr(0644,root,root) %{telemetry_home}/sourcefire/lib/metron-parser-sourcefire-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-squid
+Summary:        Metron Squid Parser Files
+Group:          Applications/Internet
+Provides:       parser-squid = %{version}
+
+%description    parser-squid
+This package installs the Metron Squid Parser files
+
+%files          parser-squid
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/squid/config
+%dir %{telemetry_home}/squid/config/zookeeper
+%dir %{telemetry_home}/squid/config/zookeeper/parsers
+%dir %{telemetry_home}/squid/config/zookeeper/enrichments
+%dir %{telemetry_home}/squid/config/zookeeper/indexing
+%dir %{telemetry_home}/squid/patterns
+%dir %{telemetry_home}/squid/lib
+%{telemetry_home}/squid/config/zookeeper/parsers/squid.json
+%{telemetry_home}/squid/config/zookeeper/enrichments/squid.json
+%{telemetry_home}/squid/config/zookeeper/indexing/squid.json
+%{telemetry_home}/squid/patterns/squid
+%{telemetry_home}/squid/patterns/common
+%attr(0644,root,root) %{telemetry_home}/squid/lib/metron-parser-squid-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-websphere
+Summary:        Metron Websphere Parser Files
+Group:          Applications/Internet
+Provides:       parser-websphere = %{version}
+
+%description    parser-websphere
+This package installs the Metron Websphere Parser files
+
+%files          parser-websphere
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/websphere/config
+%dir %{telemetry_home}/websphere/config/zookeeper
+%dir %{telemetry_home}/websphere/config/zookeeper/parsers
+%dir %{telemetry_home}/websphere/config/zookeeper/enrichments
+%dir %{telemetry_home}/websphere/config/zookeeper/indexing
+%dir %{telemetry_home}/websphere/patterns
+%{telemetry_home}/websphere/config/zookeeper/parsers/websphere.json
+%{telemetry_home}/websphere/config/zookeeper/enrichments/websphere.json
+%{telemetry_home}/websphere/config/zookeeper/indexing/websphere.json
+%{telemetry_home}/websphere/patterns/websphere
+%{telemetry_home}/websphere/patterns/common
+%dir %{telemetry_home}/websphere/lib
+%attr(0644,root,root) %{telemetry_home}/websphere/lib/metron-parser-websphere-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%package        parser-yaf
+Summary:        Metron Yaf Parser Files
+Group:          Applications/Internet
+Provides:       parser-yaf = %{version}
+
+%description    parser-yaf
+This package installs the Metron Yaf Parser files
+
+%files          parser-yaf
+%defattr(-,root,root,755)
+%dir %{metron_root}
+%dir %{metron_home}
+%dir %{telemetry_home}
+%dir %{telemetry_home}/yaf/config
+%dir %{telemetry_home}/yaf/config/zookeeper
+%dir %{telemetry_home}/yaf/config/zookeeper/parsers
+%dir %{telemetry_home}/yaf/config/zookeeper/enrichments
+%dir %{telemetry_home}/yaf/config/zookeeper/indexing
+%dir %{telemetry_home}/yaf/patterns
+%dir %{telemetry_home}/yaf/lib
+%{telemetry_home}/yaf/config/zookeeper/parsers/yaf.json
+%{telemetry_home}/yaf/config/zookeeper/enrichments/yaf.json
+%{telemetry_home}/yaf/config/zookeeper/indexing/yaf.json
+%{telemetry_home}/yaf/patterns/yaf
+%{telemetry_home}/yaf/patterns/common
+%attr(0644,root,root) %{telemetry_home}/yaf/lib/metron-parser-yaf-%{full_version}-uber.jar
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %package        elasticsearch
 Summary:        Metron Elasticsearch Files
 Group:          Applications/Internet
@@ -222,18 +661,11 @@ This package installs the Metron Enrichment files
 %dir %{metron_home}
 %dir %{metron_home}/bin
 %dir %{metron_home}/config
-%dir %{metron_home}/config/zookeeper
-%dir %{metron_home}/config/zookeeper/enrichments
 %dir %{metron_home}/flux
 %dir %{metron_home}/flux/enrichment
 %{metron_home}/bin/latency_summarizer.sh
 %{metron_home}/bin/start_enrichment_topology.sh
 %{metron_home}/config/enrichment.properties
-%{metron_home}/config/zookeeper/enrichments/bro.json
-%{metron_home}/config/zookeeper/enrichments/snort.json
-%{metron_home}/config/zookeeper/enrichments/websphere.json
-%{metron_home}/config/zookeeper/enrichments/yaf.json
-%{metron_home}/config/zookeeper/enrichments/asa.json
 %{metron_home}/flux/enrichment/remote.yaml
 %exclude %{metron_home}/flux/enrichment/test.yaml
 %attr(0644,root,root) %{metron_home}/lib/metron-enrichment-%{full_version}-uber.jar
@@ -255,11 +687,6 @@ This package installs the Metron Indexing files
 %dir %{metron_home}/flux
 %dir %{metron_home}/flux/indexing
 %{metron_home}/flux/indexing/remote.yaml
-%{metron_home}/config/zookeeper/indexing/bro.json
-%{metron_home}/config/zookeeper/indexing/snort.json
-%{metron_home}/config/zookeeper/indexing/websphere.json
-%{metron_home}/config/zookeeper/indexing/yaf.json
-%{metron_home}/config/zookeeper/indexing/asa.json
 %{metron_home}/config/zeppelin/metron/metron-yaf-telemetry.json
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -316,6 +743,8 @@ This package installs the Metron Profiler %{metron_home}
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %changelog
+* Thu Mar 02 2017 Otto Fowler <ottobackwards@gmail.com> - 0.3.1
+- remove enrichment configurations that are now per parser
 * Thu Jan 19 2017 Justin Leet <justinjleet@gmail.com> - 0.3.1
 - Replace GeoIP files with new implementation
 * Thu Nov 03 2016 David Lyle <dlyle65535@gmail.com> - 0.2.1

@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "paloalto",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "paloalto",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "paloalto",
+    "batchSize": 1,
+    "enabled" : true
+  }
+}

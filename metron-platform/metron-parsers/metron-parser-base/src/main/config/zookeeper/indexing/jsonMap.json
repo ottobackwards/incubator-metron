@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "jsonMap",
+    "batchSize": 5,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "jsonMap",
+    "batchSize": 5,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "jsonMap",
+    "batchSize": 5,
+    "enabled" : true
+  }
+}

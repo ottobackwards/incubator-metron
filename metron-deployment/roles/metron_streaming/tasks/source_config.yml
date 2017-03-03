@@ -33,7 +33,10 @@
 - name: Load Config
   shell: "{{ metron_directory }}/bin/zk_load_configs.sh --mode PUSH -i {{ zookeeper_config_path }} -z {{ zookeeper_url }} && touch {{ zookeeper_config_path }}/configured"
 
-
+- name: Load Telemetry Configs
+  shell: "{{ metron_directory }}/bin/zk_load_configs.sh --mode PUSH -i {{metron_directory}}/telemetry/{{item}}/config/zookeeper -z {{ zookeeper_url }} && touch {{metron_directory}}/telemetry/{{item}}/config/zookeeper/configured"
+  with_items:
+    - "{{metron_telemetry}}"
 
 
 

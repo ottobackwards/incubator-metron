@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "grok",
+    "batchSize": 5,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "grok",
+    "batchSize": 5,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "grok",
+    "batchSize": 5,
+    "enabled" : true
+  }
+}

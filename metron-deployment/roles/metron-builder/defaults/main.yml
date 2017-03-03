@@ -16,3 +16,6 @@
 #
 ---
 metron_build_dir: "{{ playbook_dir }}/../.."
+metron_spec_dir:  "{{ playbook_dir }}/../packaging/docker/rpm-docker/SPECS"
+metron_sources_dir:  "{{ playbook_dir }}/../packaging/docker/rpm-docker/SOURCES"
+metron_telemetry: ["asa","base","bro","cef","fireeye","ise","lancope","logstash","paloalto","snort","squid","websphere","yaf","sourcefire"]

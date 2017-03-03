@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "lancope",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "lancope",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "lancope",
+    "batchSize": 1,
+    "enabled" : true
+  }
+}

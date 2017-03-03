@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "logstash",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "logstash",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "logstash",
+    "batchSize": 1,
+    "enabled" : true
+  }
+}

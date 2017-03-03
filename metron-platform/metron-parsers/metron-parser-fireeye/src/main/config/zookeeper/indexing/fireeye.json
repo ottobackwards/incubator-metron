@@ -1,0 +1,17 @@
+{
+  "hdfs" : {
+    "index": "fireeye",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "elasticsearch" : {
+    "index": "fireeye",
+    "batchSize": 1,
+    "enabled" : true
+  },
+  "solr" : {
+    "index": "fireeye",
+    "batchSize": 1,
+    "enabled" : true
+  }
+}
