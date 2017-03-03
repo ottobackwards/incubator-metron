@@ -49,7 +49,7 @@ metron_maas_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-maas-
 metron_profiler_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-profiler/target/{{ metron_profiler_bundle_name }}"
 metron_profiler_client_bundle_path: "{{ playbook_dir }}/../../metron-analytics/metron-profiler-client/target/{{ metron_profiler_client_bundle_name }}"
 
-metron_telemetry: ["asa","base","bro","cef","fireeye","ise","lancope","logstash","paloalto","snort","squid","websphere","yaf","sourcefire"]
+metron_telemetry: ["asa","base","bro","cef","fireeye","ise","lancope","logstash","paloalto","snort","websphere","yaf","sourcefire"]
 
 # configuration paths
 config_path: "{{ metron_directory }}/config"

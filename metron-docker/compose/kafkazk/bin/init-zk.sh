@@ -22,7 +22,7 @@ echo "create /metron/topology/enrichments enrichments" | ./bin/zookeeper-shell.s
 
 $METRON_HOME/bin/zk_load_configs.sh -z localhost:2181 -m PUSH -i $METRON_HOME/config/zookeeper
 
-for p in asa base bro cef fireeye ise lancope logstash paloalto snort squid websphere yaf sourcefire
+for p in asa base bro cef fireeye ise lancope logstash paloalto snort websphere yaf sourcefire
 do
     $METRON_HOME/bin/zk_load_configs.sh -z localhost:2181 -m PUSH -i $METRON_HOME/telemetry/$p/config/zookeeper
 done

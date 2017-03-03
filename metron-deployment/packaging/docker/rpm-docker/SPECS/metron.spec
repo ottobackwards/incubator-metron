@@ -96,7 +96,6 @@ mkdir -p %{buildroot}%{telemetry_home}/logstash
 mkdir -p %{buildroot}%{telemetry_home}/paloalto
 mkdir -p %{buildroot}%{telemetry_home}/snort
 mkdir -p %{buildroot}%{telemetry_home}/sourcefire
-mkdir -p %{buildroot}%{telemetry_home}/squid
 mkdir -p %{buildroot}%{telemetry_home}/websphere
 mkdir -p %{buildroot}%{telemetry_home}/yaf
 
@@ -114,7 +113,6 @@ tar -xzf %{SOURCE9} -C %{buildroot}%{telemetry_home}/logstash
 tar -xzf %{SOURCE10} -C %{buildroot}%{telemetry_home}/paloalto
 tar -xzf %{SOURCE11} -C %{buildroot}%{telemetry_home}/snort
 tar -xzf %{SOURCE12} -C %{buildroot}%{telemetry_home}/sourcefire
-tar -xzf %{SOURCE13} -C %{buildroot}%{telemetry_home}/squid
 tar -xzf %{SOURCE14} -C %{buildroot}%{telemetry_home}/websphere
 tar -xzf %{SOURCE15} -C %{buildroot}%{telemetry_home}/yaf
 tar -xzf %{SOURCE16} -C %{buildroot}%{metron_home}
@@ -487,36 +485,6 @@ This package installs the Metron sourcefire Parser files
 %{telemetry_home}/sourcefire/patterns/sourcefire
 %{telemetry_home}/sourcefire/patterns/common
 %attr(0644,root,root) %{telemetry_home}/sourcefire/lib/metron-parser-sourcefire-%{full_version}-uber.jar
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-%package        parser-squid
-Summary:        Metron Squid Parser Files
-Group:          Applications/Internet
-Provides:       parser-squid = %{version}
-
-%description    parser-squid
-This package installs the Metron Squid Parser files
-
-%files          parser-squid
-%defattr(-,root,root,755)
-%dir %{metron_root}
-%dir %{metron_home}
-%dir %{telemetry_home}
-%dir %{telemetry_home}/squid/config
-%dir %{telemetry_home}/squid/config/zookeeper
-%dir %{telemetry_home}/squid/config/zookeeper/parsers
-%dir %{telemetry_home}/squid/config/zookeeper/enrichments
-%dir %{telemetry_home}/squid/config/zookeeper/indexing
-%dir %{telemetry_home}/squid/patterns
-%dir %{telemetry_home}/squid/lib
-%{telemetry_home}/squid/config/zookeeper/parsers/squid.json
-%{telemetry_home}/squid/config/zookeeper/enrichments/squid.json
-%{telemetry_home}/squid/config/zookeeper/indexing/squid.json
-%{telemetry_home}/squid/patterns/squid
-%{telemetry_home}/squid/patterns/common
-%attr(0644,root,root) %{telemetry_home}/squid/lib/metron-parser-squid-%{full_version}-uber.jar
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -36,7 +36,7 @@ public class SensorEnrichmentConfigTest {
   @Test
   public void test() throws IOException {
     EqualsVerifier.forClass(SensorEnrichmentConfig.class).suppress(Warning.NONFINAL_FIELDS).usingGetClass().verify();
-    Map<String, byte[]> testSensorConfigMap = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(TestConstants.ENRICHMENTS_CONFIGS_PATH);
+    Map<String, byte[]> testSensorConfigMap = ConfigurationsUtils.readSensorEnrichmentConfigsFromFile(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"yaf"));
     byte[] sensorConfigBytes = testSensorConfigMap.get("yaf");
     SensorEnrichmentConfig sensorEnrichmentConfig = SensorEnrichmentConfig.fromBytes(sensorConfigBytes);
     Assert.assertNotNull(sensorEnrichmentConfig);
@@ -45,7 +45,7 @@ public class SensorEnrichmentConfigTest {
 
   @Test
   public void testSerDe() throws IOException {
-    for(File enrichmentConfig : new File(new File(TestConstants.ENRICHMENTS_CONFIGS_PATH), "enrichments").listFiles()) {
+    for(File enrichmentConfig : new File(String.format(TestConstants.A_PARSER_CONFIGS_PATH_FMT,"yaf"), "enrichments").listFiles()) {
       SensorEnrichmentConfig config = null;
       try (BufferedReader br = new BufferedReader(new FileReader(enrichmentConfig))) {
         String parserStr = IOUtils.toString(br);
