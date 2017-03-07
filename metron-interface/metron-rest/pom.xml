@@ -112,6 +112,17 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.apache.metron</groupId>
             <artifactId>metron-parsers-common</artifactId>
             <version>${project.parent.version}</version>
@@ -141,6 +152,33 @@
         <dependency>
             <groupId>org.apache.metron</groupId>
             <artifactId>metron-parser-base</artifactId>
+            <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.metron</groupId>
+                    <artifactId>metron-profiler-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.metron</groupId>
+                    <artifactId>metron-statistics</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.metron</groupId>
+                    <artifactId>metron-writer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.metron</groupId>
+            <artifactId>metron-parser-bro</artifactId>
             <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
