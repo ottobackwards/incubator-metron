@@ -654,8 +654,11 @@ This package installs the Metron Indexing files
 %dir %{metron_home}
 %dir %{metron_home}/flux
 %dir %{metron_home}/flux/indexing
+%dir %{metron_home}/config/zookeeper/indexing
 %{metron_home}/flux/indexing/remote.yaml
 %{metron_home}/config/zeppelin/metron/metron-yaf-telemetry.json
+%{metron_home}/config/zookeeper/indexing/error.json
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
