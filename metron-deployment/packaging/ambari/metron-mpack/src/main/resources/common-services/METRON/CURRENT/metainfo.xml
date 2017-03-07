@@ -194,7 +194,46 @@
               <name>metron-data-management</name>
             </package>
             <package>
-              <name>metron-parsers</name>
+              <name>metron-parsers-common</name>
+            </package>
+            <package>
+              <name>metron-parser-base</name>
+            </package>
+            <package>
+              <name>metron-parser-asa</name>
+            </package>
+            <package>
+              <name>metron-parser-bro</name>
+            </package>
+            <package>
+              <name>metron-parser-cef</name>
+            </package>
+            <package>
+              <name>metron-parser-fireeye</name>
+            </package>
+            <package>
+              <name>metron-parser-ise</name>
+            </package>
+            <package>
+              <name>metron-parser-lancope</name>
+            </package>
+            <package>
+              <name>metron-parser-logstash</name>
+            </package>
+            <package>
+              <name>metron-parser-paloalto</name>
+            </package>
+            <package>
+              <name>metron-parser-snort</name>
+            </package>
+            <package>
+              <name>metron-parser-sourcefire</name>
+            </package>
+            <package>
+              <name>metron-parser-websphere</name>
+            </package>
+            <package>
+              <name>metron-parser-yaf</name>
             </package>
             <package>
               <name>metron-enrichment</name>

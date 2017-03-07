@@ -25,6 +25,12 @@
         <display-name>Metron home</display-name>
     </property>
     <property>
+        <name>metron_telemetry_home</name>
+        <value>/usr/metron/${metron.version}/telemetry</value>
+        <description>Metron telemetry directory</description>
+        <display-name>Metron telemetry</display-name>
+    </property>
+    <property>
         <name>metron_apps_hdfs_dir</name>
         <value>/apps/metron</value>
         <description>Metron apps HDFS dir</description>

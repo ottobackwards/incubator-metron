@@ -24,12 +24,20 @@ from resource_management.core.source import InlineTemplate
 from resource_management.libraries.functions import format as ambari_format
 
 
-def init_config():
-    Logger.info('Loading config into ZooKeeper')
+def init_config(params):
+    Logger.info('Loading Metron config into ZooKeeper')
     Execute(ambari_format(
         "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i {metron_zookeeper_config_path} -z {zookeeper_quorum}"),
         path=ambari_format("{java_home}/bin")
     )
+    Logger.info('Loading Metron Parsers config into ZooKeeper')
+    parsers_list = params.all_parsers.replace(' ', '').split(',')
+
+    for parser in parsers_list:
+        Execute(ambari_format(
+            "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i " + params.metron_telemetry_home + "/" + parser + "/{metron_zookeeper_config_dir} -z {zookeeper_quorum}"),
+            path=ambari_format("{java_home}/bin")
+        )
 
 
 def get_running_topologies():
@@ -73,4 +81,6 @@ def load_global_config(params):
          owner=params.metron_user,
          content=InlineTemplate(params.global_properties_template))
 
-    init_config()
+    init_config(params)
+
+
