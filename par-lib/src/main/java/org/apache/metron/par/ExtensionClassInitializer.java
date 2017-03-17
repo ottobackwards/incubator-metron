@@ -23,8 +23,13 @@ import java.util.List;
 
 public class ExtensionClassInitializer {
   public static void initialize(List<Class> extentionsClassList){
-    ExtensionManager.InitClassDefinitions(extentionsClassList);
-    ParThreadContextClassLoader.InitClasses(extentionsClassList);
+    ExtensionManager.initClassDefinitions(extentionsClassList);
+    ParThreadContextClassLoader.initClasses(extentionsClassList);
+  }
+
+  public static void reset(){
+    ExtensionManager.resetClassDefinitions();
+    ParThreadContextClassLoader.resetClasses();
   }
   public static void initializeFileUtilities(FileUtilities utilities){
     FileUtils.init(utilities);

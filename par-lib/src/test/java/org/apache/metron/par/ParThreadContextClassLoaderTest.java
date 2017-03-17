@@ -23,11 +23,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.metron.par.util.ParProperties;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 public class ParThreadContextClassLoaderTest {
 
 
+    @AfterClass
+    public static void after(){
+        ExtensionClassInitializer.reset();
+    }
 
     @Test
     public void validateWithPropertiesConstructor() throws Exception {

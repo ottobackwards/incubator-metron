@@ -65,13 +65,18 @@ public class ExtensionManager {
     private static AtomicBoolean inited = new AtomicBoolean(false);
 
     // should initialize class definitions
-    public static void InitClassDefinitions(final List<Class> classes){
+    public static void initClassDefinitions(final List<Class> classes){
         if(classes != null){
             for( Class clazz : classes){
                 definitionMap.put(clazz, new HashSet<>());
             }
         }
         inited.set(true);
+    }
+
+    public static void resetClassDefinitions(){
+        definitionMap.clear();
+        inited.set(false);
     }
 
     /**

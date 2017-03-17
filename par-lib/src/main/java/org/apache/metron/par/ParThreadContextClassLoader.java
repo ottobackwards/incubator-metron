@@ -55,7 +55,7 @@ public class ParThreadContextClassLoader extends URLClassLoader {
     private static final List<Class<?>> narSpecificClasses = new ArrayList<>();
     private static AtomicBoolean inited = new AtomicBoolean(false);
     // should initialize class definitions
-    public static void InitClasses(final List<Class> classes){
+    public static void initClasses(final List<Class> classes){
         narSpecificClasses.clear();
         if(classes != null){
             for( Class clazz : classes){
@@ -63,6 +63,11 @@ public class ParThreadContextClassLoader extends URLClassLoader {
             }
         }
         inited.set(true);
+    }
+
+    public static void resetClasses(){
+        narSpecificClasses.clear();
+        inited.set(false);
     }
 
     private ParThreadContextClassLoader() {
