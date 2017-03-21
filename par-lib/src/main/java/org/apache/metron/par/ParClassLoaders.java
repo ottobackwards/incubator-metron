@@ -34,6 +34,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.metron.par.util.FileUtils;
+import org.apache.metron.par.util.ParProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,15 +95,16 @@ public final class ParClassLoaders {
      * before the rest of the methods to access the classloaders are called and
      * it can be safely called any number of times provided the same framework
      * and extension working dirs are used.
-     *
+     * @param fileSystemManager the FileSystemManager
      * @param frameworkWorkingDir where to find framework artifacts
      * @param extensionsWorkingDir where to find extension artifacts
+     * @param props ParProperties
      * @throws FileSystemException if any issue occurs while exploding par working directories.
      * @throws java.lang.ClassNotFoundException if unable to load class definition
      * @throws IllegalStateException already initialized with a given pair of
      * directories cannot reinitialize or use a different pair of directories.
      */
-    public void init(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir) throws FileSystemException, ClassNotFoundException {
+    public void init(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException {
         if (frameworkWorkingDir == null || extensionsWorkingDir == null || fileSystemManager == null) {
             throw new NullPointerException("cannot have empty arguments");
         }
@@ -111,7 +113,7 @@ public final class ParClassLoaders {
             synchronized (this) {
                 ic = initContext;
                 if (ic == null) {
-                    initContext = ic = load(fileSystemManager, frameworkWorkingDir, extensionsWorkingDir);
+                    initContext = ic = load(fileSystemManager, frameworkWorkingDir, extensionsWorkingDir,props);
                 }
             }
         }
@@ -125,7 +127,7 @@ public final class ParClassLoaders {
     /**
      * Should be called at most once.
      */
-    private InitContext load(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir) throws FileSystemException, ClassNotFoundException {
+    private InitContext load(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException {
         // get the system classloader
         final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
@@ -152,7 +154,7 @@ public final class ParClassLoaders {
 
             // load the par details which includes and par dependencies
             for (final FileObject unpackedPar : parWorkingDirContents) {
-                final ParDetails parDetail = getParDetails(unpackedPar);
+                final ParDetails parDetail = getParDetails(unpackedPar,props);
 
                 // ensure the par contained an identifier
                 if (parDetail.getParId() == null) {
@@ -252,7 +254,7 @@ public final class ParClassLoaders {
      * @return details about the PAR
      * @throws FileSystemException ioe
      */
-    private static ParDetails getParDetails(final FileObject parDirectory) throws FileSystemException {
+    private static ParDetails getParDetails(final FileObject parDirectory, ParProperties props) throws FileSystemException {
         final ParDetails parDetails = new ParDetails();
         parDetails.setParWorkingDirectory(parDirectory);
 
@@ -262,8 +264,8 @@ public final class ParClassLoaders {
             final Attributes attributes = manifest.getMainAttributes();
 
             // get the par details
-            parDetails.setParId(attributes.getValue("Par-Id"));
-            parDetails.setParDependencyId(attributes.getValue("Par-Dependency-Id"));
+            parDetails.setParId(attributes.getValue(props.getMetaIdPrefix() + "-Id"));
+            parDetails.setParDependencyId(attributes.getValue(props.getMetaIdPrefix() + "-Dependency-Id"));
         }catch(IOException ioe){
             throw new FileSystemException("failed reading manifest file " + manifestFile.getURL(),ioe);
         }

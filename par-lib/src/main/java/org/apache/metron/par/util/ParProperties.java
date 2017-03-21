@@ -42,12 +42,14 @@ public abstract class ParProperties {
     public static final String PAR_WORKING_DIRECTORY = "par.working.directory";
     public static final String COMPONENT_DOCS_DIRECTORY = "par.documentation.working.directory";
     public static final String ARCHIVE_EXTENSION = "par.archive.extension";
+    public static final String META_ID_PREFIX = "par.meta.id.prefix";
 
     // defaults
     public static final String DEFAULT_ARCHIVE_EXTENSION = "par";
     public static final String DEFAULT_PAR_WORKING_DIR = "./work/par";
     public static final String DEFAULT_PAR_LIBRARY_DIR = "./lib";
     public static final String DEFAULT_COMPONENT_DOCS_DIRECTORY = "./work/docs/components";
+    public static final String DEFAULT_META_ID_PREFIX = "Par";
 
     /**
      * Retrieves the property value for the given property key.
@@ -117,7 +119,9 @@ public abstract class ParProperties {
         }
         return Paths.get(path).toUri();
     }
-
+    public String getMetaIdPrefix(){
+        return getProperty(META_ID_PREFIX,DEFAULT_META_ID_PREFIX);
+    }
     public URI getComponentDocumentationWorkingDirectory() throws URISyntaxException {
         return getURI(getProperty(COMPONENT_DOCS_DIRECTORY, DEFAULT_COMPONENT_DOCS_DIRECTORY));
     }

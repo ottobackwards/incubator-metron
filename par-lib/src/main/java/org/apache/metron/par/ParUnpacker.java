@@ -114,7 +114,7 @@ public final class ParUnpacker {
                             }
                         }
                     }
-                        final String parId = manifest.getMainAttributes().getValue("Par-Id");
+                        final String parId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + "-Id");
                         // determine if this is the framework
                         /* OPF extension point
                         if (ParClassLoaders.FRAMEWORK_PAR_ID.equals(parId)) {
