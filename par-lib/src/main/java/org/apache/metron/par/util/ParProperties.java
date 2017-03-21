@@ -119,9 +119,15 @@ public abstract class ParProperties {
         }
         return Paths.get(path).toUri();
     }
+    
     public String getMetaIdPrefix(){
         return getProperty(META_ID_PREFIX,DEFAULT_META_ID_PREFIX);
     }
+
+    public String getArchiveExtension(){
+        return getProperty(ARCHIVE_EXTENSION,DEFAULT_ARCHIVE_EXTENSION);
+    }
+
     public URI getComponentDocumentationWorkingDirectory() throws URISyntaxException {
         return getURI(getProperty(COMPONENT_DOCS_DIRECTORY, DEFAULT_COMPONENT_DOCS_DIRECTORY));
     }
