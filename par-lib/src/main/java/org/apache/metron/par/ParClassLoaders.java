@@ -43,8 +43,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class ParClassLoaders {
 
-    public static final String FRAMEWORK_NAR_ID = "nifi-framework-nar";
-    public static final String JETTY_NAR_ID = "nifi-jetty-bundle";
+    // OPF: This needs to be extendable or go
+    public static final String FRAMEWORK_PAR_ID = "nifi-framework-nar";
+    public static final String JETTY_PAR_ID = "nifi-jetty-bundle";
 
     private static volatile ParClassLoaders ncl;
     private volatile InitContext initContext;
@@ -96,7 +97,7 @@ public final class ParClassLoaders {
      *
      * @param frameworkWorkingDir where to find framework artifacts
      * @param extensionsWorkingDir where to find extension artifacts
-     * @throws FileSystemException if any issue occurs while exploding nar working directories.
+     * @throws FileSystemException if any issue occurs while exploding par working directories.
      * @throws java.lang.ClassNotFoundException if unable to load class definition
      * @throws IllegalStateException already initialized with a given pair of
      * directories cannot reinitialize or use a different pair of directories.
@@ -128,146 +129,146 @@ public final class ParClassLoaders {
         // get the system classloader
         final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-        // find all nar files and create class loaders for them.
+        // find all par files and create class loaders for them.
         final Map<String, ClassLoader> extensionDirectoryClassLoaderLookup = new LinkedHashMap<>();
-        final Map<String, ClassLoader> narIdClassLoaderLookup = new HashMap<>();
+        final Map<String, ClassLoader> parIdClassLoaderLookup = new HashMap<>();
 
-        // make sure the nar directory is there and accessible
+        // make sure the par directory is there and accessible
         FileUtils.ensureDirectoryExistAndCanAccess(frameworkWorkingDir);
         FileUtils.ensureDirectoryExistAndCanAccess(extensionsWorkingDir);
 
-        final List<FileObject> narWorkingDirContents = new ArrayList<>();
+        final List<FileObject> parWorkingDirContents = new ArrayList<>();
         final FileObject[] frameworkWorkingDirContents = frameworkWorkingDir.getChildren();
         if (frameworkWorkingDirContents != null) {
-            narWorkingDirContents.addAll(Arrays.asList(frameworkWorkingDirContents));
+            parWorkingDirContents.addAll(Arrays.asList(frameworkWorkingDirContents));
         }
         final FileObject[] extensionsWorkingDirContents = extensionsWorkingDir.getChildren();
         if (extensionsWorkingDirContents != null) {
-            narWorkingDirContents.addAll(Arrays.asList(extensionsWorkingDirContents));
+            parWorkingDirContents.addAll(Arrays.asList(extensionsWorkingDirContents));
         }
 
-        if (!narWorkingDirContents.isEmpty()) {
-            final List<NarDetails> narDetails = new ArrayList<>();
+        if (!parWorkingDirContents.isEmpty()) {
+            final List<ParDetails> parDetails = new ArrayList<>();
 
-            // load the nar details which includes and nar dependencies
-            for (final FileObject unpackedNar : narWorkingDirContents) {
-                final NarDetails narDetail = getNarDetails(unpackedNar);
+            // load the par details which includes and par dependencies
+            for (final FileObject unpackedPar : parWorkingDirContents) {
+                final ParDetails parDetail = getParDetails(unpackedPar);
 
-                // ensure the nar contained an identifier
-                if (narDetail.getNarId() == null) {
-                    logger.warn("No NAR Id found. Skipping: " + unpackedNar.getURL());
+                // ensure the par contained an identifier
+                if (parDetail.getParId() == null) {
+                    logger.warn("No PAR Id found. Skipping: " + unpackedPar.getURL());
                     continue;
                 }
 
-                // store the nar details
-                narDetails.add(narDetail);
+                // store the par details
+                parDetails.add(parDetail);
             }
 
-            // attempt to locate the jetty nar
+            // attempt to locate the jetty par
             ClassLoader jettyClassLoader = null;
-            for (final Iterator<NarDetails> narDetailsIter = narDetails.iterator(); narDetailsIter.hasNext();) {
-                final NarDetails narDetail = narDetailsIter.next();
+            for (final Iterator<ParDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
+                final ParDetails parDetail = parDetailsIter.next();
 
-                // look for the jetty nar
-                if (JETTY_NAR_ID.equals(narDetail.getNarId())) {
+                // look for the jetty par
+                if (JETTY_PAR_ID.equals(parDetail.getParId())) {
                     // create the jetty classloader
-                    jettyClassLoader = createNarClassLoader(fileSystemManager, narDetail.getNarWorkingDirectory(), systemClassLoader);
+                    jettyClassLoader = createParClassLoader(fileSystemManager, parDetail.getParWorkingDirectory(), systemClassLoader);
 
-                    // remove the jetty nar since its already loaded
-                    narIdClassLoaderLookup.put(narDetail.getNarId(), jettyClassLoader);
-                    narDetailsIter.remove();
+                    // remove the jetty par since its already loaded
+                    parIdClassLoaderLookup.put(parDetail.getParId(), jettyClassLoader);
+                    parDetailsIter.remove();
                     break;
                 }
             }
 
-            // ensure the jetty nar was found
+            // ensure the jetty par was found
             if (jettyClassLoader == null) {
                 throw new IllegalStateException("Unable to locate Jetty bundle.");
             }
 
-            int narCount;
+            int parCount;
             do {
-                // record the number of nars to be loaded
-                narCount = narDetails.size();
+                // record the number of pars to be loaded
+                parCount = parDetails.size();
 
-                // attempt to create each nar class loader
-                for (final Iterator<NarDetails> narDetailsIter = narDetails.iterator(); narDetailsIter.hasNext();) {
-                    final NarDetails narDetail = narDetailsIter.next();
-                    final String narDependencies = narDetail.getNarDependencyId();
+                // attempt to create each par class loader
+                for (final Iterator<ParDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
+                    final ParDetails parDetail = parDetailsIter.next();
+                    final String parDependencies = parDetail.getParDependencyId();
 
                     // see if this class loader is eligible for loading
-                    ClassLoader narClassLoader = null;
-                    if (narDependencies == null) {
-                        narClassLoader = createNarClassLoader(fileSystemManager,narDetail.getNarWorkingDirectory(), jettyClassLoader);
-                    } else if (narIdClassLoaderLookup.containsKey(narDetail.getNarDependencyId())) {
-                        narClassLoader = createNarClassLoader(fileSystemManager, narDetail.getNarWorkingDirectory(), narIdClassLoaderLookup.get(narDetail.getNarDependencyId()));
+                    ClassLoader parClassLoader = null;
+                    if (parDependencies == null) {
+                        parClassLoader = createParClassLoader(fileSystemManager,parDetail.getParWorkingDirectory(), jettyClassLoader);
+                    } else if (parIdClassLoaderLookup.containsKey(parDetail.getParDependencyId())) {
+                        parClassLoader = createParClassLoader(fileSystemManager, parDetail.getParWorkingDirectory(), parIdClassLoaderLookup.get(parDetail.getParDependencyId()));
                     }
 
-                    // if we were able to create the nar class loader, store it and remove the details
-                    if (narClassLoader != null) {
-                        extensionDirectoryClassLoaderLookup.put(narDetail.getNarWorkingDirectory().getURL().toString(), narClassLoader);
-                        narIdClassLoaderLookup.put(narDetail.getNarId(), narClassLoader);
-                        narDetailsIter.remove();
+                    // if we were able to create the par class loader, store it and remove the details
+                    if (parClassLoader != null) {
+                        extensionDirectoryClassLoaderLookup.put(parDetail.getParWorkingDirectory().getURL().toString(), parClassLoader);
+                        parIdClassLoaderLookup.put(parDetail.getParId(), parClassLoader);
+                        parDetailsIter.remove();
                     }
                 }
 
                 // attempt to load more if some were successfully loaded this iteration
-            } while (narCount != narDetails.size());
+            } while (parCount != parDetails.size());
 
-            // see if any nars couldn't be loaded
-            for (final NarDetails narDetail : narDetails) {
-                logger.warn(String.format("Unable to resolve required dependency '%s'. Skipping NAR %s", narDetail.getNarDependencyId(), narDetail.getNarWorkingDirectory().getURL()));
+            // see if any pars couldn't be loaded
+            for (final ParDetails parDetail : parDetails) {
+                logger.warn(String.format("Unable to resolve required dependency '%s'. Skipping PAR %s", parDetail.getParDependencyId(), parDetail.getParWorkingDirectory().getURL()));
             }
         }
 
-        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, narIdClassLoaderLookup.get(FRAMEWORK_NAR_ID), new LinkedHashMap<>(extensionDirectoryClassLoaderLookup));
+        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, parIdClassLoaderLookup.get(FRAMEWORK_PAR_ID), new LinkedHashMap<>(extensionDirectoryClassLoaderLookup));
     }
 
     /**
      * Creates a new ParClassLoader. The parentClassLoader may be null.
      *
-     * @param narDirectory root directory of nar
-     * @param parentClassLoader parent classloader of nar
-     * @return the nar classloader
+     * @param parDirectory root directory of par
+     * @param parentClassLoader parent classloader of par
+     * @return the par classloader
      * @throws FileSystemException ioe
      * @throws ClassNotFoundException cfne
      */
-    private static ClassLoader createNarClassLoader(final FileSystemManager fileSystemManager, final FileObject narDirectory, final ClassLoader parentClassLoader) throws FileSystemException, ClassNotFoundException {
-        logger.debug("Loading NAR file: " + narDirectory.getURL());
+    private static ClassLoader createParClassLoader(final FileSystemManager fileSystemManager, final FileObject parDirectory, final ClassLoader parentClassLoader) throws FileSystemException, ClassNotFoundException {
+        logger.debug("Loading PAR file: " + parDirectory.getURL());
         ParClassLoader.Builder builder = new ParClassLoader.Builder()
                 .withFileSystemManager(fileSystemManager)
-                .withNarWorkingDirectory(narDirectory)
+                .withParWorkingDirectory(parDirectory)
                 .withParentClassloader(parentClassLoader);
-        final ClassLoader narClassLoader = builder.build();
-        logger.info("Loaded NAR file: " + narDirectory.getURL() + " as class loader " + narClassLoader);
-        return narClassLoader;
+        final ClassLoader parClassLoader = builder.build();
+        logger.info("Loaded PAR file: " + parDirectory.getURL() + " as class loader " + parClassLoader);
+        return parClassLoader;
     }
 
     /**
-     * Loads the details for the specified NAR. The details will be extracted
+     * Loads the details for the specified PAR. The details will be extracted
      * from the manifest file.
      *
-     * @param narDirectory the nar directory
-     * @return details about the NAR
+     * @param parDirectory the par directory
+     * @return details about the PAR
      * @throws FileSystemException ioe
      */
-    private static NarDetails getNarDetails(final FileObject narDirectory) throws FileSystemException {
-        final NarDetails narDetails = new NarDetails();
-        narDetails.setNarWorkingDirectory(narDirectory);
+    private static ParDetails getParDetails(final FileObject parDirectory) throws FileSystemException {
+        final ParDetails parDetails = new ParDetails();
+        parDetails.setParWorkingDirectory(parDirectory);
 
-        final FileObject manifestFile = narDirectory.resolveFile("META-INF/MANIFEST.MF");
+        final FileObject manifestFile = parDirectory.resolveFile("META-INF/MANIFEST.MF");
         try (final InputStream fis = manifestFile.getContent().getInputStream()) {
             final Manifest manifest = new Manifest(fis);
             final Attributes attributes = manifest.getMainAttributes();
 
-            // get the nar details
-            narDetails.setNarId(attributes.getValue("Nar-Id"));
-            narDetails.setNarDependencyId(attributes.getValue("Nar-Dependency-Id"));
+            // get the par details
+            parDetails.setParId(attributes.getValue("Par-Id"));
+            parDetails.setParDependencyId(attributes.getValue("Par-Dependency-Id"));
         }catch(IOException ioe){
             throw new FileSystemException("failed reading manifest file " + manifestFile.getURL(),ioe);
         }
 
-        return narDetails;
+        return parDetails;
     }
 
     /**
@@ -317,34 +318,34 @@ public final class ParClassLoaders {
         return new LinkedHashSet<>(initContext.extensionClassLoaders.values());
     }
 
-    private static class NarDetails {
+    private static class ParDetails {
 
-        private String narId;
-        private String narDependencyId;
-        private FileObject narWorkingDirectory;
+        private String parId;
+        private String parDependencyId;
+        private FileObject parWorkingDirectory;
 
-        public String getNarDependencyId() {
-            return narDependencyId;
+        public String getParDependencyId() {
+            return parDependencyId;
         }
 
-        public void setNarDependencyId(String narDependencyId) {
-            this.narDependencyId = narDependencyId;
+        public void setParDependencyId(String parDependencyId) {
+            this.parDependencyId = parDependencyId;
         }
 
-        public String getNarId() {
-            return narId;
+        public String getParId() {
+            return parId;
         }
 
-        public void setNarId(String narId) {
-            this.narId = narId;
+        public void setParId(String parId) {
+            this.parId = parId;
         }
 
-        public FileObject getNarWorkingDirectory() {
-            return narWorkingDirectory;
+        public FileObject getParWorkingDirectory() {
+            return parWorkingDirectory;
         }
 
-        public void setNarWorkingDirectory(FileObject narWorkingDirectory) {
-            this.narWorkingDirectory = narWorkingDirectory;
+        public void setParWorkingDirectory(FileObject parWorkingDirectory) {
+            this.parWorkingDirectory = parWorkingDirectory;
         }
     }
 

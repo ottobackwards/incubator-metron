@@ -90,13 +90,13 @@ public class ParUnpackerTest {
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", Collections.EMPTY_MAP);
 
         assertEquals("./target/ParUnpacker/lib/",
-                properties.getProperty("metron.par.library.directory"));
+                properties.getProperty("par.library.directory"));
         assertEquals("./target/ParUnpacker/lib2/",
-                properties.getProperty("metron.par.library.directory.alt"));
+                properties.getProperty("par.library.directory.alt"));
 
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs();
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackNars(fileSystemManager,properties);
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
 
         assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
@@ -107,13 +107,13 @@ public class ParUnpackerTest {
         final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
         FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
 
-        Set<String> expectedNars = new HashSet<>();
-        expectedNars.add("dummy-one.nar-unpacked");
-        expectedNars.add("dummy-two.nar-unpacked");
-        assertEquals(expectedNars.size(), extensionFiles.length);
+        Set<String> expectedPars = new HashSet<>();
+        expectedPars.add("dummy-one.foo-unpacked");
+        expectedPars.add("dummy-two.foo-unpacked");
+        assertEquals(expectedPars.size(), extensionFiles.length);
 
         for (FileObject extensionFile : extensionFiles) {
-            Assert.assertTrue(expectedNars.contains(extensionFile.getName().getBaseName()));
+            Assert.assertTrue(expectedPars.contains(extensionFile.getName().getBaseName()));
         }
     }
 
@@ -126,11 +126,11 @@ public class ParUnpackerTest {
         assertTrue(emptyDir.mkdirs());
 
         final Map<String, String> others = new HashMap<>();
-        others.put("metron.par.library.directory.alt", emptyDir.toString());
+        others.put("par.library.directory.alt", emptyDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs();
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackNars(fileSystemManager, properties);
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertEquals(1, extensionMapping.getAllExtensionNames().size());
         assertTrue(extensionMapping.getAllExtensionNames().contains(
@@ -140,7 +140,7 @@ public class ParUnpackerTest {
         FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
 
         assertEquals(1, extensionFiles.length);
-        assertEquals("dummy-one.nar-unpacked", extensionFiles[0].getName().getBaseName());
+        assertEquals("dummy-one.foo-unpacked", extensionFiles[0].getName().getBaseName());
     }
 
     @Test
@@ -151,11 +151,11 @@ public class ParUnpackerTest {
         nonExistantDir.deleteOnExit();
 
         final Map<String, String> others = new HashMap<>();
-        others.put("metron.par.library.directory.alt", nonExistantDir.toString());
+        others.put("par.library.directory.alt", nonExistantDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs();
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackNars(fileSystemManager, properties);
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertTrue(extensionMapping.getAllExtensionNames().contains(
                 "org.apache.nifi.processors.dummy.one"));
@@ -166,7 +166,7 @@ public class ParUnpackerTest {
         FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
 
         assertEquals(1, extensionFiles.length);
-        assertEquals("dummy-one.nar-unpacked", extensionFiles[0].getName().getBaseName());
+        assertEquals("dummy-one.foo-unpacked", extensionFiles[0].getName().getBaseName());
     }
 
     @Test
@@ -177,11 +177,11 @@ public class ParUnpackerTest {
         nonDir.deleteOnExit();
 
         final Map<String, String> others = new HashMap<>();
-        others.put("metron.par.library.directory.alt", nonDir.toString());
+        others.put("par.library.directory.alt", nonDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs();
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackNars(fileSystemManager, properties);
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertNull(extensionMapping);
     }

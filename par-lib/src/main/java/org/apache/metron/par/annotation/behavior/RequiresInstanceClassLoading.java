@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 
 /**
  *  Marker annotation a component can use to indicate that the framework should create a new ClassLoader
- *  for each instance of the component, copying all resources from the component's NARClassLoader to a
+ *  for each instance of the component, copying all resources from the component's PARClassLoader to a
  *  new ClassLoader which will only be used by a given instance of the component.
  *
  *  This annotation is typically used when a component has one or more PropertyDescriptors which set

@@ -51,14 +51,22 @@ public class VFSClassloaderUtil {
    * @throws FileSystemException
    */
   public static FileSystemManager generateVfs() throws FileSystemException {
+    return generateVfs(null);
+  }
+  public static FileSystemManager generateVfs(String jarExtensionToRegister) throws FileSystemException {
     DefaultFileSystemManager vfs = new DefaultFileSystemManager();
+
+    if(jarExtensionToRegister == null || StringUtils.isBlank(jarExtensionToRegister) ) {
+      vfs.addExtensionMap(jarExtensionToRegister, "jar");
+      vfs.addProvider(jarExtensionToRegister, new org.apache.commons.vfs2.provider.jar.JarFileProvider());
+    }
+
     vfs.addProvider("res", new org.apache.commons.vfs2.provider.res.ResourceFileProvider());
     vfs.addProvider("zip", new org.apache.commons.vfs2.provider.zip.ZipFileProvider());
     vfs.addProvider("gz", new org.apache.commons.vfs2.provider.gzip.GzipFileProvider());
     vfs.addProvider("ram", new org.apache.commons.vfs2.provider.ram.RamFileProvider());
     vfs.addProvider("file", new org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider());
     vfs.addProvider("jar", new org.apache.commons.vfs2.provider.jar.JarFileProvider());
-    vfs.addProvider("nar", new org.apache.commons.vfs2.provider.jar.JarFileProvider());
     vfs.addProvider("http", new org.apache.commons.vfs2.provider.http.HttpFileProvider());
     vfs.addProvider("https", new org.apache.commons.vfs2.provider.https.HttpsFileProvider());
     vfs.addProvider("ftp", new org.apache.commons.vfs2.provider.ftp.FtpFileProvider());
@@ -75,7 +83,6 @@ public class VFSClassloaderUtil {
     vfs.addProvider("bz2", new org.apache.commons.vfs2.provider.bzip2.Bzip2FileProvider());
     vfs.addProvider("hdfs", new HdfsFileProvider());
     vfs.addExtensionMap("jar", "jar");
-    vfs.addExtensionMap("nar", "jar");
     vfs.addExtensionMap("zip", "zip");
     vfs.addExtensionMap("gz", "gz");
     vfs.addExtensionMap("tar", "tar");

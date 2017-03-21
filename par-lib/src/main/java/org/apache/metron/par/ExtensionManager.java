@@ -19,20 +19,6 @@ package org.apache.metron.par;
 
 import org.apache.metron.par.util.StringUtils;
 import org.apache.metron.par.annotation.behavior.RequiresInstanceClassLoading;
-/*
-OPF
-import org.apache.nifi.authentication.LoginIdentityProvider;
-import org.apache.nifi.authorization.Authorizer;
-import org.apache.nifi.controller.ControllerService;
-import org.apache.nifi.controller.repository.ContentRepository;
-import org.apache.nifi.controller.repository.FlowFileRepository;
-import org.apache.nifi.controller.repository.FlowFileSwapManager;
-import org.apache.nifi.controller.status.history.ComponentStatusRepository;
-import org.apache.nifi.flowfile.FlowFilePrioritizer;
-import org.apache.nifi.processor.Processor;
-import org.apache.nifi.provenance.ProvenanceRepository;
-import org.apache.nifi.reporting.ReportingTask;
-*/
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Scans through the classpath to load all FlowFileProcessors, FlowFileComparators, and ReportingTasks using the service provider API and running through all classloaders (root, NARs).
+ * Scans through the classpath to load all extension components using the service provider API and running through all classloaders (root, PARs).
  *
  * @ThreadSafe - is immutable
  */
@@ -80,7 +66,7 @@ public class ExtensionManager {
     }
 
     /**
-     * Loads all FlowFileProcessor, FlowFileComparator, ReportingTask class types that can be found on the bootstrap classloader and by creating classloaders for all NARs found within the classpath.
+     * Loads all extension class types that can be found on the bootstrap classloader and by creating classloaders for all PARs found within the classpath.
      * @param extensionLoaders the loaders to scan through in search of extensions
      */
     public static void discoverExtensions(final Set<ClassLoader> extensionLoaders) throws NotInitializedException {
@@ -93,10 +79,10 @@ public class ExtensionManager {
         // consider the system class loader
         loadExtensions(systemClassLoader);
 
-        // consider each nar class loader
+        // consider each par class loader
         for (final ClassLoader ncl : extensionLoaders) {
 
-            // Must set the context class loader to the nar classloader itself
+            // Must set the context class loader to the par classloader itself
             // so that static initialization techniques that depend on the context class loader will work properly
             Thread.currentThread().setContextClassLoader(ncl);
             loadExtensions(ncl);
@@ -163,7 +149,7 @@ public class ExtensionManager {
             if (!loadedFromAncestor) {
                 logger.warn("Attempt was made to load " + className + " from " + classLoader
                         + " but that class name is already loaded/registered from " + registeredClassLoader
-                        + ".  This may cause unpredictable behavior.  Order of NARs is not guaranteed.");
+                        + ".  This may cause unpredictable behavior.  Order of PARs is not guaranteed.");
             }
         }
     }
@@ -203,8 +189,8 @@ public class ExtensionManager {
             }
 
             // If the class is annotated with @RequiresInstanceClassLoading and the registered ClassLoader is a URLClassLoader
-            // then make a new InstanceClassLoader that is a full copy of the NAR Class Loader, otherwise create an empty
-            // InstanceClassLoader that has the NAR ClassLoader as a parent
+            // then make a new InstanceClassLoader that is a full copy of the PAR Class Loader, otherwise create an empty
+            // InstanceClassLoader that has the PAR ClassLoader as a parent
             if (requiresInstanceClassLoading.contains(classType) && (registeredClassLoader instanceof URLClassLoader)) {
                 final URLClassLoader registeredUrlClassLoader = (URLClassLoader) registeredClassLoader;
                 instanceClassLoader = new InstanceClassLoader(instanceIdentifier, classType, registeredUrlClassLoader.getURLs(), registeredUrlClassLoader.getParent());

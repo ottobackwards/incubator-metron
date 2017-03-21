@@ -105,7 +105,7 @@ public class ParUnpackerIntegrationTest {
     properties.setProperty(ParProperties.PAR_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
     properties.setProperty(ParProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
     FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs();
-    final ExtensionMapping extensionMapping = ParUnpacker.unpackNars(fileSystemManager,properties);
+    final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
 
     assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
@@ -116,13 +116,13 @@ public class ParUnpackerIntegrationTest {
     final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
     FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
 
-    Set<String> expectedNars = new HashSet<>();
-    expectedNars.add("dummy-one.nar-unpacked");
-    expectedNars.add("dummy-two.nar-unpacked");
-    assertEquals(expectedNars.size(), extensionFiles.length);
+    Set<String> expectedPars = new HashSet<>();
+    expectedPars.add("dummy-one.foo-unpacked");
+    expectedPars.add("dummy-two.foo-unpacked");
+    assertEquals(expectedPars.size(), extensionFiles.length);
 
     for (FileObject extensionFile : extensionFiles) {
-      Assert.assertTrue(expectedNars.contains(extensionFile.getName().getBaseName()));
+      Assert.assertTrue(expectedPars.contains(extensionFile.getName().getBaseName()));
     }
   }
 }

@@ -36,13 +36,15 @@ import java.util.*;
 public abstract class ParProperties {
 
     // core properties
-    public static final String PROPERTIES_FILE_PATH = "metron.properties.file.path";
-    public static final String PAR_LIBRARY_DIRECTORY = "metron.par.library.directory";
-    public static final String PAR_LIBRARY_DIRECTORY_PREFIX = "metron.par.library.directory.";
-    public static final String PAR_WORKING_DIRECTORY = "metron.par.working.directory";
-    public static final String COMPONENT_DOCS_DIRECTORY = "metron.documentation.working.directory";
+    public static final String PROPERTIES_FILE_PATH = "par.properties.file.path";
+    public static final String PAR_LIBRARY_DIRECTORY = "par.library.directory";
+    public static final String PAR_LIBRARY_DIRECTORY_PREFIX = "par.library.directory.";
+    public static final String PAR_WORKING_DIRECTORY = "par.working.directory";
+    public static final String COMPONENT_DOCS_DIRECTORY = "par.documentation.working.directory";
+    public static final String ARCHIVE_EXTENSION = "par.archive.extension";
 
     // defaults
+    public static final String DEFAULT_ARCHIVE_EXTENSION = "par";
     public static final String DEFAULT_PAR_WORKING_DIR = "./work/par";
     public static final String DEFAULT_PAR_LIBRARY_DIR = "./lib";
     public static final String DEFAULT_COMPONENT_DOCS_DIRECTORY = "./work/docs/components";
@@ -70,40 +72,40 @@ public abstract class ParProperties {
 
     // getters for core properties //
 
-    public URI getNarWorkingDirectory() throws URISyntaxException {
+    public URI getParWorkingDirectory() throws URISyntaxException {
             return getURI(getProperty(PAR_WORKING_DIRECTORY, DEFAULT_PAR_WORKING_DIR));
     }
 
     public URI getFrameworkWorkingDirectory() throws URISyntaxException{
-        return new URI(getNarWorkingDirectory().toString().concat("framework/"));
+        return new URI(getParWorkingDirectory().toString().concat("framework/"));
     }
 
     public URI getExtensionsWorkingDirectory() throws URISyntaxException{
-        return new URI(getNarWorkingDirectory().toString().concat("extensions/"));
+        return new URI(getParWorkingDirectory().toString().concat("extensions/"));
     }
 
-    public List<URI> getNarLibraryDirectories() throws URISyntaxException{
+    public List<URI> getParLibraryDirectories() throws URISyntaxException{
 
-        List<URI> narLibraryPaths = new ArrayList<>();
+        List<URI> parLibraryPaths = new ArrayList<>();
 
         // go through each property
         for (String propertyName : getPropertyKeys()) {
-            // determine if the property is a nar library path
+            // determine if the property is a par library path
             if (StringUtils.startsWith(propertyName, PAR_LIBRARY_DIRECTORY_PREFIX)
                     || PAR_LIBRARY_DIRECTORY.equals(propertyName)) {
                 // attempt to resolve the path specified
-                String narLib = getProperty(propertyName);
-                if (!StringUtils.isBlank(narLib)) {
-                    narLibraryPaths.add(getURI(narLib));
+                String parLib = getProperty(propertyName);
+                if (!StringUtils.isBlank(parLib)) {
+                    parLibraryPaths.add(getURI(parLib));
                 }
             }
         }
 
-        if (narLibraryPaths.isEmpty()) {
-            narLibraryPaths.add(getURI(DEFAULT_PAR_LIBRARY_DIR));
+        if (parLibraryPaths.isEmpty()) {
+            parLibraryPaths.add(getURI(DEFAULT_PAR_LIBRARY_DIR));
         }
 
-        return narLibraryPaths;
+        return parLibraryPaths;
     }
 
     private URI getURI(String path)throws URISyntaxException{
@@ -123,11 +125,11 @@ public abstract class ParProperties {
     public static ParProperties createBasicParProperties(final String propertiesFilePath, final Map<String, String> additionalProperties) {
         final Map<String, String> addProps = (additionalProperties == null) ? Collections.EMPTY_MAP : additionalProperties;
         final Properties properties = new Properties();
-        final String nfPropertiesFilePath = (propertiesFilePath == null)
+        final String parPropertiesFilePath = (propertiesFilePath == null)
                 ? System.getProperty(ParProperties.PROPERTIES_FILE_PATH)
                 : propertiesFilePath;
-        if (nfPropertiesFilePath != null) {
-            final File propertiesFile = new File(nfPropertiesFilePath.trim());
+        if (parPropertiesFilePath != null) {
+            final File propertiesFile = new File(parPropertiesFilePath.trim());
             if (!propertiesFile.exists()) {
                 throw new RuntimeException("Properties file doesn't exist \'"
                         + propertiesFile.getAbsolutePath() + "\'");

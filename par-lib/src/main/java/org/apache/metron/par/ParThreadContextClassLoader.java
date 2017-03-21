@@ -15,23 +15,7 @@
  * limitations under the License.
  */
 package org.apache.metron.par;
-/* OPF
-import org.apache.nifi.authentication.LoginIdentityProvider;
-import org.apache.nifi.authorization.Authorizer;
-import org.apache.nifi.components.Validator;
-import org.apache.nifi.controller.ControllerService;
-import org.apache.nifi.controller.repository.ContentRepository;
-import org.apache.nifi.controller.repository.FlowFileRepository;
-import org.apache.nifi.controller.repository.FlowFileSwapManager;
-import org.apache.nifi.controller.status.history.ComponentStatusRepository;
-import org.apache.nifi.flowfile.FlowFilePrioritizer;
-import org.apache.nifi.processor.Processor;
-import org.apache.nifi.processor.io.InputStreamCallback;
-import org.apache.nifi.processor.io.OutputStreamCallback;
-import org.apache.nifi.processor.io.StreamCallback;
-import org.apache.nifi.provenance.ProvenanceRepository;
-import org.apache.nifi.reporting.ReportingTask;
-*/
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -52,21 +36,21 @@ public class ParThreadContextClassLoader extends URLClassLoader {
 
     static final ContextSecurityManager contextSecurityManager = new ContextSecurityManager();
     private final ClassLoader forward = ClassLoader.getSystemClassLoader();
-    private static final List<Class<?>> narSpecificClasses = new ArrayList<>();
+    private static final List<Class<?>> parSpecificClasses = new ArrayList<>();
     private static AtomicBoolean inited = new AtomicBoolean(false);
     // should initialize class definitions
     public static void initClasses(final List<Class> classes){
-        narSpecificClasses.clear();
+        parSpecificClasses.clear();
         if(classes != null){
             for( Class clazz : classes){
-                narSpecificClasses.add(clazz);
+                parSpecificClasses.add(clazz);
             }
         }
         inited.set(true);
     }
 
     public static void resetClasses(){
-        narSpecificClasses.clear();
+        parSpecificClasses.clear();
         inited.set(false);
     }
 
@@ -118,17 +102,18 @@ public class ParThreadContextClassLoader extends URLClassLoader {
         final Class<?>[] classStack = contextSecurityManager.getExecutionStack();
 
         for (Class<?> currentClass : classStack) {
-            final Class<?> narClass = findNarClass(currentClass);
-            if (narClass != null) {
-                final ClassLoader desiredClassLoader = narClass.getClassLoader();
+            final Class<?> parClass = findParClass(currentClass);
+            if (parClass != null) {
+                final ClassLoader desiredClassLoader = parClass.getClassLoader();
 
                 // When new Threads are created, the new Thread inherits the ClassLoaderContext of
-                // the caller. However, the call stack of that new Thread may not trace back to any NiFi-specific
-                // code. Therefore, the ParThreadContextClassLoader will be unable to find the appropriate NAR
-                // ClassLoader. As a result, we want to set the ContextClassLoader to the NAR ClassLoader that
+                // the caller. However, the call stack of that new Thread may not trace back to any app-specific
+                // code. Therefore, the ParThreadContextClassLoader will be unable to find the appropriate PAR
+                // ClassLoader. As a result, we want to set the ContextClassLoader to the PAR ClassLoader that
                 // contains the class or resource that we are looking for.
-                // This locks the current Thread into the appropriate NAR ClassLoader Context. The framework will change
+                // This locks the current Thread into the appropriate PAR ClassLoader Context. The framework will change
                 // the ContextClassLoader back to the ParThreadContextClassLoader as appropriate via the
+                // OPF NEEDS CLARIFICATION
                 // {@link FlowEngine.beforeExecute(Thread, Runnable)} and
                 // {@link FlowEngine.afterExecute(Thread, Runnable)} methods.
                 if (desiredClassLoader instanceof ParClassLoader) {
@@ -140,12 +125,12 @@ public class ParThreadContextClassLoader extends URLClassLoader {
         return forward;
     }
 
-    private Class<?> findNarClass(final Class<?> cls) {
-        for (final Class<?> narClass : narSpecificClasses) {
-            if (narClass.isAssignableFrom(cls)) {
+    private Class<?> findParClass(final Class<?> cls) {
+        for (final Class<?> parClass : parSpecificClasses) {
+            if (parClass.isAssignableFrom(cls)) {
                 return cls;
             } else if (cls.getEnclosingClass() != null) {
-                return findNarClass(cls.getEnclosingClass());
+                return findParClass(cls.getEnclosingClass());
             }
         }
 
@@ -179,13 +164,13 @@ public class ParThreadContextClassLoader extends URLClassLoader {
      * @param <T> the type to create an instance for
      * @param implementationClassName the implementation class name
      * @param typeDefinition the type definition
-     * @param nifiProperties the ParProperties instance
+     * @param parProperties the ParProperties instance
      * @return constructed instance
      * @throws InstantiationException if there is an error instantiating the class
      * @throws IllegalAccessException if there is an error accessing the type
      * @throws ClassNotFoundException if the class cannot be found
      */
-    public static <T> T createInstance(final String implementationClassName, final Class<T> typeDefinition, final ParProperties nifiProperties)
+    public static <T> T createInstance(final String implementationClassName, final Class<T> typeDefinition, final ParProperties parProperties)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException, NotInitializedException {
         final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(ParThreadContextClassLoader.getInstance());
@@ -202,7 +187,7 @@ public class ParThreadContextClassLoader extends URLClassLoader {
 
             Thread.currentThread().setContextClassLoader(detectedClassLoaderForType);
             final Class<?> desiredClass = rawClass.asSubclass(typeDefinition);
-            if(nifiProperties == null){
+            if(parProperties == null){
                 return typeDefinition.cast(desiredClass.newInstance());
             }
             Constructor<?> constructor = null;
@@ -221,7 +206,7 @@ public class ParThreadContextClassLoader extends URLClassLoader {
                 if (constructor.getParameterTypes().length == 0) {
                     return typeDefinition.cast(constructor.newInstance());
                 } else {
-                    return typeDefinition.cast(constructor.newInstance(nifiProperties));
+                    return typeDefinition.cast(constructor.newInstance(parProperties));
                 }
             } catch (InvocationTargetException ite) {
                 throw new IllegalStateException("Failed to instantiate a component due to (see target exception)", ite);

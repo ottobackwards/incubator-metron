@@ -28,7 +28,7 @@ public class ParCloseable implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(ParCloseable.class);
 
-    public static ParCloseable withNarLoader() throws NotInitializedException{
+    public static ParCloseable withParLoader() throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(ParThreadContextClassLoader.getInstance());
         return new ParCloseable(current);
@@ -38,14 +38,14 @@ public class ParCloseable implements Closeable {
      * Sets the current thread context class loader to the specific appropriate class loader for the given
      * component. If the component requires per-instance class loading then the class loader will be the
      * specific class loader for instance with the given identifier, otherwise the class loader will be
-     * the NARClassLoader.
+     * the PARClassLoader.
      *
      * @param componentClass the component class
      * @param componentIdentifier the identifier of the component
-     * @return ParCloseable with the current thread context classloader jailed to the Nar
+     * @return ParCloseable with the current thread context classloader jailed to the Par
      *              or instance class loader of the component
      */
-    public static ParCloseable withComponentNarLoader(final Class componentClass, final String componentIdentifier) throws NotInitializedException{
+    public static ParCloseable withComponentParLoader(final Class componentClass, final String componentIdentifier) throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();
 
         ClassLoader componentClassLoader = ExtensionManager.getClassLoader(componentClass.getName(), componentIdentifier);
@@ -64,7 +64,7 @@ public class ParCloseable implements Closeable {
      *
      * @return a ParCloseable
      */
-    public static ParCloseable withFrameworkNar() {
+    public static ParCloseable withFrameworkPar() {
         final ClassLoader frameworkClassLoader;
         try {
             frameworkClassLoader = ParClassLoaders.getInstance().getFrameworkClassLoader();

@@ -42,12 +42,13 @@ import org.slf4j.LoggerFactory;
 public final class ParUnpacker {
 
     private static final Logger logger = LoggerFactory.getLogger(ParUnpacker.class);
-    private static String HASH_FILENAME = "nar-md5sum";
-    private static final FileSelector NAR_FILTER = new FileSelector() {
+    private static String HASH_FILENAME = "par-md5sum";
+    private static String archiveExtension = ParProperties.DEFAULT_ARCHIVE_EXTENSION;
+    private static final FileSelector PAR_FILTER = new FileSelector() {
         @Override
         public boolean includeFile(FileSelectInfo fileSelectInfo) throws Exception {
             final String nameToTest = fileSelectInfo.getFile().getName().getExtension();
-            return nameToTest.equals("nar") && fileSelectInfo.getFile().isFile();
+            return nameToTest.equals(archiveExtension) && fileSelectInfo.getFile().isFile();
         }
 
         @Override
@@ -56,49 +57,52 @@ public final class ParUnpacker {
         }
     };
 
-    public static ExtensionMapping unpackNars(final FileSystemManager fileSystemManager, ParProperties props){
+    public static ExtensionMapping unpackPars(final FileSystemManager fileSystemManager, ParProperties props){
         try{
-            final List<URI> narLibraryDirs = props.getNarLibraryDirectories();
+            final List<URI> parLibraryDirs = props.getParLibraryDirectories();
             final URI frameworkWorkingDir = props.getFrameworkWorkingDirectory();
             final URI extensionsWorkingDir = props.getExtensionsWorkingDirectory();
             final URI docsWorkingDir = props.getComponentDocumentationWorkingDirectory();
-
+            String proposedExtension = props.getProperty(ParProperties.ARCHIVE_EXTENSION);
+            if(proposedExtension != null && !StringUtils.isBlank(proposedExtension)){
+                archiveExtension = proposedExtension;
+            }
 
             FileObject unpackedFramework = null;
             final FileObject frameworkWorkingDirFO = fileSystemManager.resolveFile(frameworkWorkingDir);
             final FileObject extensionsWorkingDirFO = fileSystemManager.resolveFile(extensionsWorkingDir);
             final FileObject docsWorkingDirFO = fileSystemManager.resolveFile(docsWorkingDir);
             final Set<FileObject> unpackedExtensions = new HashSet<>();
-            final List<FileObject> narFiles = new ArrayList<>();
+            final List<FileObject> parFiles = new ArrayList<>();
 
-            // make sure the nar directories are there and accessible
+            // make sure the par directories are there and accessible
             FileUtils.ensureDirectoryExistAndCanReadAndWrite(frameworkWorkingDirFO);
             FileUtils.ensureDirectoryExistAndCanReadAndWrite(extensionsWorkingDirFO);
             FileUtils.ensureDirectoryExistAndCanReadAndWrite(docsWorkingDirFO);
 
-            for (URI narLibraryDir : narLibraryDirs) {
+            for (URI parLibraryDir : parLibraryDirs) {
 
-                FileObject narDir = fileSystemManager.resolveFile(narLibraryDir);
+                FileObject parDir = fileSystemManager.resolveFile(parLibraryDir);
 
-                // Test if the source NARs can be read
-                FileUtils.ensureDirectoryExistAndCanRead(narDir);
+                // Test if the source PARs can be read
+                FileUtils.ensureDirectoryExistAndCanRead(parDir);
 
-                FileObject[] dirFiles = narDir.findFiles(NAR_FILTER);
+                FileObject[] dirFiles = parDir.findFiles(PAR_FILTER);
                 if (dirFiles != null) {
                     List<FileObject> fileList = Arrays.asList(dirFiles);
-                    narFiles.addAll(fileList);
+                    parFiles.addAll(fileList);
                 }
             }
 
-            if (!narFiles.isEmpty()) {
+            if (!parFiles.isEmpty()) {
                 final long startTime = System.nanoTime();
-                logger.info("Expanding " + narFiles.size() + " NAR files with all processors...");
-                for (FileObject narFile : narFiles) {
-                    logger.debug("Expanding NAR file: " + narFile.getURL().toString());
+                logger.info("Expanding " + parFiles.size() + " PAR files with all processors...");
+                for (FileObject parFile : parFiles) {
+                    logger.debug("Expanding PAR file: " + parFile.getURL().toString());
 
-                    // get the manifest for this nar
+                    // get the manifest for this par
                     Manifest manifest = null;
-                    try(JarInputStream jis = new JarInputStream(narFile.getContent().getInputStream())) {
+                    try(JarInputStream jis = new JarInputStream(parFile.getContent().getInputStream())) {
                         JarEntry je;
                         manifest = jis.getManifest();
                         if(manifest == null){
@@ -110,51 +114,56 @@ public final class ParUnpacker {
                             }
                         }
                     }
-                        final String narId = manifest.getMainAttributes().getValue("Nar-Id");
+                        final String parId = manifest.getMainAttributes().getValue("Par-Id");
                         // determine if this is the framework
-                        if (ParClassLoaders.FRAMEWORK_NAR_ID.equals(narId)) {
+                        /* OPF extension point
+                        if (ParClassLoaders.FRAMEWORK_PAR_ID.equals(parId)) {
                             if (unpackedFramework != null) {
                                 throw new IllegalStateException(
-                                        "Multiple framework NARs discovered. Only one framework is permitted.");
+                                        "Multiple framework PARs discovered. Only one framework is permitted.");
                             }
 
-                            unpackedFramework = unpackNar(narFile, frameworkWorkingDirFO);
+                            unpackedFramework = unpackPar(parFile, frameworkWorkingDirFO);
                         } else {
-                            unpackedExtensions.add(unpackNar(narFile, extensionsWorkingDirFO));
+                            unpackedExtensions.add(unpackPar(parFile, extensionsWorkingDirFO));
                         }
+                        */
+                    unpackedExtensions.add(unpackPar(parFile, extensionsWorkingDirFO));
                 }
 
-                // ensure we've found the framework nar
+                /*
+                // ensure we've found the framework par
                 if (unpackedFramework == null) {
-                    throw new IllegalStateException("No framework NAR found.");
+                    throw new IllegalStateException("No framework PAR found.");
                 } else if (!unpackedFramework.isReadable()) {
-                    throw new IllegalStateException("Framework NAR cannot be read.");
+                    throw new IllegalStateException("Framework PAR cannot be read.");
                 }
+                */
 
-                // Determine if any nars no longer exist and delete their
+                // Determine if any pars no longer exist and delete their
                 // working directories. This happens
-                // if a new version of a nar is dropped into the lib dir.
+                // if a new version of a par is dropped into the lib dir.
                 // ensure no old framework are present
                 final FileObject[] frameworkWorkingDirContents = frameworkWorkingDirFO.getChildren();
                 if (frameworkWorkingDirContents != null) {
-                    for (final FileObject unpackedNar : frameworkWorkingDirContents) {
-                        if (!unpackedFramework.equals(unpackedNar)) {
-                            FileUtils.deleteFile(unpackedNar, true);
-                        }
+                    for (final FileObject unpackedPar : frameworkWorkingDirContents) {
+                      // OPF  if (!unpackedFramework.equals(unpackedPar)) {
+                            FileUtils.deleteFile(unpackedPar, true);
+                      // OPF  }
                     }
                 }
 
                 // ensure no old extensions are present
                 final FileObject[] extensionsWorkingDirContents = extensionsWorkingDirFO.getChildren();
                 if (extensionsWorkingDirContents != null) {
-                    for (final FileObject unpackedNar : extensionsWorkingDirContents) {
-                        if (!unpackedExtensions.contains(unpackedNar)) {
-                            FileUtils.deleteFile(unpackedNar, true);
+                    for (final FileObject unpackedPar : extensionsWorkingDirContents) {
+                        if (!unpackedExtensions.contains(unpackedPar)) {
+                            FileUtils.deleteFile(unpackedPar, true);
                         }
                     }
                 }
                 final long endTime = System.nanoTime();
-                logger.info("NAR loading process took " + (endTime - startTime) + " nanoseconds.");
+                logger.info("PAR loading process took " + (endTime - startTime) + " nanoseconds.");
             }
 
             // attempt to delete any docs files that exist so that any
@@ -170,8 +179,8 @@ public final class ParUnpacker {
             mapExtensions(extensionsWorkingDirFO, docsWorkingDirFO, extensionMapping);
             return extensionMapping;
         } catch (IOException | URISyntaxException | NotInitializedException e) {
-            logger.warn("Unable to load NAR library bundles due to " + e
-                    + " Will proceed without loading any further Nar bundles");
+            logger.warn("Unable to load PAR library bundles due to " + e
+                    + " Will proceed without loading any further Par bundles");
             if (logger.isDebugEnabled()) {
                 logger.warn("", e);
             }
@@ -194,59 +203,59 @@ public final class ParUnpacker {
     }
 
     /**
-     * Unpacks the specified nar into the specified base working directory.
+     * Unpacks the specified par into the specified base working directory.
      *
-     * @param nar
-     *            the nar to unpack
+     * @param par
+     *            the par to unpack
      * @param baseWorkingDirectory
      *            the directory to unpack to
-     * @return the directory to the unpacked NAR
+     * @return the directory to the unpacked par
      * @throws IOException
-     *             if unable to explode nar
+     *             if unable to explode par
      */
-    private static FileObject unpackNar(final FileObject nar, final FileObject baseWorkingDirectory)
+    private static FileObject unpackPar(final FileObject par, final FileObject baseWorkingDirectory)
             throws IOException, NotInitializedException {
 
-        final FileObject narWorkingDirectory = baseWorkingDirectory.resolveFile(nar.getName().getBaseName() + "-unpacked");
+        final FileObject parWorkingDirectory = baseWorkingDirectory.resolveFile(par.getName().getBaseName() + "-unpacked");
 
-        // if the working directory doesn't exist, unpack the nar
-        if (!narWorkingDirectory.exists()) {
-            unpack(nar, narWorkingDirectory, calculateMd5sum(nar));
+        // if the working directory doesn't exist, unpack the par
+        if (!parWorkingDirectory.exists()) {
+            unpack(par, parWorkingDirectory, calculateMd5sum(par));
         } else {
-            // the working directory does exist. Run MD5 sum against the nar
-            // file and check if the nar has changed since it was deployed.
-            final byte[] narMd5 = calculateMd5sum(nar);
-            final FileObject workingHashFile = narWorkingDirectory.getChild(HASH_FILENAME);
+            // the working directory does exist. Run MD5 sum against the par
+            // file and check if the par has changed since it was deployed.
+            final byte[] parMd5 = calculateMd5sum(par);
+            final FileObject workingHashFile = parWorkingDirectory.getChild(HASH_FILENAME);
             if (!workingHashFile.exists()) {
-                FileUtils.deleteFile(narWorkingDirectory, true);
-                unpack(nar, narWorkingDirectory, narMd5);
+                FileUtils.deleteFile(parWorkingDirectory, true);
+                unpack(par, parWorkingDirectory, parMd5);
             } else {
                 final byte[] hashFileContents = IOUtils.toByteArray(workingHashFile.getContent().getInputStream());
-                if (!Arrays.equals(hashFileContents, narMd5)) {
-                    logger.info("Contents of nar {} have changed. Reloading.",
-                            new Object[] { nar.getURL() });
-                    FileUtils.deleteFile(narWorkingDirectory, true);
-                    unpack(nar, narWorkingDirectory, narMd5);
+                if (!Arrays.equals(hashFileContents, parMd5)) {
+                    logger.info("Contents of par {} have changed. Reloading.",
+                            new Object[] { par.getURL() });
+                    FileUtils.deleteFile(parWorkingDirectory, true);
+                    unpack(par, parWorkingDirectory, parMd5);
                 }
             }
         }
 
-        return narWorkingDirectory;
+        return parWorkingDirectory;
     }
 
     /**
-     * Unpacks the NAR to the specified directory. Creates a checksum file that
+     * Unpacks the PAR to the specified directory. Creates a checksum file that
      * used to determine if future expansion is necessary.
      *
      * @param workingDirectory
-     *            the root directory to which the NAR should be unpacked.
+     *            the root directory to which the PAR should be unpacked.
      * @throws IOException
-     *             if the NAR could not be unpacked.
+     *             if the PAR could not be unpacked.
      */
-    private static void unpack(final FileObject nar, final FileObject workingDirectory, final byte[] hash)
+    private static void unpack(final FileObject par, final FileObject workingDirectory, final byte[] hash)
             throws IOException {
 
-        try(JarInputStream jarFile = new JarInputStream(nar.getContent().getInputStream())){
+        try(JarInputStream jarFile = new JarInputStream(par.getContent().getInputStream())){
             JarEntry je;
             while((je=jarFile.getNextJarEntry())!=null){
                 String name = je.getName();
@@ -267,7 +276,7 @@ public final class ParUnpacker {
     private static void unpackDocumentation(final FileObject jar, final FileObject docsDirectory,
             final ExtensionMapping extensionMapping) throws IOException {
         // determine the components that may have documentation
-        if (!determineDocumentedNiFiComponents(jar, extensionMapping)) {
+        if (!determineDocumentedComponents(jar, extensionMapping)) {
             return;
         }
 
@@ -311,27 +320,28 @@ public final class ParUnpacker {
     }
 
     /*
-     * Returns true if this jar file contains a NiFi component
+     * Returns true if this jar file contains a par component
      */
-    private static boolean determineDocumentedNiFiComponents(final FileObject jar,
-            final ExtensionMapping extensionMapping) throws IOException {
+    private static boolean determineDocumentedComponents(final FileObject jar,
+                                                         final ExtensionMapping extensionMapping) throws IOException {
         try (final JarInputStream jarFile = new JarInputStream(jar.getContent().getInputStream())) {
             JarEntry jarEntry;
             boolean hasProc = false;
             boolean hasRpt = false;
             boolean hasCont = false;
             while ((jarEntry = jarFile.getNextJarEntry()) != null) {
+                /* OPF NEEDS EXTENSION */
                 if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.processor.Processor")) {
                     hasProc = true;
-                    extensionMapping.addAllProcessors(determineDocumentedNiFiComponents(jarFile,
+                    extensionMapping.addAllProcessors(determineDocumentedComponents(jarFile,
                             jarEntry));
                 } else if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.reporting.ReportingTask")) {
                     hasRpt = true;
-                    extensionMapping.addAllReportingTasks(determineDocumentedNiFiComponents(jarFile,
+                    extensionMapping.addAllReportingTasks(determineDocumentedComponents(jarFile,
                             jarEntry));
                 } else if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.controller.ControllerService")) {
                     hasCont = true;
-                    extensionMapping.addAllControllerServices(determineDocumentedNiFiComponents(jarFile,
+                    extensionMapping.addAllControllerServices(determineDocumentedComponents(jarFile,
                             jarEntry));
                 }
             }
@@ -342,8 +352,8 @@ public final class ParUnpacker {
         }
     }
 
-    private static List<String> determineDocumentedNiFiComponents(final JarInputStream jarFile,
-                                                                  final JarEntry jarEntry) throws IOException {
+    private static List<String> determineDocumentedComponents(final JarInputStream jarFile,
+                                                              final JarEntry jarEntry) throws IOException {
         final List<String> componentNames = new ArrayList<>();
 
         if (jarEntry == null) {

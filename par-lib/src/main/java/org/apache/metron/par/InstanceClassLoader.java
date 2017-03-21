@@ -27,8 +27,8 @@ import java.net.URLClassLoader;
  * A ClassLoader created for an instance of a component which lets a client add resources to an intermediary ClassLoader
  * that will be checked first when loading/finding classes.
  *
- * Typically an instance of this ClassLoader will be created by passing in the URLs and parent from a NARClassLoader in
- * order to create a copy of the NARClassLoader without modifying it.
+ * Typically an instance of this ClassLoader will be created by passing in the URLs and parent from a PARClassLoader in
+ * order to create a copy of the PARClassLoader without modifying it.
  */
 public class InstanceClassLoader extends URLClassLoader {
 
