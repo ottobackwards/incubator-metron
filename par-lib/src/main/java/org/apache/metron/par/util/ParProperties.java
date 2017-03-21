@@ -119,7 +119,7 @@ public abstract class ParProperties {
         }
         return Paths.get(path).toUri();
     }
-    
+
     public String getMetaIdPrefix(){
         return getProperty(META_ID_PREFIX,DEFAULT_META_ID_PREFIX);
     }
