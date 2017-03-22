@@ -43,6 +43,7 @@ public abstract class ParProperties {
     public static final String COMPONENT_DOCS_DIRECTORY = "par.documentation.working.directory";
     public static final String ARCHIVE_EXTENSION = "par.archive.extension";
     public static final String META_ID_PREFIX = "par.meta.id.prefix";
+    public static final String PAR_EXTENSION_TYPE_PREFIX = "par.extension.type.";
 
     // defaults
     public static final String DEFAULT_ARCHIVE_EXTENSION = "par";
@@ -108,6 +109,27 @@ public abstract class ParProperties {
         }
 
         return parLibraryPaths;
+    }
+
+    public Map<String,String> getParExtensionTypes(){
+        HashMap<String,String> extensionTypeMap = new HashMap<>();
+
+        // go through each property
+        for (String propertyName : getPropertyKeys()){
+            // determine if the property is an extention type
+            if(StringUtils.startsWith(propertyName,PAR_EXTENSION_TYPE_PREFIX)){
+                // attempt to resolve class name
+                String className = getProperty(propertyName);
+                if(!StringUtils.isBlank(className)){
+                    // get the extension name
+                    String extensionName = StringUtils.substringAfterLast(propertyName,".");
+                    if(!StringUtils.isBlank(extensionName)){
+                        extensionTypeMap.put(extensionName,className);
+                    }
+                }
+            }
+        }
+        return extensionTypeMap;
     }
 
     private URI getURI(String path)throws URISyntaxException{

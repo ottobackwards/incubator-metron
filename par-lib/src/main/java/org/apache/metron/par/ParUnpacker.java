@@ -21,11 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.*;
 
 import org.apache.commons.io.IOUtils;
@@ -176,7 +172,7 @@ public final class ParUnpacker {
                 }
             }
             final ExtensionMapping extensionMapping = new ExtensionMapping();
-            mapExtensions(extensionsWorkingDirFO, docsWorkingDirFO, extensionMapping);
+            mapExtensions(extensionsWorkingDirFO, docsWorkingDirFO, extensionMapping, props);
             return extensionMapping;
         } catch (IOException | URISyntaxException | NotInitializedException e) {
             logger.warn("Unable to load PAR library bundles due to " + e
@@ -189,14 +185,14 @@ public final class ParUnpacker {
     }
 
     private static void mapExtensions(final FileObject workingDirectory, final FileObject docsDirectory,
-            final ExtensionMapping mapping) throws IOException {
+            final ExtensionMapping mapping, final ParProperties props) throws IOException {
         final FileObject[] directoryContents = workingDirectory.getChildren();
         if (directoryContents != null) {
             for (final FileObject file : directoryContents) {
                 if (file.isFolder()) {
-                    mapExtensions(file, docsDirectory, mapping);
+                    mapExtensions(file, docsDirectory, mapping, props);
                 } else if (file.getName().getExtension().equals("jar")) {
-                    unpackDocumentation(file, docsDirectory, mapping);
+                    unpackDocumentation(file, docsDirectory, mapping, props);
                 }
             }
         }
@@ -274,9 +270,9 @@ public final class ParUnpacker {
     }
 
     private static void unpackDocumentation(final FileObject jar, final FileObject docsDirectory,
-            final ExtensionMapping extensionMapping) throws IOException {
+            final ExtensionMapping extensionMapping, final ParProperties props) throws IOException {
         // determine the components that may have documentation
-        if (!determineDocumentedComponents(jar, extensionMapping)) {
+        if (!determineDocumentedComponents(jar, extensionMapping, props)) {
             return;
         }
 
@@ -319,34 +315,29 @@ public final class ParUnpacker {
         }
     }
 
+    final static String META_FMT = "META-INF/services/%s";
+
     /*
      * Returns true if this jar file contains a par component
      */
     private static boolean determineDocumentedComponents(final FileObject jar,
-                                                         final ExtensionMapping extensionMapping) throws IOException {
+                                                         final ExtensionMapping extensionMapping, final ParProperties props) throws IOException {
         try (final JarInputStream jarFile = new JarInputStream(jar.getContent().getInputStream())) {
             JarEntry jarEntry;
-            boolean hasProc = false;
-            boolean hasRpt = false;
-            boolean hasCont = false;
-            while ((jarEntry = jarFile.getNextJarEntry()) != null) {
-                /* OPF NEEDS EXTENSION */
-                if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.processor.Processor")) {
-                    hasProc = true;
-                    extensionMapping.addAllProcessors(determineDocumentedComponents(jarFile,
-                            jarEntry));
-                } else if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.reporting.ReportingTask")) {
-                    hasRpt = true;
-                    extensionMapping.addAllReportingTasks(determineDocumentedComponents(jarFile,
-                            jarEntry));
-                } else if (jarEntry.getName().equals("META-INF/services/org.apache.nifi.controller.ControllerService")) {
-                    hasCont = true;
-                    extensionMapping.addAllControllerServices(determineDocumentedComponents(jarFile,
-                            jarEntry));
-                }
-            }
-            if (!hasCont && !hasProc && !hasRpt) {
+
+            // The ParProperties has configuration for the extension names and classnames
+            final Map<String,String> extensions = props.getParExtensionTypes();
+            if(extensions.isEmpty()){
+                logger.info("No Extensions configured in properties");
                 return false;
+            }
+
+            while ((jarEntry = jarFile.getNextJarEntry()) != null) {
+                for (Map.Entry<String,String> extensionEntry : extensions.entrySet()) {
+                    if(jarEntry.getName().equals(String.format(META_FMT, extensionEntry.getValue()))){
+                       extensionMapping.addAllExtensions(extensionEntry.getKey(),determineDocumentedComponents(jarFile,jarEntry));
+                    }
+                }
             }
             return true;
         }

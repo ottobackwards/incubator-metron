@@ -66,6 +66,21 @@ public class StringUtils {
         return str.substring(pos + separator.length());
     }
 
+    public static String substringAfterLast(final String str, final String separator) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        if (separator == null) {
+            return EMPTY;
+        }
+        int pos = str.lastIndexOf(separator);
+        if (pos == -1) {
+            return EMPTY;
+        }
+        return str.substring(pos + separator.length());
+    }
+
+
     public static String join(final Collection collection, String delimiter) {
         if (collection == null || collection.size() == 0) {
             return EMPTY;

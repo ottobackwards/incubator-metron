@@ -16,58 +16,57 @@
  */
 package org.apache.metron.par;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ExtensionMapping {
 
-    private final List<String> processorNames = new ArrayList<>();
-    private final List<String> controllerServiceNames = new ArrayList<>();
-    private final List<String> reportingTaskNames = new ArrayList<>();
+    private final Map<String,List<String>> extensionNameMap = new HashMap<>();
 
-    void addProcessor(final String processorName) {
-        processorNames.add(processorName);
+    void addExtension(final String extensionName, String extensionClassName){
+        if(extensionNameMap.containsKey(extensionName)){
+            extensionNameMap.get(extensionName).add(extensionClassName);
+        }else{
+            List<String> list = new ArrayList<>();
+            list.add(extensionClassName);
+            extensionNameMap.put(extensionName,list);
+        }
     }
 
-    void addAllProcessors(final Collection<String> processorNames) {
-        this.processorNames.addAll(processorNames);
+    void addAllExtensions(final String extensionName, List<String> extensionClassNames){
+        if(extensionNameMap.containsKey(extensionName)){
+            extensionNameMap.get(extensionName).addAll(extensionClassNames);
+        }else{
+            List<String> list = new ArrayList<>();
+            list.addAll(extensionClassNames);
+            extensionNameMap.put(extensionName,list);
+        }
     }
 
-    void addControllerService(final String controllerServiceName) {
-        controllerServiceNames.add(controllerServiceName);
+    public List<String> getExtensionNames(String extensionName){
+        if(extensionNameMap.containsKey(extensionName)){
+            return Collections.unmodifiableList(extensionNameMap.get(extensionName));
+        }else{
+            return Collections.EMPTY_LIST;
+        }
     }
 
-    void addAllControllerServices(final Collection<String> controllerServiceNames) {
-        this.controllerServiceNames.addAll(controllerServiceNames);
-    }
-
-    void addReportingTask(final String reportingTaskName) {
-        reportingTaskNames.add(reportingTaskName);
-    }
-
-    void addAllReportingTasks(final Collection<String> reportingTaskNames) {
-        this.reportingTaskNames.addAll(reportingTaskNames);
-    }
-
-    public List<String> getProcessorNames() {
-        return Collections.unmodifiableList(processorNames);
-    }
-
-    public List<String> getControllerServiceNames() {
-        return Collections.unmodifiableList(controllerServiceNames);
-    }
-
-    public List<String> getReportingTaskNames() {
-        return Collections.unmodifiableList(reportingTaskNames);
+    public Map<String,List<String>> getAllExtensions(){
+        return Collections.unmodifiableMap(extensionNameMap);
     }
 
     public List<String> getAllExtensionNames() {
         final List<String> extensionNames = new ArrayList<>();
-        extensionNames.addAll(processorNames);
-        extensionNames.addAll(controllerServiceNames);
-        extensionNames.addAll(reportingTaskNames);
+        for (Map.Entry<String,List<String>> entry : extensionNameMap.entrySet()){
+            extensionNames.addAll(entry.getValue());
+        }
+        return extensionNames;
+    }
+
+    public List<String> getAllExtensionNames(String extensionName) {
+        final List<String> extensionNames = new ArrayList<>();
+        if(extensionNameMap.containsKey(extensionName)){
+            extensionNames.addAll(extensionNameMap.get(extensionName));
+        }
         return extensionNames;
     }
 }
