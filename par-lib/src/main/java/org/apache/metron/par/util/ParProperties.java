@@ -47,9 +47,9 @@ public abstract class ParProperties {
 
     // defaults
     public static final String DEFAULT_ARCHIVE_EXTENSION = "par";
-    public static final String DEFAULT_PAR_WORKING_DIR = "./work/par";
-    public static final String DEFAULT_PAR_LIBRARY_DIR = "./lib";
-    public static final String DEFAULT_COMPONENT_DOCS_DIRECTORY = "./work/docs/components";
+    public static final String DEFAULT_PAR_WORKING_DIR = "./work/par/";
+    public static final String DEFAULT_PAR_LIBRARY_DIR = "./lib/";
+    public static final String DEFAULT_COMPONENT_DOCS_DIRECTORY = "./work/docs/components/";
     public static final String DEFAULT_META_ID_PREFIX = "Par";
 
     /**
@@ -80,11 +80,21 @@ public abstract class ParProperties {
     }
 
     public URI getFrameworkWorkingDirectory() throws URISyntaxException{
-        return new URI(getParWorkingDirectory().toString().concat("framework/"));
+        return getConcatedDirURI(getParWorkingDirectory(),"framework/");
     }
 
     public URI getExtensionsWorkingDirectory() throws URISyntaxException{
-        return new URI(getParWorkingDirectory().toString().concat("extensions/"));
+        return getConcatedDirURI(getParWorkingDirectory(),"extensions/");
+    }
+
+    private static URI getConcatedDirURI(URI original, String dir) throws URISyntaxException{
+        String uri = original.toString();
+        StringBuilder builder = new StringBuilder(uri);
+        if(uri.endsWith("/") == false){
+            builder.append("/");
+        }
+        builder.append(dir);
+        return new URI(builder.toString());
     }
 
     public List<URI> getParLibraryDirectories() throws URISyntaxException{
