@@ -205,6 +205,8 @@ public final class ParUnpacker {
      * @return the directory to the unpacked par
      * @throws IOException
      *             if unable to explode par
+     * @throws NotInitializedException
+     *             if system was not initialized
      */
     private static FileObject unpackPar(final FileObject par, final FileObject baseWorkingDirectory)
             throws IOException, NotInitializedException {
@@ -374,10 +376,10 @@ public final class ParUnpacker {
      *            the contents of the file to create.
      * @param file
      *            the file to create.
-     * @throws IOException
+     * @throws FileSystemException
      *             if the file could not be created.
      */
-    private static void makeFile(final InputStream inputStream, final FileObject file) throws IOException, FileSystemException{
+    private static void makeFile(final InputStream inputStream, final FileObject file) throws FileSystemException{
         FileUtils.createFile(file, inputStream);
     }
 

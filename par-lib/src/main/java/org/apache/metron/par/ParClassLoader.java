@@ -16,7 +16,6 @@
  */
 package org.apache.metron.par;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,7 +200,7 @@ public class ParClassLoader extends VFSClassLoader {
      * API file for implementations.
      * @throws ClassNotFoundException if any of the <tt>FlowFileProcessor</tt>
      * implementations defined by the Java Services API cannot be loaded.
-     * @throws IOException if an error occurs while loading the PAR.
+     * @throws FileSystemException if an error occurs while loading the PAR.
      */
     private ParClassLoader(final FileSystemManager fileSystemManager, final FileObject parWorkingDirectory, final FileObject[] classPaths, final ClassLoader parentClassLoader) throws FileSystemException {
         super(classPaths,fileSystemManager,parentClassLoader);
