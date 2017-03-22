@@ -104,7 +104,7 @@ public class ParUnpackerIntegrationTest {
     properties.setProperty(ParProperties.PAR_LIBRARY_DIRECTORY_PREFIX + "alt",configuration.get("fs.defaultFS") + "/lib2/");
     properties.setProperty(ParProperties.PAR_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
     properties.setProperty(ParProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
-    FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getProperty(ParProperties.ARCHIVE_EXTENSION));
+    FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
     final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
 
     assertEquals(2, extensionMapping.getAllExtensionNames().size());

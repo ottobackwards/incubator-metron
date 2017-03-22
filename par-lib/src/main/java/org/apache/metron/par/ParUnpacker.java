@@ -59,10 +59,7 @@ public final class ParUnpacker {
             final URI frameworkWorkingDir = props.getFrameworkWorkingDirectory();
             final URI extensionsWorkingDir = props.getExtensionsWorkingDirectory();
             final URI docsWorkingDir = props.getComponentDocumentationWorkingDirectory();
-            String proposedExtension = props.getProperty(ParProperties.ARCHIVE_EXTENSION);
-            if(proposedExtension != null && !StringUtils.isBlank(proposedExtension)){
-                archiveExtension = proposedExtension;
-            }
+            archiveExtension = props.getArchiveExtension();
 
             FileObject unpackedFramework = null;
             final FileObject frameworkWorkingDirFO = fileSystemManager.resolveFile(frameworkWorkingDir);

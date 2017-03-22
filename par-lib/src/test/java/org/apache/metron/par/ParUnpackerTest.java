@@ -95,7 +95,7 @@ public class ParUnpackerTest {
                 properties.getProperty("par.library.directory.alt"));
 
         // create a FileSystemManager
-        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getProperty(ParProperties.ARCHIVE_EXTENSION));
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
         final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
 
         assertEquals(2, extensionMapping.getAllExtensionNames().size());
@@ -129,7 +129,7 @@ public class ParUnpackerTest {
         others.put("par.library.directory.alt", emptyDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
-        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getProperty(ParProperties.ARCHIVE_EXTENSION));
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
         final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertEquals(1, extensionMapping.getAllExtensionNames().size());
@@ -154,7 +154,7 @@ public class ParUnpackerTest {
         others.put("par.library.directory.alt", nonExistantDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
-        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getProperty(ParProperties.ARCHIVE_EXTENSION));
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
         final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertTrue(extensionMapping.getAllExtensionNames().contains(
@@ -180,7 +180,7 @@ public class ParUnpackerTest {
         others.put("par.library.directory.alt", nonDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
-        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getProperty(ParProperties.ARCHIVE_EXTENSION));
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
         final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
 
         assertNull(extensionMapping);
