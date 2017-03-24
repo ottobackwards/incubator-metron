@@ -29,16 +29,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class ParBundleUtilTest {
-
+    Map<String, String> additionalProperties = new HashMap<>();
     @Test
     public void testManifestWithVersioningAndBuildInfo() throws IOException , URISyntaxException{
 
-        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", new HashMap<>());
+        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -64,7 +65,7 @@ public class ParBundleUtilTest {
 
     @Test
     public void testManifestWithoutVersioningAndBuildInfo() throws IOException, URISyntaxException {
-        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties",  new HashMap<>());
+        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties",  additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -90,7 +91,7 @@ public class ParBundleUtilTest {
 
     @Test
     public void testManifestWithoutNarDependency() throws IOException, URISyntaxException {
-        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties",  new HashMap<>());
+        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties",  additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -114,7 +115,7 @@ public class ParBundleUtilTest {
 
     @Test(expected = IOException.class)
     public void testFromManifestWhenNarDirectoryDoesNotExist() throws IOException, URISyntaxException {
-        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", new HashMap<>());
+        ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
