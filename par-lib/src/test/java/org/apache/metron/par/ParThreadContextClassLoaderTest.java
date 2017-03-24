@@ -19,10 +19,14 @@ package org.apache.metron.par;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.metron.par.bundle.Bundle;
 import org.apache.metron.par.util.ParProperties;
+import org.apache.metron.par.util.VFSClassloaderUtil;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -37,24 +41,45 @@ public class ParThreadContextClassLoaderTest {
     @Test
     public void validateWithPropertiesConstructor() throws Exception {
         ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", null);
-        ExtensionClassInitializer.initialize(new ArrayList<>());
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(AbstractFoo.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+
         assertTrue(ParThreadContextClassLoader.createInstance(WithPropertiesConstructor.class.getName(),
                 WithPropertiesConstructor.class, properties) instanceof WithPropertiesConstructor);
     }
 
     @Test(expected = IllegalStateException.class)
     public void validateWithPropertiesConstructorInstantiationFailure() throws Exception {
-        ExtensionClassInitializer.initialize(new ArrayList<>());
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(AbstractFoo.class);
+        ExtensionClassInitializer.initialize(classes);
         Map<String, String> additionalProperties = new HashMap<>();
         additionalProperties.put("fail", "true");
         ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", additionalProperties);
+        // create a FileSystemManager
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+
         ParThreadContextClassLoader.createInstance(WithPropertiesConstructor.class.getName(), WithPropertiesConstructor.class, properties);
     }
 
     @Test
     public void validateWithDefaultConstructor() throws Exception {
-        ExtensionClassInitializer.initialize(new ArrayList<>());
         ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", null);
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(AbstractFoo.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+        FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+
         assertTrue(ParThreadContextClassLoader.createInstance(WithDefaultConstructor.class.getName(),
                 WithDefaultConstructor.class, properties) instanceof WithDefaultConstructor);
     }
@@ -66,7 +91,8 @@ public class ParThreadContextClassLoaderTest {
         ParThreadContextClassLoader.createInstance(WrongConstructor.class.getName(), WrongConstructor.class, properties);
     }
 
-    public static class WithPropertiesConstructor {
+    public static class WithPropertiesConstructor  extends AbstractFoo{
+        public WithPropertiesConstructor(){}
         public WithPropertiesConstructor(ParProperties properties) {
             if (properties.getProperty("fail") != null) {
                 throw new RuntimeException("Intentional failure");
@@ -74,13 +100,13 @@ public class ParThreadContextClassLoaderTest {
         }
     }
 
-    public static class WithDefaultConstructor {
+    public static class WithDefaultConstructor extends AbstractFoo{
         public WithDefaultConstructor() {
 
         }
     }
 
-    public static class WrongConstructor {
+    public static class WrongConstructor extends AbstractFoo {
         public WrongConstructor(String s) {
 
         }

@@ -97,6 +97,11 @@ public abstract class ParProperties {
         return new URI(builder.toString());
     }
 
+    public URI getParLibraryDirectory() throws URISyntaxException{
+        String parLib = getProperty(PAR_LIBRARY_DIRECTORY);
+        return getURI(parLib);
+    }
+
     public List<URI> getParLibraryDirectories() throws URISyntaxException{
 
         List<URI> parLibraryPaths = new ArrayList<>();
@@ -142,7 +147,7 @@ public abstract class ParProperties {
         return extensionTypeMap;
     }
 
-    private URI getURI(String path)throws URISyntaxException{
+    public static URI getURI(String path)throws URISyntaxException{
         // we may have URI's or paths or relative paths
         //
         // if it is not a URI string then use Paths.get().getURI()

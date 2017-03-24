@@ -16,57 +16,86 @@
  */
 package org.apache.metron.par;
 
+import org.apache.metron.par.bundle.BundleCoordinate;
+
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class ExtensionMapping {
 
-    private final Map<String,List<String>> extensionNameMap = new HashMap<>();
+    private final Map<String,Map<String,Set<BundleCoordinate>>> extensionNameMap = new HashMap<>();
 
-    void addExtension(final String extensionName, String extensionClassName){
+    private final BiFunction<Set<BundleCoordinate>, Set<BundleCoordinate>, Set<BundleCoordinate>> merger = (oldValue, newValue) -> {
+        final Set<BundleCoordinate> merged = new HashSet<>();
+        merged.addAll(oldValue);
+        merged.addAll(newValue);
+        return merged;
+    };
+
+    void addExtension(final String extensionName, final BundleCoordinate coordinate, final String type) {
+        if(!extensionNameMap.containsKey(extensionName)){
+            Map<String,Set<BundleCoordinate>> bundles = new HashMap<>();
+            bundles.put(type,new HashSet<>());
+            extensionNameMap.put(extensionName,bundles);
+        }
+        extensionNameMap.get(extensionName).computeIfAbsent(type, name-> new HashSet<>()).add(coordinate);
+    }
+
+    void addAllExtensions(final String extensionName, final BundleCoordinate coordinate,  final Collection<String> types){
+        if(!extensionNameMap.containsKey(extensionName)){
+            Map<String,Set<BundleCoordinate>> bundles = new HashMap<>();
+            extensionNameMap.put(extensionName,bundles);
+        }
+        types.forEach(name -> {
+            addExtension(extensionName, coordinate, name);
+        });
+    }
+
+    public Map<String,Set<BundleCoordinate>> getExtensionNames(String extensionName){
         if(extensionNameMap.containsKey(extensionName)){
-            extensionNameMap.get(extensionName).add(extensionClassName);
+            return Collections.unmodifiableMap(extensionNameMap.get(extensionName));
         }else{
-            List<String> list = new ArrayList<>();
-            list.add(extensionClassName);
-            extensionNameMap.put(extensionName,list);
+            return Collections.EMPTY_MAP;
         }
     }
 
-    void addAllExtensions(final String extensionName, List<String> extensionClassNames){
-        if(extensionNameMap.containsKey(extensionName)){
-            extensionNameMap.get(extensionName).addAll(extensionClassNames);
-        }else{
-            List<String> list = new ArrayList<>();
-            list.addAll(extensionClassNames);
-            extensionNameMap.put(extensionName,list);
-        }
-    }
-
-    public List<String> getExtensionNames(String extensionName){
-        if(extensionNameMap.containsKey(extensionName)){
-            return Collections.unmodifiableList(extensionNameMap.get(extensionName));
-        }else{
-            return Collections.EMPTY_LIST;
-        }
-    }
-
-    public Map<String,List<String>> getAllExtensions(){
+    public Map<String,Map<String,Set<BundleCoordinate>>> getAllExtensions(){
         return Collections.unmodifiableMap(extensionNameMap);
     }
 
-    public List<String> getAllExtensionNames() {
-        final List<String> extensionNames = new ArrayList<>();
-        for (Map.Entry<String,List<String>> entry : extensionNameMap.entrySet()){
-            extensionNames.addAll(entry.getValue());
+    public Map<String, Set<BundleCoordinate>> getAllExtensionNames() {
+        final Map<String, Set<BundleCoordinate>> extensionNames = new HashMap<>();
+        for( final Map<String,Set<BundleCoordinate>> bundleSets : extensionNameMap.values()) {
+            extensionNames.putAll(bundleSets);
         }
         return extensionNames;
     }
 
-    public List<String> getAllExtensionNames(String extensionName) {
-        final List<String> extensionNames = new ArrayList<>();
-        if(extensionNameMap.containsKey(extensionName)){
-            extensionNames.addAll(extensionNameMap.get(extensionName));
+    void merge(final ExtensionMapping other) {
+        other.getAllExtensions().forEach((ex,set) -> {
+                set.forEach((name, otherCoordinates) -> {
+                    if(!extensionNameMap.containsKey(ex)) {
+                        extensionNameMap.put(ex,new HashMap<>());
+                    }
+                    extensionNameMap.get(ex).merge(name, otherCoordinates, merger);
+                });
+        });
+    }
+
+
+    public int size() {
+        int size = 0;
+
+        for( final Map<String,Set<BundleCoordinate>> bundleSets : extensionNameMap.values()) {
+            for (final Set<BundleCoordinate> coordinates : bundleSets.values()) {
+                size += coordinates.size();
+            }
         }
-        return extensionNames;
+        return size;
+    }
+
+
+    public boolean isEmpty() {
+        return extensionNameMap.isEmpty();
     }
 }

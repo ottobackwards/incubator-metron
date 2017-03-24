@@ -17,23 +17,17 @@
 package org.apache.metron.par;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import java.net.URISyntaxException;
+import java.util.*;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.metron.par.bundle.Bundle;
+import org.apache.metron.par.bundle.BundleCoordinate;
+import org.apache.metron.par.bundle.BundleDetails;
 import org.apache.metron.par.util.FileUtils;
+import org.apache.metron.par.util.ParBundleUtil;
 import org.apache.metron.par.util.ParProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,18 +50,18 @@ public final class ParClassLoaders {
 
         private final FileObject frameworkWorkingDir;
         private final FileObject extensionWorkingDir;
-        private final ClassLoader frameworkClassLoader;
-        private final Map<String, ClassLoader> extensionClassLoaders;
+        private final Bundle frameworkBundle;
+        private final Map<String, Bundle> bundles;
 
         private InitContext(
                 final FileObject frameworkDir,
                 final FileObject extensionDir,
-                final ClassLoader frameworkClassloader,
-                final Map<String, ClassLoader> extensionClassLoaders) {
+                final Bundle frameworkBundle,
+                final Map<String, Bundle> bundles) {
             this.frameworkWorkingDir = frameworkDir;
             this.extensionWorkingDir = extensionDir;
-            this.frameworkClassLoader = frameworkClassloader;
-            this.extensionClassLoaders = extensionClassLoaders;
+            this.frameworkBundle = frameworkBundle;
+            this.bundles = bundles;
         }
     }
 
@@ -104,7 +98,7 @@ public final class ParClassLoaders {
      * @throws IllegalStateException already initialized with a given pair of
      * directories cannot reinitialize or use a different pair of directories.
      */
-    public void init(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException {
+    public void init(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException, URISyntaxException {
         if (frameworkWorkingDir == null || extensionsWorkingDir == null || fileSystemManager == null) {
             throw new NullPointerException("cannot have empty arguments");
         }
@@ -113,7 +107,7 @@ public final class ParClassLoaders {
             synchronized (this) {
                 ic = initContext;
                 if (ic == null) {
-                    initContext = ic = load(fileSystemManager, frameworkWorkingDir, extensionsWorkingDir,props);
+                    initContext = ic = load(fileSystemManager, frameworkWorkingDir, extensionsWorkingDir, props);
                 }
             }
         }
@@ -127,17 +121,18 @@ public final class ParClassLoaders {
     /**
      * Should be called at most once.
      */
-    private InitContext load(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException {
+    private InitContext load(final FileSystemManager fileSystemManager, final FileObject frameworkWorkingDir, final FileObject extensionsWorkingDir, ParProperties props) throws FileSystemException, ClassNotFoundException, URISyntaxException {
         // get the system classloader
         final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-        // find all par files and create class loaders for them.
-        final Map<String, ClassLoader> extensionDirectoryClassLoaderLookup = new LinkedHashMap<>();
-        final Map<String, ClassLoader> parIdClassLoaderLookup = new HashMap<>();
+        // find all nar files and create class loaders for them.
+        final Map<String, Bundle> narDirectoryBundleLookup = new LinkedHashMap<>();
+        final Map<String, ClassLoader> narCoordinateClassLoaderLookup = new HashMap<>();
+        final Map<String, Set<BundleCoordinate>> narIdBundleLookup = new HashMap<>();
 
-        // make sure the par directory is there and accessible
-        FileUtils.ensureDirectoryExistAndCanAccess(frameworkWorkingDir);
-        FileUtils.ensureDirectoryExistAndCanAccess(extensionsWorkingDir);
+        // make sure the nar directory is there and accessible
+        FileUtils.ensureDirectoryExistAndCanReadAndWrite(frameworkWorkingDir);
+        FileUtils.ensureDirectoryExistAndCanReadAndWrite(extensionsWorkingDir);
 
         final List<FileObject> parWorkingDirContents = new ArrayList<>();
         final FileObject[] frameworkWorkingDirContents = frameworkWorkingDir.getChildren();
@@ -150,37 +145,49 @@ public final class ParClassLoaders {
         }
 
         if (!parWorkingDirContents.isEmpty()) {
-            final List<ParDetails> parDetails = new ArrayList<>();
+            final List<BundleDetails> parDetails = new ArrayList<>();
+            final Map<String,String> parCoordinatesToWorkingDir = new HashMap<>();
 
-            // load the par details which includes and par dependencies
+            // load the nar details which includes and nar dependencies
             for (final FileObject unpackedPar : parWorkingDirContents) {
-                final ParDetails parDetail = getParDetails(unpackedPar,props);
-
-                // ensure the par contained an identifier
-                if (parDetail.getParId() == null) {
-                    logger.warn("No PAR Id found. Skipping: " + unpackedPar.getURL());
-                    continue;
+                BundleDetails parDetail = null;
+                try {
+                     parDetail = getBundleDetails(unpackedPar, props);
+                } catch (IllegalStateException e) {
+                    logger.warn("Unable to load PAR {} due to {}, skipping...",
+                            new Object[] {unpackedPar.getURL(), e.getMessage()});
                 }
 
-                // store the par details
+                // prevent the application from starting when there are two PARs with same group, id, and version
+                final String parCoordinate = parDetail.getCoordinate().getCoordinate();
+                if (parCoordinatesToWorkingDir.containsKey(parCoordinate)) {
+                    final String existingParWorkingDir = parCoordinatesToWorkingDir.get(parCoordinate);
+                    throw new IllegalStateException("Unable to load PAR with coordinates " + parCoordinate
+                            + " and working directory " + parDetail.getWorkingDirectory()
+                            + " because another PAR with the same coordinates already exists at " + existingParWorkingDir);
+                }
+
                 parDetails.add(parDetail);
+                parCoordinatesToWorkingDir.put(parCoordinate, parDetail.getWorkingDirectory().getURL().toURI().toString());
             }
 
             // attempt to locate the jetty par
             ClassLoader jettyClassLoader = null;
-            for (final Iterator<ParDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
-                final ParDetails parDetail = parDetailsIter.next();
+            for (final Iterator<BundleDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
+                final BundleDetails parDetail = parDetailsIter.next();
 
                 // look for the jetty par
-                if (JETTY_PAR_ID.equals(parDetail.getParId())) {
+                if (JETTY_PAR_ID.equals(parDetail.getCoordinate().getId())) {
                     // create the jetty classloader
-                    jettyClassLoader = createParClassLoader(fileSystemManager, parDetail.getParWorkingDirectory(), systemClassLoader);
+                    jettyClassLoader = createParClassLoader(fileSystemManager, parDetail.getWorkingDirectory(), systemClassLoader);
 
-                    // remove the jetty par since its already loaded
-                    parIdClassLoaderLookup.put(parDetail.getParId(), jettyClassLoader);
+                    // remove the jetty nar since its already loaded
+                    narCoordinateClassLoaderLookup.put(parDetail.getCoordinate().getCoordinate(), jettyClassLoader);
                     parDetailsIter.remove();
-                    break;
                 }
+
+                // populate bundle lookup
+                narIdBundleLookup.computeIfAbsent(parDetail.getCoordinate().getId(), id -> new HashSet<>()).add(parDetail.getCoordinate());
             }
 
             // ensure the jetty par was found
@@ -193,23 +200,51 @@ public final class ParClassLoaders {
                 // record the number of pars to be loaded
                 parCount = parDetails.size();
 
-                // attempt to create each par class loader
-                for (final Iterator<ParDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
-                    final ParDetails parDetail = parDetailsIter.next();
-                    final String parDependencies = parDetail.getParDependencyId();
+                // attempt to create each nar class loader
+                for (final Iterator<BundleDetails> parDetailsIter = parDetails.iterator(); parDetailsIter.hasNext();) {
+                    final BundleDetails parDetail = parDetailsIter.next();
+                    final BundleCoordinate parDependencyCoordinate = parDetail.getDependencyCoordinate();
 
                     // see if this class loader is eligible for loading
                     ClassLoader parClassLoader = null;
-                    if (parDependencies == null) {
-                        parClassLoader = createParClassLoader(fileSystemManager,parDetail.getParWorkingDirectory(), jettyClassLoader);
-                    } else if (parIdClassLoaderLookup.containsKey(parDetail.getParDependencyId())) {
-                        parClassLoader = createParClassLoader(fileSystemManager, parDetail.getParWorkingDirectory(), parIdClassLoaderLookup.get(parDetail.getParDependencyId()));
+                    if (parDependencyCoordinate == null) {
+                        parClassLoader = createParClassLoader(fileSystemManager, parDetail.getWorkingDirectory(), jettyClassLoader);
+                    } else {
+                        final String dependencyCoordinateStr = parDependencyCoordinate.getCoordinate();
+
+                        // if the declared dependency has already been loaded
+                        if (narCoordinateClassLoaderLookup.containsKey(dependencyCoordinateStr)) {
+                            final ClassLoader parDependencyClassLoader = narCoordinateClassLoaderLookup.get(dependencyCoordinateStr);
+                            parClassLoader = createParClassLoader(fileSystemManager, parDetail.getWorkingDirectory(), parDependencyClassLoader);
+                        } else {
+                            // get all bundles that match the declared dependency id
+                            final Set<BundleCoordinate> coordinates = narIdBundleLookup.get(parDependencyCoordinate.getId());
+
+                            // ensure there are known bundles that match the declared dependency id
+                            if (coordinates != null && !coordinates.contains(parDependencyCoordinate)) {
+                                // ensure the declared dependency only has one possible bundle
+                                if (coordinates.size() == 1) {
+                                    // get the bundle with the matching id
+                                    final BundleCoordinate coordinate = coordinates.stream().findFirst().get();
+
+                                    // if that bundle is loaded, use it
+                                    if (narCoordinateClassLoaderLookup.containsKey(coordinate.getCoordinate())) {
+                                        logger.warn(String.format("While loading '%s' unable to locate exact NAR dependency '%s'. Only found one possible match '%s'. Continuing...",
+                                                parDetail.getCoordinate().getCoordinate(), dependencyCoordinateStr, coordinate.getCoordinate()));
+
+                                        final ClassLoader narDependencyClassLoader = narCoordinateClassLoaderLookup.get(coordinate.getCoordinate());
+                                        parClassLoader = createParClassLoader(fileSystemManager, parDetail.getWorkingDirectory(), narDependencyClassLoader);
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    // if we were able to create the par class loader, store it and remove the details
-                    if (parClassLoader != null) {
-                        extensionDirectoryClassLoaderLookup.put(parDetail.getParWorkingDirectory().getURL().toString(), parClassLoader);
-                        parIdClassLoaderLookup.put(parDetail.getParId(), parClassLoader);
+                    // if we were able to create the nar class loader, store it and remove the details
+                    final ClassLoader bundleClassLoader = parClassLoader;
+                    if (bundleClassLoader != null) {
+                        narDirectoryBundleLookup.put(parDetail.getWorkingDirectory().getURL().toURI().toString(), new Bundle(parDetail, bundleClassLoader));
+                        narCoordinateClassLoaderLookup.put(parDetail.getCoordinate().getCoordinate(), parClassLoader);
                         parDetailsIter.remove();
                     }
                 }
@@ -217,13 +252,19 @@ public final class ParClassLoaders {
                 // attempt to load more if some were successfully loaded this iteration
             } while (parCount != parDetails.size());
 
-            // see if any pars couldn't be loaded
-            for (final ParDetails parDetail : parDetails) {
-                logger.warn(String.format("Unable to resolve required dependency '%s'. Skipping PAR %s", parDetail.getParDependencyId(), parDetail.getParWorkingDirectory().getURL()));
+            // see if any nars couldn't be loaded
+            for (final BundleDetails narDetail : parDetails) {
+                logger.warn(String.format("Unable to resolve required dependency '%s'. Skipping PAR '%s'",
+                        narDetail.getDependencyCoordinate().getId(), narDetail.getWorkingDirectory().getURL().toURI().toString()));
             }
         }
 
-        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, parIdClassLoaderLookup.get(FRAMEWORK_PAR_ID), new LinkedHashMap<>(extensionDirectoryClassLoaderLookup));
+        // find the framework bundle, NarUnpacker already checked that there was a framework NAR and that there was only one
+        final Bundle frameworkBundle = narDirectoryBundleLookup.values().stream()
+                .filter(b -> b.getBundleDetails().getCoordinate().getId().equals(FRAMEWORK_PAR_ID))
+                .findFirst().orElse(null);
+
+        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, frameworkBundle, new LinkedHashMap<>(narDirectoryBundleLookup));
     }
 
     /**
@@ -254,101 +295,54 @@ public final class ParClassLoaders {
      * @return details about the PAR
      * @throws FileSystemException ioe
      */
-    private static ParDetails getParDetails(final FileObject parDirectory, ParProperties props) throws FileSystemException {
-        final ParDetails parDetails = new ParDetails();
-        parDetails.setParWorkingDirectory(parDirectory);
-
-        final FileObject manifestFile = parDirectory.resolveFile("META-INF/MANIFEST.MF");
-        try (final InputStream fis = manifestFile.getContent().getInputStream()) {
-            final Manifest manifest = new Manifest(fis);
-            final Attributes attributes = manifest.getMainAttributes();
-
-            // get the par details
-            parDetails.setParId(attributes.getValue(props.getMetaIdPrefix() + "-Id"));
-            parDetails.setParDependencyId(attributes.getValue(props.getMetaIdPrefix() + "-Dependency-Id"));
-        }catch(IOException ioe){
-            throw new FileSystemException("failed reading manifest file " + manifestFile.getURL(),ioe);
-        }
-
-        return parDetails;
+    private static BundleDetails getBundleDetails(final FileObject parDirectory, ParProperties props) throws FileSystemException {
+        return ParBundleUtil.fromParDirectory(parDirectory, props);
     }
 
     /**
-     * @return the framework class loader
+     * @return the framework class Bundle
      *
-     * @throws IllegalStateException if the frame class loader has not been
-     * loaded
+     * @throws IllegalStateException if the frame Bundle has not been loaded
      */
-    public ClassLoader getFrameworkClassLoader() {
+    public Bundle getFrameworkBundle() {
         if (initContext == null) {
-            throw new IllegalStateException("Framework class loader has not been loaded.");
+            throw new IllegalStateException("Framework bundle has not been loaded.");
         }
 
-        return initContext.frameworkClassLoader;
+        return initContext.frameworkBundle;
     }
 
     /**
      * @param extensionWorkingDirectory the directory
-     * @return the class loader for the specified working directory. Returns
-     * null when no class loader exists for the specified working directory
-     * @throws IllegalStateException if the class loaders have not been loaded
+     * @return the bundle for the specified working directory. Returns
+     * null when no bundle exists for the specified working directory
+     * @throws IllegalStateException if the bundles have not been loaded
      */
-    public ClassLoader getExtensionClassLoader(final FileObject extensionWorkingDirectory) {
+    public Bundle getBundle(final FileObject extensionWorkingDirectory) {
         if (initContext == null) {
             throw new IllegalStateException("Extensions class loaders have not been loaded.");
         }
 
         try {
-            return initContext.extensionClassLoaders.get(extensionWorkingDirectory.getURL().toString());
-        } catch (final IOException ioe) {
+           return initContext.bundles.get(extensionWorkingDirectory.getURL().toURI().toString());
+        } catch (URISyntaxException | FileSystemException e) {
             if(logger.isDebugEnabled()){
-                logger.debug("Unable to get extension classloader for working directory '{}'", extensionWorkingDirectory);
+                logger.debug("Unable to get extension classloader for working directory '{}'", extensionWorkingDirectory.getName().toString());
             }
             return null;
         }
     }
 
     /**
-     * @return the extension class loaders
-     * @throws IllegalStateException if the class loaders have not been loaded
+     * @return the extensions that have been loaded
+     * @throws IllegalStateException if the extensions have not been loaded
      */
-    public Set<ClassLoader> getExtensionClassLoaders() {
+    public Set<Bundle> getBundles() {
         if (initContext == null) {
-            throw new IllegalStateException("Extensions class loaders have not been loaded.");
+            throw new IllegalStateException("Bundles have not been loaded.");
         }
 
-        return new LinkedHashSet<>(initContext.extensionClassLoaders.values());
-    }
-
-    private static class ParDetails {
-
-        private String parId;
-        private String parDependencyId;
-        private FileObject parWorkingDirectory;
-
-        public String getParDependencyId() {
-            return parDependencyId;
-        }
-
-        public void setParDependencyId(String parDependencyId) {
-            this.parDependencyId = parDependencyId;
-        }
-
-        public String getParId() {
-            return parId;
-        }
-
-        public void setParId(String parId) {
-            this.parId = parId;
-        }
-
-        public FileObject getParWorkingDirectory() {
-            return parWorkingDirectory;
-        }
-
-        public void setParWorkingDirectory(FileObject parWorkingDirectory) {
-            this.parWorkingDirectory = parWorkingDirectory;
-        }
+        return new LinkedHashSet<>(initContext.bundles.values());
     }
 
 }

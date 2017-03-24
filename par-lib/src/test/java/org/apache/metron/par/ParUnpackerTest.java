@@ -19,8 +19,10 @@ package org.apache.metron.par;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.metron.par.bundle.Bundle;
 import org.apache.metron.par.util.ParProperties;
 import org.apache.metron.par.util.VFSClassloaderUtil;
+import org.apache.nifi.processor.Processor;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,13 +36,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.apache.metron.par.util.TestUtil.loadSpecifiedProperties;
 import static org.junit.Assert.assertEquals;
@@ -85,7 +83,7 @@ public class ParUnpackerTest {
     }
 
     @Test
-    public void testUnpackPars() throws FileSystemException, URISyntaxException {
+    public void testUnpackPars() throws FileSystemException, URISyntaxException, NotInitializedException {
 
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", Collections.EMPTY_MAP);
 
@@ -94,15 +92,20 @@ public class ParUnpackerTest {
         assertEquals("./target/ParUnpacker/lib2/",
                 properties.getProperty("par.library.directory.alt"));
 
-        // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(Processor.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+       // Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+       // ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
 
         assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
-        assertTrue(extensionMapping.getAllExtensionNames().contains(
+        assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
                 "org.apache.nifi.processors.dummy.one"));
-        assertTrue(extensionMapping.getAllExtensionNames().contains(
+        assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
                 "org.apache.nifi.processors.dummy.two"));
         final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
         FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
@@ -118,7 +121,7 @@ public class ParUnpackerTest {
     }
 
     @Test
-    public void testUnpackParsFromEmptyDir() throws IOException, FileSystemException , URISyntaxException {
+    public void testUnpackParsFromEmptyDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
 
         final File emptyDir = new File("./target/empty/dir");
         emptyDir.delete();
@@ -128,12 +131,17 @@ public class ParUnpackerTest {
         final Map<String, String> others = new HashMap<>();
         others.put("par.library.directory.alt", emptyDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
-        // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(Processor.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
 
         assertEquals(1, extensionMapping.getAllExtensionNames().size());
-        assertTrue(extensionMapping.getAllExtensionNames().contains(
+        assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
                 "org.apache.nifi.processors.dummy.one"));
 
         final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
@@ -144,7 +152,7 @@ public class ParUnpackerTest {
     }
 
     @Test
-    public void testUnpackParsFromNonExistantDir() throws FileSystemException, URISyntaxException {
+    public void testUnpackParsFromNonExistantDir() throws FileSystemException, URISyntaxException, NotInitializedException {
 
         final File nonExistantDir = new File("./target/this/dir/should/not/exist/");
         nonExistantDir.delete();
@@ -153,11 +161,16 @@ public class ParUnpackerTest {
         final Map<String, String> others = new HashMap<>();
         others.put("par.library.directory.alt", nonExistantDir.toString());
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
-        // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(Processor.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
-        assertTrue(extensionMapping.getAllExtensionNames().contains(
+        assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
                 "org.apache.nifi.processors.dummy.one"));
 
         assertEquals(1, extensionMapping.getAllExtensionNames().size());
@@ -170,7 +183,7 @@ public class ParUnpackerTest {
     }
 
     @Test
-    public void testUnpackParsFromNonDir() throws IOException , FileSystemException, URISyntaxException {
+    public void testUnpackParsFromNonDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
 
         final File nonDir = new File("./target/file.txt");
         nonDir.createNewFile();
@@ -181,7 +194,13 @@ public class ParUnpackerTest {
         ParProperties properties = loadSpecifiedProperties("/ParUnpacker/conf/par.properties", others);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
-        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, properties);
+        ArrayList<Class> classes = new ArrayList<>();
+        classes.add(Processor.class);
+        ExtensionClassInitializer.initialize(classes);
+        // create a FileSystemManager
+        Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+        ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+        final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
         assertNull(extensionMapping);
     }

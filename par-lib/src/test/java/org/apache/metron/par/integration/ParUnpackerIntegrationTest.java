@@ -25,19 +25,19 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.metron.par.ExtensionMapping;
-import org.apache.metron.par.ParUnpacker;
+import org.apache.metron.par.*;
+import org.apache.metron.par.bundle.Bundle;
 import org.apache.metron.par.integration.components.MRComponent;
 import org.apache.metron.par.util.HDFSFileUtilities;
 import org.apache.metron.par.util.ParProperties;
 import org.apache.metron.par.util.VFSClassloaderUtil;
-import org.apache.metron.par.ExtensionClassInitializer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -105,13 +105,20 @@ public class ParUnpackerIntegrationTest {
     properties.setProperty(ParProperties.PAR_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
     properties.setProperty(ParProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
     FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
-    final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager,properties);
+    ArrayList<Class> classes = new ArrayList<>();
+    classes.add(AbstractFoo.class);
+    ExtensionClassInitializer.initialize(classes);
+    // create a FileSystemManager
+    Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
+    ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+
+    final ExtensionMapping extensionMapping = ParUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
     assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
-    assertTrue(extensionMapping.getAllExtensionNames().contains(
+    assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
             "org.apache.nifi.processors.dummy.one"));
-    assertTrue(extensionMapping.getAllExtensionNames().contains(
+    assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
             "org.apache.nifi.processors.dummy.two"));
     final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
     FileObject[] extensionFiles = extensionsWorkingDir.getChildren();

@@ -16,18 +16,33 @@
  */
 package org.apache.metron.par;
 
-import org.apache.metron.par.util.ParProperties;
-import org.junit.Test;
+/**
+ * Enumeration of entries that will be in a NAR MANIFEST file.
+ */
+public enum ParManifestEntry {
 
-public class ExtensionClassInitializerTest {
-  @Test(expected = NotInitializedException.class)
-  public void testNotInitializedClassloader() throws Exception{
-    ParProperties properties = ParProperties.createBasicParProperties("src/test/resources/par.properties", null);
-    ParThreadContextClassLoader.createInstance(ParThreadContextClassLoaderTest.WithPropertiesConstructor.class.getName(),
-            ParThreadContextClassLoaderTest.WithPropertiesConstructor.class, properties);
-  }
-  @Test(expected = NotInitializedException.class)
-  public void testNotInitializedExtensionManager() throws Exception{
-    ExtensionManager.getInstanceClassLoader("org.junit.Test");
-  }
+    PRE_GROUP("-Group"),
+    PRE_ID("-Id"),
+    PRE_VERSION("-Version"),
+    PRE_DEPENDENCY_GROUP("-Dependency-Group"),
+    PRE_DEPENDENCY_ID("-Dependency-Id"),
+    PRE_DEPENDENCY_VERSION("-Dependency-Version"),
+    BUILD_TAG("Build-Tag"),
+    BUILD_REVISION("Build-Revision"),
+    BUILD_BRANCH("Build-Branch"),
+    BUILD_TIMESTAMP("Build-Timestamp"),
+    BUILD_JDK("Build-Jdk"),
+    BUILT_BY("Built-By")
+    ;
+
+    final String manifestName;
+
+    ParManifestEntry(String manifestName) {
+        this.manifestName = manifestName;
+    }
+
+    public String getManifestName() {
+        return manifestName;
+    }
+
 }

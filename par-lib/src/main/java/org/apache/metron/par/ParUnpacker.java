@@ -26,6 +26,8 @@ import java.util.jar.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
+import org.apache.metron.par.bundle.Bundle;
+import org.apache.metron.par.bundle.BundleCoordinate;
 import org.apache.metron.par.util.StringUtils;
 import org.apache.metron.par.util.FileUtils;
 import org.apache.metron.par.util.ParProperties;
@@ -53,12 +55,13 @@ public final class ParUnpacker {
         }
     };
 
-    public static ExtensionMapping unpackPars(final FileSystemManager fileSystemManager, ParProperties props){
+    public static ExtensionMapping unpackPars(final FileSystemManager fileSystemManager, final Bundle systemBundle, ParProperties props){
         try{
             final List<URI> parLibraryDirs = props.getParLibraryDirectories();
             final URI frameworkWorkingDir = props.getFrameworkWorkingDirectory();
             final URI extensionsWorkingDir = props.getExtensionsWorkingDirectory();
             final URI docsWorkingDir = props.getComponentDocumentationWorkingDirectory();
+            final Map<FileObject, BundleCoordinate> unpackedPars = new HashMap<>();
             archiveExtension = props.getArchiveExtension();
 
             FileObject unpackedFramework = null;
@@ -107,9 +110,11 @@ public final class ParUnpacker {
                             }
                         }
                     }
-                        final String parId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + "-Id");
+                    final String parId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + ParManifestEntry.PRE_ID.getManifestName());
+                    final String groupId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + ParManifestEntry.PRE_GROUP.getManifestName());
+                    final String version = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + ParManifestEntry.PRE_VERSION.getManifestName());
                         // determine if this is the framework
-                        /* OPF extension point
+                        /* OPF extension point */
                         if (ParClassLoaders.FRAMEWORK_PAR_ID.equals(parId)) {
                             if (unpackedFramework != null) {
                                 throw new IllegalStateException(
@@ -118,10 +123,16 @@ public final class ParUnpacker {
 
                             unpackedFramework = unpackPar(parFile, frameworkWorkingDirFO);
                         } else {
-                            unpackedExtensions.add(unpackPar(parFile, extensionsWorkingDirFO));
+
+                            final FileObject unpackedExtension = unpackPar(parFile, extensionsWorkingDirFO);
+
+                            // record the current bundle
+                            unpackedPars.put(unpackedExtension, new BundleCoordinate(groupId, parId, version));
+
+                            // unpack the extension nar
+                            unpackedExtensions.add(unpackedExtension);
                         }
-                        */
-                    unpackedExtensions.add(unpackPar(parFile, extensionsWorkingDirFO));
+
                 }
 
                 /*
@@ -169,7 +180,11 @@ public final class ParUnpacker {
                 }
             }
             final ExtensionMapping extensionMapping = new ExtensionMapping();
-            mapExtensions(extensionsWorkingDirFO, docsWorkingDirFO, extensionMapping, props);
+            mapExtensions(unpackedPars, docsWorkingDirFO, extensionMapping, props);
+
+            // unpack docs for the system bundle which will catch any JARs directly in the lib directory that might have docs
+            unpackBundleDocs(docsWorkingDirFO, extensionMapping, systemBundle.getBundleDetails().getCoordinate(), systemBundle.getBundleDetails().getWorkingDirectory(), props);
+
             return extensionMapping;
         } catch (IOException | URISyntaxException | NotInitializedException e) {
             logger.warn("Unable to load PAR library bundles due to " + e
@@ -178,18 +193,27 @@ public final class ParUnpacker {
                 logger.warn("", e);
             }
         }
+
         return null;
     }
 
-    private static void mapExtensions(final FileObject workingDirectory, final FileObject docsDirectory,
-            final ExtensionMapping mapping, final ParProperties props) throws IOException {
-        final FileObject[] directoryContents = workingDirectory.getChildren();
+    private static void mapExtensions(final Map<FileObject, BundleCoordinate> unpackedNars, final FileObject docsDirectory, final ExtensionMapping mapping, ParProperties props) throws IOException {
+        for (final Map.Entry<FileObject, BundleCoordinate> entry : unpackedNars.entrySet()) {
+            final FileObject unpackedNar = entry.getKey();
+            final BundleCoordinate bundleCoordinate = entry.getValue();
+
+            final FileObject bundledDependencies = unpackedNar.resolveFile("META-INF/bundled-dependencies");
+
+            unpackBundleDocs(docsDirectory, mapping, bundleCoordinate, bundledDependencies, props);
+        }
+    }
+
+    private static void unpackBundleDocs(final FileObject docsDirectory, final ExtensionMapping mapping, final BundleCoordinate bundleCoordinate, final FileObject bundledDirectory, ParProperties props) throws IOException {
+        final FileObject[] directoryContents = bundledDirectory.getChildren();
         if (directoryContents != null) {
             for (final FileObject file : directoryContents) {
-                if (file.isFolder()) {
-                    mapExtensions(file, docsDirectory, mapping, props);
-                } else if (file.getName().getExtension().equals("jar")) {
-                    unpackDocumentation(file, docsDirectory, mapping, props);
+                if (file.getName().getExtension().equals("jar")) {
+                    unpackDocumentation(bundleCoordinate, file, docsDirectory, mapping, props);
                 }
             }
         }
@@ -268,16 +292,20 @@ public final class ParUnpacker {
         FileUtils.createFile(hashFile, hash);
     }
 
-    private static void unpackDocumentation(final FileObject jar, final FileObject docsDirectory,
-            final ExtensionMapping extensionMapping, final ParProperties props) throws IOException {
-        // determine the components that may have documentation
-        if (!determineDocumentedComponents(jar, extensionMapping, props)) {
+    private static void unpackDocumentation(final BundleCoordinate coordinate, final FileObject jar, final FileObject docsDirectory, final ExtensionMapping extensionMapping, final ParProperties props) throws IOException {
+        final ExtensionMapping jarExtensionMapping = determineDocumentedComponents(coordinate, jar, props);
+
+        // skip if there are not components to document
+        if (jarExtensionMapping.isEmpty()) {
             return;
         }
 
+        // merge the extension mapping found in this jar
+        extensionMapping.merge(jarExtensionMapping);
+
         // look for all documentation related to each component
         try (final JarInputStream jarFile = new JarInputStream(jar.getContent().getInputStream())) {
-            for (final String componentName : extensionMapping.getAllExtensionNames()) {
+            for (final String componentName : extensionMapping.getAllExtensionNames().keySet()) {
                 final String entryName = "docs/" + componentName;
 
                 // go through each entry in this jar
@@ -287,6 +315,7 @@ public final class ParUnpacker {
                     // if this entry is documentation for this component
                     if (jarEntry.getName().startsWith(entryName)) {
                         final String name = StringUtils.substringAfter(jarEntry.getName(), "docs/");
+                        final String path = coordinate.getGroup() + "/" + coordinate.getId() + "/" + coordinate.getVersion() + "/" + name;
 
                         // if this is a directory create it
                         if (jarEntry.isDirectory()) {
@@ -319,27 +348,28 @@ public final class ParUnpacker {
     /*
      * Returns true if this jar file contains a par component
      */
-    private static boolean determineDocumentedComponents(final FileObject jar,
-                                                         final ExtensionMapping extensionMapping, final ParProperties props) throws IOException {
-        try (final JarInputStream jarFile = new JarInputStream(jar.getContent().getInputStream())) {
-            JarEntry jarEntry;
+    private static ExtensionMapping determineDocumentedComponents(final BundleCoordinate coordinate, final FileObject jar, final ParProperties props) throws IOException {
+        final ExtensionMapping mapping = new ExtensionMapping();
 
             // The ParProperties has configuration for the extension names and classnames
             final Map<String,String> extensions = props.getParExtensionTypes();
             if(extensions.isEmpty()){
                 logger.info("No Extensions configured in properties");
-                return false;
+                return mapping;
             }
+            JarEntry jarEntry;
+        try (final JarInputStream jarFile = new JarInputStream(jar.getContent().getInputStream())) {
 
             while ((jarEntry = jarFile.getNextJarEntry()) != null) {
-                for (Map.Entry<String,String> extensionEntry : extensions.entrySet()) {
-                    if(jarEntry.getName().equals(String.format(META_FMT, extensionEntry.getValue()))){
-                       extensionMapping.addAllExtensions(extensionEntry.getKey(),determineDocumentedComponents(jarFile,jarEntry));
+                for (Map.Entry<String, String> extensionEntry : extensions.entrySet()) {
+                    if (jarEntry.getName().equals(String.format(META_FMT, extensionEntry.getValue()))) {
+                        mapping.addAllExtensions(extensionEntry.getKey(),coordinate, determineDocumentedComponents(jarFile, jarEntry));
                     }
                 }
             }
-            return true;
         }
+            return mapping;
+
     }
 
     private static List<String> determineDocumentedComponents(final JarInputStream jarFile,
@@ -349,22 +379,18 @@ public final class ParUnpacker {
         if (jarEntry == null) {
             return componentNames;
         }
-
-
         final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 jarFile));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            final String trimmedLine = line.trim();
-            if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("#")) {
-                final int indexOfPound = trimmedLine.indexOf("#");
-                final String effectiveLine = (indexOfPound > 0) ? trimmedLine.substring(0,
-                        indexOfPound) : trimmedLine;
-                componentNames.add(effectiveLine);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                final String trimmedLine = line.trim();
+                if (!trimmedLine.isEmpty() && !trimmedLine.startsWith("#")) {
+                    final int indexOfPound = trimmedLine.indexOf("#");
+                    final String effectiveLine = (indexOfPound > 0) ? trimmedLine.substring(0,
+                            indexOfPound) : trimmedLine;
+                    componentNames.add(effectiveLine);
+                }
             }
-        }
-
-
         return componentNames;
     }
 

@@ -48,12 +48,26 @@ public class ParCloseable implements Closeable {
     public static ParCloseable withComponentParLoader(final Class componentClass, final String componentIdentifier) throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();
 
-        ClassLoader componentClassLoader = ExtensionManager.getClassLoader(componentClass.getName(), componentIdentifier);
+        ClassLoader componentClassLoader = ExtensionManager.getInstanceClassLoader(componentIdentifier);
         if (componentClassLoader == null) {
             componentClassLoader = componentClass.getClassLoader();
         }
 
         Thread.currentThread().setContextClassLoader(componentClassLoader);
+        return new ParCloseable(current);
+    }
+
+    /**
+     * Sets the current thread context class loader to the provided class loader, and returns a NarCloseable that will
+     * return the current thread context class loader to it's previous state.
+     *
+     * @param componentNarLoader the class loader to set as the current thread context class loader
+     *
+     * @return NarCloseable that will return the current thread context class loader to its previous state
+     */
+    public static ParCloseable withComponentNarLoader(final ClassLoader componentNarLoader) {
+        final ClassLoader current = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(componentNarLoader);
         return new ParCloseable(current);
     }
 
@@ -67,7 +81,7 @@ public class ParCloseable implements Closeable {
     public static ParCloseable withFrameworkPar() {
         final ClassLoader frameworkClassLoader;
         try {
-            frameworkClassLoader = ParClassLoaders.getInstance().getFrameworkClassLoader();
+            frameworkClassLoader = ParClassLoaders.getInstance().getFrameworkBundle().getClassLoader();
         } catch (final Exception e) {
             // This should never happen in a running instance, but it will occur in unit tests
             logger.error("Unable to access Framework ClassLoader due to " + e + ". Will continue without changing ClassLoaders.");
