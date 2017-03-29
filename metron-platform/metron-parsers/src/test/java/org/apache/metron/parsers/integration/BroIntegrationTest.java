@@ -24,12 +24,12 @@ import java.util.List;
 
 public class BroIntegrationTest extends ParserIntegrationTest {
   @Override
-  String getSensorType() {
+  public String getSensorType() {
     return "bro";
   }
 
   @Override
-  List<ParserValidation> getValidations() {
+  public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
       add(new SampleDataValidation());
     }};

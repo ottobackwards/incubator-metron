@@ -15,23 +15,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.parsers.integration;
+package org.apache.metron.parsers.asa.integration;
 
+import org.apache.metron.parsers.integration.ParserIntegrationTest;
+import org.apache.metron.parsers.integration.ParserValidation;
+import org.apache.metron.parsers.integration.validation.PathedSampleDataValidation;
 import org.apache.metron.parsers.integration.validation.SampleDataValidation;
+import org.apache.metron.test.TestDataType;
+import org.apache.metron.test.utils.SampleDataUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class YafIntegrationTest extends ParserIntegrationTest {
+public class AsaIntegrationTest extends ParserIntegrationTest {
   @Override
   public String getSensorType() {
-    return "yaf";
+    return "asa";
   }
 
   @Override
   public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
-      add(new SampleDataValidation());
+      add(new PathedSampleDataValidation("src/test/resources/data/parsed/asa_parsed"));
     }};
+  }
+
+  @Override
+
+  protected String getGlobalConfigPath() throws Exception{
+    return "../../../../metron-platform/metron-integration-test/src/main/config/zookeeper/";
+  }
+  @Override
+  protected String getSampleDataPath() throws Exception {
+    return "src/test/resources/data/raw/asa_raw";
   }
 }

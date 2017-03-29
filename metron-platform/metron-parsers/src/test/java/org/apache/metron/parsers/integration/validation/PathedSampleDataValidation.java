@@ -17,7 +17,6 @@
  */
 package org.apache.metron.parsers.integration.validation;
 
-import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.apache.metron.integration.utils.TestUtils;
 import org.apache.metron.parsers.integration.ParserValidation;
 import org.apache.metron.test.TestDataType;
@@ -27,18 +26,36 @@ import org.junit.Assert;
 
 import java.util.List;
 
-public class SampleDataValidation extends PathedSampleDataValidation {
+public class PathedSampleDataValidation implements ParserValidation {
+  protected String path;
 
-  public SampleDataValidation(){
-    super("");
+  public PathedSampleDataValidation(String path){
+    this.path = path;
   }
+
   @Override
   public String getName() {
-    return "Sample Data Validation";
+    return "Pathed Sample Data Validation";
   }
 
   @Override
-  protected String getPath(String sensorType) throws Exception{
-    return SampleDataUtils.getSampleDataPath(sensorType, TestDataType.PARSED);
+  public void validate(String sensorType, List<byte[]> actualMessages) throws Exception {
+    List<byte[]> expectedMessages = TestUtils.readSampleData(getPath(sensorType));
+    Assert.assertEquals(expectedMessages.size(), actualMessages.size());
+    for (int i = 0; i < actualMessages.size(); i++) {
+      String expectedMessage = new String(expectedMessages.get(i));
+      String actualMessage = new String(actualMessages.get(i));
+      try {
+        ValidationUtils.assertJSONEqual(expectedMessage, actualMessage);
+      } catch (Throwable t) {
+        System.out.println("expected: " + expectedMessage);
+        System.out.println("actual: " + actualMessage);
+        throw t;
+      }
+    }
+  }
+
+  protected String getPath(String sensorType)throws Exception{
+    return path;
   }
 }

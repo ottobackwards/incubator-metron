@@ -24,12 +24,12 @@ import java.util.List;
 
 public class AsaIntegrationTest extends ParserIntegrationTest {
   @Override
-  String getSensorType() {
+  public String getSensorType() {
     return "asa";
   }
 
   @Override
-  List<ParserValidation> getValidations() {
+  public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
       add(new SampleDataValidation());
     }};

@@ -42,7 +42,7 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
   @Test
   public void test() throws Exception {
     final String sensorType = getSensorType();
-    inputMessages = TestUtils.readSampleData(SampleDataUtils.getSampleDataPath(sensorType, TestDataType.RAW));
+    inputMessages = TestUtils.readSampleData(getSampleDataPath());
 
     final Properties topologyProperties = new Properties();
     final KafkaComponent kafkaComponent = getKafkaComponent(topologyProperties, new ArrayList<KafkaComponent.Topic>() {{
@@ -56,8 +56,8 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
 
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
-            .withGlobalConfigsPath(TestConstants.SAMPLE_CONFIG_PATH)
-            .withParserConfigsPath(TestConstants.PARSER_CONFIGS_PATH);
+            .withGlobalConfigsPath(getGlobalConfigPath())
+            .withParserConfigsPath(TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
             .withSensorType(sensorType)
@@ -131,7 +131,16 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
               }
             });
   }
-  abstract String getSensorType();
-  abstract List<ParserValidation> getValidations();
 
+  protected String getSampleDataPath() throws Exception{
+    return SampleDataUtils.getSampleDataPath(1,getSensorType(), TestDataType.RAW);
+  }
+
+
+  abstract public String getSensorType();
+  abstract public List<ParserValidation> getValidations();
+
+  protected String getGlobalConfigPath() throws Exception{
+    return TestConstants.SAMPLE_CONFIG_PATH;
+  }
 }

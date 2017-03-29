@@ -31,7 +31,7 @@ public class WebSphereIntegrationTest extends ParserIntegrationTest {
 	}
 
 	@Override
-	List<ParserValidation> getValidations() {
+	public List<ParserValidation> getValidations() {
 		return new ArrayList<ParserValidation>() {{
 			add(new SampleDataValidation());
 		}};
