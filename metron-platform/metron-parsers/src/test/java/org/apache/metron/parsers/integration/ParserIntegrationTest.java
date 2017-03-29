@@ -133,7 +133,7 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
   }
 
   protected String getSampleDataPath() throws Exception{
-    return SampleDataUtils.getSampleDataPath(1,getSensorType(), TestDataType.RAW);
+    return SampleDataUtils.getSampleDataPath(0,getSensorType(), TestDataType.RAW);
   }
 
 
