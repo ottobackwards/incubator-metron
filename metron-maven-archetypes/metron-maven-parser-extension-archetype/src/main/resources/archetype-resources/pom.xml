@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.apache.metron</groupId>
         <artifactId>metron-parser-extensions</artifactId>
-        <version>0.3.1</version>
+        <version>${metronVersion}</version>
     </parent>
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
 
 
-    <description>ASA Parser Extension for Metron</description>
+    <description>${parserClassName} Parser Extension for Metron</description>
     <modules>
         <module>metron-parser-${parserName}</module>
         <module>metron-parser-${parserName}-bundle</module>
