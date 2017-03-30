@@ -1,3 +1,0 @@
-# ASA Parser
-
-## Introduction

@@ -1,3 +1,6 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -15,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.parsers.asa.integration;
+package ${package}.integration;
 
 import org.apache.metron.parsers.integration.ParserIntegrationTest;
 import org.apache.metron.parsers.integration.ParserValidation;
@@ -24,26 +27,26 @@ import org.apache.metron.parsers.integration.validation.PathedSampleDataValidati
 import java.util.ArrayList;
 import java.util.List;
 
-public class AsaIntegrationTest extends ParserIntegrationTest {
+public class ${parserClassName}IntegrationTest extends ParserIntegrationTest {
   @Override
   public String getSensorType() {
-    return "asa";
+    return "${parserName}";
   }
 
   @Override
   public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
-      add(new PathedSampleDataValidation("src/test/resources/data/parsed/asa_parsed"));
+      add(new PathedSampleDataValidation("src/test/resources/data/parsed/test.parsed"));
     }};
   }
 
   @Override
 
   protected String getGlobalConfigPath() throws Exception{
-    return "../../../../metron-platform/metron-integration-test/src/main/config/zookeeper/";
+    return "src/test/resources";
   }
   @Override
   protected String getSampleDataPath() throws Exception {
-    return "src/test/resources/data/raw/asa_raw";
+    return "src/test/resources/data/raw/test.raw";
   }
 }

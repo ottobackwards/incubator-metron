@@ -12,25 +12,30 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <groupId>org.apache.metron</groupId>
-        <artifactId>metron-parser-extensions</artifactId>
-        <version>0.3.1</version>
+        <groupId>${groupId}</groupId>
+        <artifactId>${rootArtifactId}</artifactId>
+        <version>${version}</version>
     </parent>
-    <groupId>${groupId}</groupId>
-    <artifactId>${artifactId}</artifactId>
-    <name>${artifactId}</name>
+
+    <artifactId>metron-parser-${parserName}-bundle</artifactId>
     <version>${version}</version>
-    <packaging>pom</packaging>
+    <name>metron-parser-${parserName}-bundle</name>
+    <packaging>bundle</packaging>
+    <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <source.skip>false</source.skip>
+    </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>metron-parser-${parserName}</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
 
-    <description>ASA Parser Extension for Metron</description>
-    <modules>
-        <module>metron-parser-${parserName}</module>
-        <module>metron-parser-${parserName}-bundle</module>
-        <module>metron-parser-${parserName}-assembly</module>
-    </modules>
 </project>

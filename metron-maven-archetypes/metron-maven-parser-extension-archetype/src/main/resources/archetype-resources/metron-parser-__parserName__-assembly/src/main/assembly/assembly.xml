@@ -1,3 +1,6 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
 <!--
   Licensed to the Apache Software
 	Foundation (ASF) under one or more contributor license agreements. See the
@@ -19,7 +22,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.basedir}/../metron-parser-asa/src/main/config</directory>
+            <directory>${symbol_dollar}{project.basedir}/../metron-parser-${parserName}/src/main/config</directory>
             <outputDirectory>/config</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
@@ -31,7 +34,7 @@
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../metron-parser-asa/src/main/resources/patterns</directory>
+            <directory>${symbol_dollar}{project.basedir}/../metron-parser-${parserName}/src/main/resources/patterns</directory>
             <outputDirectory>/patterns</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
@@ -42,21 +45,9 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/../metron-parser-asa/src/main/scripts</directory>
-            <outputDirectory>/bin</outputDirectory>
-            <useDefaultExcludes>true</useDefaultExcludes>
-            <excludes>
-                <exclude>**/*.formatted</exclude>
-                <exclude>**/*.filtered</exclude>
-            </excludes>
-            <fileMode>0755</fileMode>
-            <lineEnding>unix</lineEnding>
-            <filtered>true</filtered>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/../metron-parser-asa-bundle/target</directory>
+            <directory>${symbol_dollar}{project.basedir}/../metron-parser-${parserName}-bundle/target</directory>
             <includes>
-                <include>metron-parser-asa-${project.version}.bundle</include>
+                <include>metron-parser-${parserName}-bundle-${symbol_dollar}{project.version}.bundle</include>
             </includes>
             <outputDirectory>/lib</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>

@@ -2,16 +2,16 @@
 <archetype-descriptor xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd" name="metron-parser-asa-extension"
     xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <fileSets>
-    <fileSet encoding="UTF-8">
-      <directory></directory>
-      <includes>
-        <include>metron-parser-asa-extension.iml</include>
-      </includes>
-    </fileSet>
-  </fileSets>
+  <requiredProperties>
+    <requiredProperty key="parserName">
+      <validationRegex>^[a-z]*$</validationRegex>
+    </requiredProperty>
+    <requiredProperty key="parserClassName">
+      <validationRegex>^[A-Z].*$</validationRegex>
+    </requiredProperty>
+  </requiredProperties>
   <modules>
-    <module id="metron-parser-asa" dir="metron-parser-asa" name="metron-parser-asa">
+    <module id="metron-parser-__parserName__" dir="metron-parser-__parserName__" name="metron-parser-__parserName__">
       <fileSets>
         <fileSet filtered="true" packaged="true" encoding="UTF-8">
           <directory>src/main/java</directory>
@@ -48,39 +48,28 @@
           <includes>
             <include>**/*.</include>
             <include>**/*.config</include>
+            <include>**/*.gz</include>
+            <include>**/*.json</include>
+            <include>**/*.raw</include>
+            <include>**/*.parsed</include>
           </includes>
         </fileSet>
         <fileSet encoding="UTF-8">
           <directory></directory>
           <includes>
-            <include>metron-parser-asa.iml</include>
             <include>README.md</include>
           </includes>
         </fileSet>
       </fileSets>
     </module>
-    <module id="metron-parser-asa-bundle" dir="metron-parser-asa-bundle" name="metron-parser-asa-bundle">
-      <fileSets>
-        <fileSet encoding="UTF-8">
-          <directory></directory>
-          <includes>
-            <include>metron-parser-asa-bundle.iml</include>
-          </includes>
-        </fileSet>
-      </fileSets>
+    <module id="metron-parser-__parserName__-bundle" dir="metron-parser-__parserName__-bundle" name="metron-parser-__parserName__-bundle">
     </module>
-    <module id="metron-parser-asa-assembly" dir="metron-parser-asa-assembly" name="metron-parser-asa-assembly">
+    <module id="metron-parser-__parserName__-assembly" dir="metron-parser-__parserName__-assembly" name="metron-parser-parserName__-assembly">
       <fileSets>
         <fileSet filtered="true" encoding="UTF-8">
           <directory>src/main/assembly</directory>
           <includes>
             <include>**/*.xml</include>
-          </includes>
-        </fileSet>
-        <fileSet encoding="UTF-8">
-          <directory></directory>
-          <includes>
-            <include>metron-parser-asa-assembly.iml</include>
           </includes>
         </fileSet>
       </fileSets>
