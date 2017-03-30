@@ -47,6 +47,7 @@
             <version>${global_classindex_version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- testing -->
         <dependency>
             <groupId>org.apache.metron</groupId>
             <artifactId>metron-parsers</artifactId>
