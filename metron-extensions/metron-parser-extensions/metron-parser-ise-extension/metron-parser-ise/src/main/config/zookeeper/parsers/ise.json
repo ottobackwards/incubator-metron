@@ -1,0 +1,7 @@
+{
+  "parserClassName": "org.apache.metron.parsers.ise.ISEParser",
+  "sensorTopic": "ise",
+  "parserConfig": {
+    "deviceTimeZone": "UTC"
+  }
+}
