@@ -43,6 +43,7 @@
 		<module>metron-parser-asa-extension</module>
         <module>metron-parsers-bro-extension</module>
         <module>metron-parser-cef-extension</module>
+    <module>metron-parser-fireeye-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
