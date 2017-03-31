@@ -1,4 +1,4 @@
-#fireeye Parser
+#Fireeye Parser
 
 
-This is the fireeye parser
+This is the Fireeye parser

@@ -1,0 +1,7 @@
+{
+  "parserClassName": "org.apache.metron.parsers.lancope.LancopeParser",
+  "sensorTopic": "lancope",
+  "parserConfig": {
+    "deviceTimeZone": "UTC"
+  }
+}

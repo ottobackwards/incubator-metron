@@ -1,4 +1,4 @@
-#ise Parser
+#ISE Parser
 
 
-This is the ise parser
+This is the ISE parser

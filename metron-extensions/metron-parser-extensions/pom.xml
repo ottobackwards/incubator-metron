@@ -45,6 +45,7 @@
         <module>metron-parser-cef-extension</module>
     <module>metron-parser-fireeye-extension</module>
     <module>metron-parser-ise-extension</module>
+    <module>metron-parser-lancope-extension</module>
   </modules>
 	<dependencies>
 		<dependency>

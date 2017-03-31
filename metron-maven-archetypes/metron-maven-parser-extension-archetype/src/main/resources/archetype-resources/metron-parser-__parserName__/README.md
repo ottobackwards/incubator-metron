@@ -1,5 +1,5 @@
-#${parserName} Parser
+#${parserClassName} Parser
 
 ## Introduction
 
-This is the ${parserName} parser
+This is the ${parserClassName} parser
