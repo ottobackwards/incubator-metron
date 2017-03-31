@@ -6,7 +6,7 @@
     <requiredProperty key="metronVersion">
     </requiredProperty>
     <requiredProperty key="parserName">
-      <validationRegex>^[a-z]*$</validationRegex>
+      <validationRegex> ^[a-z]+[A-Z,a-z]+$</validationRegex>
     </requiredProperty>
     <requiredProperty key="parserClassName">
       <validationRegex>^[A-Z].*$</validationRegex>
