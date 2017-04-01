@@ -17,6 +17,7 @@
  */
 package org.apache.metron.parsers.integration;
 
+import org.apache.metron.parsers.integration.validation.PathedSampleDataValidation;
 import org.apache.metron.parsers.integration.validation.SampleDataValidation;
 
 import java.util.ArrayList;
@@ -31,7 +32,18 @@ public class SnortIntegrationTest extends ParserIntegrationTest {
   @Override
   public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
-      add(new SampleDataValidation());
+      add(new PathedSampleDataValidation("src/test/resources/data/parsed/test.parsed"));
     }};
+  }
+
+  @Override
+
+  protected String getGlobalConfigPath() throws Exception {
+    return "../../../../metron-platform/metron-integration-test/src/main/config/zookeeper/";
+  }
+
+  @Override
+  protected String getSampleDataPath() throws Exception {
+    return "src/test/resources/data/raw/tes.raw";
   }
 }

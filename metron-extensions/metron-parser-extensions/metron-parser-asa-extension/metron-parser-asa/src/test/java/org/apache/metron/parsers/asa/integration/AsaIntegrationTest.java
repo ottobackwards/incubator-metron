@@ -33,7 +33,7 @@ public class AsaIntegrationTest extends ParserIntegrationTest {
   @Override
   public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
-      add(new PathedSampleDataValidation("src/test/resources/data/parsed/asa_parsed"));
+      add(new PathedSampleDataValidation("src/test/resources/data/parsed/test.parsed"));
     }};
   }
 
@@ -44,6 +44,6 @@ public class AsaIntegrationTest extends ParserIntegrationTest {
   }
   @Override
   protected String getSampleDataPath() throws Exception {
-    return "src/test/resources/data/raw/asa_raw";
+    return "src/test/resources/data/raw/test.raw";
   }
 }
