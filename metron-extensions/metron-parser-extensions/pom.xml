@@ -47,6 +47,7 @@
     <module>metron-parser-ise-extension</module>
     <module>metron-parser-lancope-extension</module>
     <module>metron-parser-logstash-extension</module>
+    <module>metron-parser-paloalto-extension</module>
   </modules>
 	<dependencies>
 		<dependency>

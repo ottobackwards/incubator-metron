@@ -1,0 +1,7 @@
+{
+  "parserClassName": "org.apache.metron.parsers.paloalto.PaloaltoParser",
+  "sensorTopic": "paloalto",
+  "parserConfig": {
+    "deviceTimeZone": "UTC"
+  }
+}
