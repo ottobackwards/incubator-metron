@@ -44,6 +44,6 @@ public class SnortIntegrationTest extends ParserIntegrationTest {
 
   @Override
   protected String getSampleDataPath() throws Exception {
-    return "src/test/resources/data/raw/tes.raw";
+    return "src/test/resources/data/raw/test.raw";
   }
 }
