@@ -46,6 +46,7 @@
     <module>metron-parser-fireeye-extension</module>
     <module>metron-parser-ise-extension</module>
     <module>metron-parser-lancope-extension</module>
+    <module>metron-parser-logstash-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
