@@ -1,5 +1,5 @@
 {
-  "parserClassName": "org.apache.metron.parsers.paloalto.PaloaltoParser",
+  "parserClassName": "org.apache.metron.parsers.paloalto.BasicPaloAltoFirewallParser",
   "sensorTopic": "paloalto",
   "parserConfig": {
     "deviceTimeZone": "UTC"

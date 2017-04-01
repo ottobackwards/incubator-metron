@@ -1,5 +1,5 @@
 {
-  "parserClassName": "org.apache.metron-parsers.fireeye.FireEyeParserParser",
+  "parserClassName": "org.apache.metron-parsers.fireeye.BasicFireEyeParser",
   "sensorTopic": "fireeye",
   "parserConfig": {
     "deviceTimeZone": "UTC"

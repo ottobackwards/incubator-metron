@@ -1,5 +1,5 @@
 {
-  "parserClassName": "org.apache.metron.parsers.logstash.LogStashParser",
+  "parserClassName": "org.apache.metron.parsers.logstash.BasicLogstashParser",
   "sensorTopic": "logstash",
   "parserConfig": {
     "deviceTimeZone": "UTC"
