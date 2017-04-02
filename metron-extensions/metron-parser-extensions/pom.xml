@@ -49,6 +49,7 @@
     <module>metron-parser-logstash-extension</module>
     <module>metron-parser-paloalto-extension</module>
     <module>metron-parser-snort-extension</module>
+    <module>metron-parser-sourcefire-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
