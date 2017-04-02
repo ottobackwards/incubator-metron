@@ -50,6 +50,7 @@
     <module>metron-parser-paloalto-extension</module>
     <module>metron-parser-snort-extension</module>
     <module>metron-parser-sourcefire-extension</module>
+    <module>metron-parser-websphere-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
