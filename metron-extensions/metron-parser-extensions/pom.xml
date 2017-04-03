@@ -52,6 +52,7 @@
     <module>metron-parser-sourcefire-extension</module>
     <module>metron-parser-websphere-extension</module>
     <module>metron-parser-squid-extension</module>
+    <module>metron-parser-yaf-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
