@@ -18,7 +18,7 @@
 
 package org.apache.metron.parsers.websphere;
 
-import org.apache.metron.parsers.GrokParser;
+import org.apache.metron.parsers.grok.GrokParser;
 import org.json.simple.JSONObject;
 
 import java.text.ParseException;

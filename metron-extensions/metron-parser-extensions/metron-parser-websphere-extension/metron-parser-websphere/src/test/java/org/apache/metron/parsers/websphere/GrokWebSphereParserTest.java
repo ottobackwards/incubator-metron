@@ -19,7 +19,7 @@
 package org.apache.metron.parsers.websphere;
 
 import org.apache.log4j.Level;
-import org.apache.metron.parsers.GrokParser;
+import org.apache.metron.parsers.grok.GrokParser;
 import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.junit.Before;

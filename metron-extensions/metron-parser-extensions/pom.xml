@@ -41,18 +41,18 @@
 	</licenses>
 	<modules>
 		<module>metron-parser-asa-extension</module>
-        <module>metron-parsers-bro-extension</module>
+        <module>metron-parser-bro-extension</module>
         <module>metron-parser-cef-extension</module>
-    <module>metron-parser-fireeye-extension</module>
-    <module>metron-parser-ise-extension</module>
-    <module>metron-parser-lancope-extension</module>
-    <module>metron-parser-logstash-extension</module>
-    <module>metron-parser-paloalto-extension</module>
-    <module>metron-parser-snort-extension</module>
-    <module>metron-parser-sourcefire-extension</module>
-    <module>metron-parser-websphere-extension</module>
-    <module>metron-parser-squid-extension</module>
-    <module>metron-parser-yaf-extension</module>
+    	<module>metron-parser-fireeye-extension</module>
+    	<module>metron-parser-ise-extension</module>
+    	<module>metron-parser-lancope-extension</module>
+    	<module>metron-parser-logstash-extension</module>
+    	<module>metron-parser-paloalto-extension</module>
+    	<module>metron-parser-snort-extension</module>
+    	<module>metron-parser-sourcefire-extension</module>
+    	<module>metron-parser-websphere-extension</module>
+    	<module>metron-parser-squid-extension</module>
+    	<module>metron-parser-yaf-extension</module>
   </modules>
 	<dependencies>
 		<dependency>

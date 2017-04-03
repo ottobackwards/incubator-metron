@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.parsers.yaf;
+package org.apache.metron.parsers.grok;
 
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.parsers.grok.GrokParserTest;
@@ -25,45 +25,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class YafParserTest extends GrokParserTest {
+public class SampleGrokParserTest extends GrokParserTest {
 
   /**
    * {
-   "iflags": "AS",
-   "uflags": 0,
-   "isn": "22efa001",
-   "ip_dst_addr": "10.0.2.15",
-   "ip_dst_port": 39468,
-   "duration": "0.000",
-   "rpkt": 0,
-   "original_string": "2016-01-28 15:29:48.512|2016-01-28 15:29:48.512|   0.000|   0.000|  6|                          216.21.170.221|   80|                               10.0.2.15|39468|      AS|       0|       0|       0|22efa001|00000000|000|000|       1|      44|       0|       0|    0|idle",
-   "pkt": 1,
-   "ruflags": 0,
-   "roct": 0,
-   "ip_src_addr": "216.21.170.221",
-   "tag": 0,
-   "rtag": 0,
-   "ip_src_port": 80,
-   "timestamp": 1453994988512,
-   "app": 0,
-   "oct": 44,
-   "end_reason": "idle",
-   "risn": 0,
-   "end_time": 1453994988512,
-   "start_time": 1453994988512,
-   "riflags": 0,
-   "rtt": "0.000",
-   "protocol": 6
-   }
+   * "roct":0,
+   * "end_reason":"idle",
+   * "ip_dst_addr":"10.0.2.15",
+   * "iflags":"AS",
+   * "rpkt":0,
+   * "original_string":"1453994987000|2016-01-28 15:29:48|   0.000|   0.000|  6|                          216.21.170.221|   80|                               10.0.2.15|39468|      AS|       0|       0|       0|22efa001|00000000|000|000|       1|      44|       0|       0|    0|idle",
+   * "tag":0,
+   * "risn":0,
+   * "ip_dst_port":39468,
+   * "ruflags":0,
+   * "app":0,
+   * "protocol":6
+   * ,"isn":"22efa001",
+   * "uflags":0,"duration":"0.000",
+   * "oct":44,
+   * "ip_src_port":80,
+   * "end_time":1453994988000,
+   * "start_time":1453994987000
+   * "timestamp":1453994987000,
+   * "riflags":0,
+   * "rtt":"0.000",
+   * "rtag":0,
+   * "pkt":1,
+   * "ip_src_addr":"216.21.170.221"
+   * }
    */
   @Multiline
   public String result;
+
 
   @Override
   public Map getTestData() {
 
     Map testData = new HashMap<String,String>();
-    String input = "2016-01-28 15:29:48.512|2016-01-28 15:29:48.512|   0.000|   0.000|  6|                          216.21.170.221|   80|                               10.0.2.15|39468|      AS|       0|       0|       0|22efa001|00000000|000|000|       1|      44|       0|       0|    0|idle";
+    String input = "1453994987000|2016-01-28 15:29:48|   0.000|   0.000|  6|                          216.21.170.221|   80|                               10.0.2.15|39468|      AS|       0|       0|       0|22efa001|00000000|000|000|       1|      44|       0|       0|    0|idle";
     testData.put(input,result);
     return testData;
 
@@ -71,10 +71,8 @@ public class YafParserTest extends GrokParserTest {
 
   @Override
   public String getGrokPath() {
-    return "src/main/resources/patterns/yaf";
+    return "../metron-integration-test/src/main/sample/patterns/test";
   }
-
-
 
   @Override
   public String getGrokPatternLabel() {
@@ -84,14 +82,13 @@ public class YafParserTest extends GrokParserTest {
   @Override
   public List<String> getTimeFields() {
     return new ArrayList<String>() {{
-      add("start_time");
       add("end_time");
     }};
   }
 
   @Override
   public String getDateFormat() {
-    return "yyyy-MM-dd HH:mm:ss.S";
+    return "yyyy-MM-dd HH:mm:ss";
   }
 
   @Override

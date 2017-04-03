@@ -66,7 +66,7 @@ public class SensorParserConfigServiceImplTest {
 
   /**
    {
-   "parserClassName": "org.apache.metron.parsers.GrokParser",
+   "parserClassName": "org.apache.metron.parsers.grok.GrokParser",
    "sensorTopic": "squid",
    "parserConfig": {
    "grokPath": "/patterns/squid",
@@ -255,7 +255,7 @@ public class SensorParserConfigServiceImplTest {
   public void reloadAvailableParsersShouldReturnParserClasses() throws Exception {
     Map<String, String> availableParsers = sensorParserConfigService.reloadAvailableParsers();
     assertTrue(availableParsers.size() > 0);
-    assertEquals("org.apache.metron.parsers.GrokParser", availableParsers.get("Grok"));
+    assertEquals("org.apache.metron.parsers.grok.GrokParser", availableParsers.get("Grok"));
     assertEquals("org.apache.metron.parsers.bro.BasicBroParser", availableParsers.get("Bro"));
   }
 
@@ -332,7 +332,7 @@ public class SensorParserConfigServiceImplTest {
   private SensorParserConfig getTestSquidSensorParserConfig() {
     SensorParserConfig sensorParserConfig = new SensorParserConfig();
     sensorParserConfig.setSensorTopic("squid");
-    sensorParserConfig.setParserClassName("org.apache.metron.parsers.GrokParser");
+    sensorParserConfig.setParserClassName("org.apache.metron.parsers.grok.GrokParser");
     sensorParserConfig.setParserConfig(new HashMap() {{
       put("grokPath", "/patterns/squid");
       put("patternLabel", "SQUID_DELIMITED");

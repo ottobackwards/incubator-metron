@@ -18,7 +18,7 @@
 package org.apache.metron.parsers.squid;
 
 import org.adrianwalker.multilinestring.Multiline;
-import org.apache.metron.parsers.GrokParserTest;
+import org.apache.metron.parsers.grok.GrokParserTest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
