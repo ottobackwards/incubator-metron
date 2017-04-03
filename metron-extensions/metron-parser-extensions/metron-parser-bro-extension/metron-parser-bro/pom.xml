@@ -14,7 +14,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.metron</groupId>
-        <artifactId>metron-parsers-bro-extension</artifactId>
+        <artifactId>metron-parser-bro-extension</artifactId>
         <version>0.3.1</version>
     </parent>
     <artifactId>metron-parser-bro</artifactId>
