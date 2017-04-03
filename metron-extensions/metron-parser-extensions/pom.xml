@@ -51,6 +51,7 @@
     <module>metron-parser-snort-extension</module>
     <module>metron-parser-sourcefire-extension</module>
     <module>metron-parser-websphere-extension</module>
+    <module>metron-parser-squid-extension</module>
   </modules>
 	<dependencies>
 		<dependency>
