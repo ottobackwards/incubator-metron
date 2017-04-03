@@ -18,7 +18,6 @@
 package org.apache.metron.parsers.paloalto;
 
 import org.apache.metron.parsers.AbstractConfigTest;
-import org.apache.metron.parsers.sourcefire.BasicSourcefireParser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -89,10 +88,6 @@ public class BasicPaloAltoFirewallParserTest extends AbstractConfigTest {
 			paParser = null;
 		}
 
-		/**
-		 * Test method for
-		 * {@link BasicSourcefireParser#parse(byte[])}.
-		 */
 		@SuppressWarnings({ "rawtypes" })
 		public void testParse() {
 			for (String inputString : getInputStrings()) {

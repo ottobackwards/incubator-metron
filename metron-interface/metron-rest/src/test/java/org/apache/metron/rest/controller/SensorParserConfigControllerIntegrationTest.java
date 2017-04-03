@@ -20,7 +20,6 @@ package org.apache.metron.rest.controller;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.metron.rest.MetronRestConstants;
-import org.apache.metron.rest.service.GrokService;
 import org.apache.metron.rest.service.SensorParserConfigService;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,13 +79,13 @@ public class SensorParserConfigControllerIntegrationTest {
 
   /**
    {
-   "parserClassName":"org.apache.metron.parsers.bro.BasicBroParser",
-   "sensorTopic":"broTest",
+   "parserClassName":"org.apache.metron.parsers.json.JSONMapParser",
+   "sensorTopic":"jsonTest",
    "parserConfig": {}
    }
    */
   @Multiline
-  public static String broJson;
+  public static String jsonMapJson;
 
   /**
    {
@@ -191,7 +190,7 @@ public class SensorParserConfigControllerIntegrationTest {
   @Test
   public void test() throws Exception {
     cleanFileSystem();
-    this.sensorParserConfigService.delete("broTest");
+    this.sensorParserConfigService.delete("jsonTest");
     this.sensorParserConfigService.delete("squidTest");
 
     this.mockMvc.perform(post(sensorParserConfigUrl).with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(squidJson))
@@ -236,18 +235,18 @@ public class SensorParserConfigControllerIntegrationTest {
                     "@.fieldTransformations[0].config.full_hostname == 'URL_TO_HOST(url)' &&" +
                     "@.fieldTransformations[0].config.domain_without_subdomains == 'DOMAIN_REMOVE_SUBDOMAINS(full_hostname)')]").exists());
 
-    this.mockMvc.perform(post(sensorParserConfigUrl).with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(broJson))
+    this.mockMvc.perform(post(sensorParserConfigUrl).with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(jsonMapJson))
             .andExpect(status().isCreated())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
-            .andExpect(jsonPath("$.parserClassName").value("org.apache.metron.parsers.bro.BasicBroParser"))
-            .andExpect(jsonPath("$.sensorTopic").value("broTest"))
+            .andExpect(jsonPath("$.parserClassName").value("org.apache.metron.parsers.json.JSONMapParser"))
+            .andExpect(jsonPath("$.sensorTopic").value("jsonTest"))
             .andExpect(jsonPath("$.parserConfig").isEmpty());
 
-    this.mockMvc.perform(post(sensorParserConfigUrl).with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(broJson))
+    this.mockMvc.perform(post(sensorParserConfigUrl).with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(jsonMapJson))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
-            .andExpect(jsonPath("$.parserClassName").value("org.apache.metron.parsers.bro.BasicBroParser"))
-            .andExpect(jsonPath("$.sensorTopic").value("broTest"))
+            .andExpect(jsonPath("$.parserClassName").value("org.apache.metron.parsers.json.JSONMapParser"))
+            .andExpect(jsonPath("$.sensorTopic").value("jsonTest"))
             .andExpect(jsonPath("$.parserConfig").isEmpty());
 
     this.mockMvc.perform(get(sensorParserConfigUrl).with(httpBasic(user,password)))
@@ -263,8 +262,8 @@ public class SensorParserConfigControllerIntegrationTest {
                     "@.fieldTransformations[0].output[1] == 'domain_without_subdomains' &&" +
                     "@.fieldTransformations[0].config.full_hostname == 'URL_TO_HOST(url)' &&" +
                     "@.fieldTransformations[0].config.domain_without_subdomains == 'DOMAIN_REMOVE_SUBDOMAINS(full_hostname)')]").exists())
-            .andExpect(jsonPath("$[?(@.parserClassName == 'org.apache.metron.parsers.bro.BasicBroParser' && " +
-                    "@.sensorTopic == 'broTest')]").exists());
+            .andExpect(jsonPath("$[?(@.parserClassName == 'org.apache.metron.parsers.json.JSONMapParser' && " +
+                    "@.sensorTopic == 'jsonTest')]").exists());
 
     this.mockMvc.perform(delete(sensorParserConfigUrl + "/squidTest").with(httpBasic(user,password)).with(csrf()))
             .andExpect(status().isOk());
@@ -279,30 +278,30 @@ public class SensorParserConfigControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
             .andExpect(jsonPath("$[?(@.sensorTopic == 'squidTest')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.sensorTopic == 'broTest')]").exists());
+            .andExpect(jsonPath("$[?(@.sensorTopic == 'jsonTest')]").exists());
 
-    this.mockMvc.perform(delete(sensorParserConfigUrl + "/broTest").with(httpBasic(user,password)).with(csrf()))
+    this.mockMvc.perform(delete(sensorParserConfigUrl + "/jsonTest").with(httpBasic(user,password)).with(csrf()))
             .andExpect(status().isOk());
 
-    this.mockMvc.perform(delete(sensorParserConfigUrl + "/broTest").with(httpBasic(user,password)).with(csrf()))
+    this.mockMvc.perform(delete(sensorParserConfigUrl + "/jsonTest").with(httpBasic(user,password)).with(csrf()))
             .andExpect(status().isNotFound());
 
     this.mockMvc.perform(get(sensorParserConfigUrl).with(httpBasic(user,password)))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
             .andExpect(jsonPath("$[?(@.sensorTopic == 'squidTest')]").doesNotExist())
-            .andExpect(jsonPath("$[?(@.sensorTopic == 'broTest')]").doesNotExist());
+            .andExpect(jsonPath("$[?(@.sensorTopic == 'jsonTest')]").doesNotExist());
 
     this.mockMvc.perform(get(sensorParserConfigUrl + "/list/available").with(httpBasic(user,password)))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
-            .andExpect(jsonPath("$.Bro").value("org.apache.metron.parsers.bro.BasicBroParser"))
+            .andExpect(jsonPath("$.JSONMap").value("org.apache.metron.parsers.json.JSONMapParser"))
             .andExpect(jsonPath("$.Grok").value("org.apache.metron.parsers.grok.GrokParser"));
 
     this.mockMvc.perform(get(sensorParserConfigUrl + "/reload/available").with(httpBasic(user,password)))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
-            .andExpect(jsonPath("$.Bro").value("org.apache.metron.parsers.bro.BasicBroParser"))
+            .andExpect(jsonPath("$.JSONMap").value("org.apache.metron.parsers.json.JSONMapParser"))
             .andExpect(jsonPath("$.Grok").value("org.apache.metron.parsers.grok.GrokParser"));
 
     this.mockMvc.perform(post(sensorParserConfigUrl + "/parseMessage").with(httpBasic(user, password)).with(csrf()).contentType(MediaType.parseMediaType("application/json;charset=UTF-8")).content(parseRequest))
@@ -336,7 +335,7 @@ public class SensorParserConfigControllerIntegrationTest {
             .andExpect(jsonPath("$.responseCode").value(500))
             .andExpect(jsonPath("$.message").value("java.lang.ClassNotFoundException: badClass"));
 
-    this.sensorParserConfigService.delete("broTest");
+    this.sensorParserConfigService.delete("jsonTest");
     this.sensorParserConfigService.delete("squidTest");
   }
 

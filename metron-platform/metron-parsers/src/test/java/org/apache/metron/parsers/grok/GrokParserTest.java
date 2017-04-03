@@ -20,7 +20,6 @@ package org.apache.metron.parsers.grok;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import junit.framework.Assert;
-import org.apache.metron.parsers.grok.GrokParser;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;

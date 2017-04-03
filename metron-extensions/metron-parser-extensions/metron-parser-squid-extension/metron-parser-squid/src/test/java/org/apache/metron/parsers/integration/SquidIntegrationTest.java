@@ -18,7 +18,6 @@
 package org.apache.metron.parsers.integration;
 
 import org.apache.metron.parsers.integration.validation.PathedSampleDataValidation;
-import org.apache.metron.parsers.integration.validation.SampleDataValidation;
 
 import java.util.ArrayList;
 import java.util.List;
