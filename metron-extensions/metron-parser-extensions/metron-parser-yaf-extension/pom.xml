@@ -30,7 +30,9 @@
     <description>Yaf Parser Extension for Metron</description>
     <modules>
         <module>metron-parser-yaf</module>
+        <!-- YAF IS CONFIGURATION ONLY AT THIS TIME
         <module>metron-parser-yaf-bundle</module>
+        -->
         <module>metron-parser-yaf-assembly</module>
     </modules>
 </project>

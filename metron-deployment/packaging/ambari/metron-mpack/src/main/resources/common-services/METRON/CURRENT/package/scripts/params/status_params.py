@@ -26,7 +26,10 @@ config = Script.get_config()
 
 # Parsers
 parsers = config['configurations']['metron-env']['parsers']
+all_parsers = "asa,bro,cef,fireeye,ise,lancope,logstash,paloalto,snort,sourcefire,squid,websphere,yaf"
 metron_home = config['configurations']['metron-env']['metron_home']
+metron_extension_etc = format(format(config['configurations']['metron-env']['metron_extension_etc']))
+metron_extension_etc_parsers = format(format(config['configurations']['metron-env']['metron_extension_etc_parsers']))
 metron_zookeeper_config_dir = config['configurations']['metron-env']['metron_zookeeper_config_dir']
 metron_zookeeper_config_path = format('{metron_home}/{metron_zookeeper_config_dir}')
 parsers_configured_flag_file = metron_zookeeper_config_path + '/../metron_parsers_configured'

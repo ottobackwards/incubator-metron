@@ -30,7 +30,9 @@
     <description>BasicSquid Parser Extension for Metron</description>
     <modules>
         <module>metron-parser-squid</module>
+        <!-- SQUID IS CONFIGURATION ONLY AT THIS TIME
         <module>metron-parser-squid-bundle</module>
+        -->
         <module>metron-parser-squid-assembly</module>
     </modules>
 </project>

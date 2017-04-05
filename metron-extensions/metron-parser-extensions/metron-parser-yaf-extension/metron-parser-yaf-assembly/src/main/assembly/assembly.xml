@@ -41,6 +41,7 @@
             <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </fileSet>
+        <!--  YAF IS CONFIGURATION ONLY AT THIS TIME
         <fileSet>
             <directory>${project.basedir}/../metron-parser-yaf-bundle/target</directory>
             <includes>
@@ -49,5 +50,6 @@
             <outputDirectory>/lib</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
         </fileSet>
+        -->
     </fileSets>
 </assembly>

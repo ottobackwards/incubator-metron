@@ -56,7 +56,7 @@
         <fileSet>
             <directory>${project.basedir}/../metron-parser-asa-bundle/target</directory>
             <includes>
-                <include>metron-parser-asa-${project.version}.bundle</include>
+                <include>metron-parser-asa-bundle-${project.version}.bundle</include>
             </includes>
             <outputDirectory>/lib</outputDirectory>
             <useDefaultExcludes>true</useDefaultExcludes>
