@@ -55,7 +55,7 @@ public final class BundleUnpacker {
         }
     };
 
-    public static ExtensionMapping unpackPars(final FileSystemManager fileSystemManager, final Bundle systemBundle, BundleProperties props){
+    public static ExtensionMapping unpackBundles(final FileSystemManager fileSystemManager, final Bundle systemBundle, BundleProperties props){
         try{
             final List<URI> bundleLibraryDirs = props.getBundleLibraryDirectories();
             final URI frameworkWorkingDir = props.getFrameworkWorkingDirectory();
@@ -121,10 +121,10 @@ public final class BundleUnpacker {
                                         "Multiple framework PARs discovered. Only one framework is permitted.");
                             }
 
-                            unpackedFramework = unpackPar(bundleFile, frameworkWorkingDirFO);
+                            unpackedFramework = unpackBundle(bundleFile, frameworkWorkingDirFO);
                         } else {
 
-                            final FileObject unpackedExtension = unpackPar(bundleFile, extensionsWorkingDirFO);
+                            final FileObject unpackedExtension = unpackBundle(bundleFile, extensionsWorkingDirFO);
 
                             // record the current bundle
                             unpackedPars.put(unpackedExtension, new BundleCoordinate(groupId, bundleId, version));
@@ -232,7 +232,7 @@ public final class BundleUnpacker {
      * @throws NotInitializedException
      *             if system was not initialized
      */
-    private static FileObject unpackPar(final FileObject bundle, final FileObject baseWorkingDirectory)
+    private static FileObject unpackBundle(final FileObject bundle, final FileObject baseWorkingDirectory)
             throws IOException, NotInitializedException {
 
         final FileObject bundleWorkingDirectory = baseWorkingDirectory.resolveFile(bundle.getName().getBaseName() + "-unpacked");

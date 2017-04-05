@@ -103,7 +103,7 @@ public class BundleThreadContextClassLoader extends URLClassLoader {
         final Class<?>[] classStack = contextSecurityManager.getExecutionStack();
 
         for (Class<?> currentClass : classStack) {
-            final Class<?> bundleClass = findParClass(currentClass);
+            final Class<?> bundleClass = findBundleClass(currentClass);
             if (bundleClass != null) {
                 final ClassLoader desiredClassLoader = bundleClass.getClassLoader();
 
@@ -126,12 +126,12 @@ public class BundleThreadContextClassLoader extends URLClassLoader {
         return forward;
     }
 
-    private Class<?> findParClass(final Class<?> cls) {
+    private Class<?> findBundleClass(final Class<?> cls) {
         for (final Class<?> bundleClass : bundleSpecificClasses) {
             if (bundleClass.isAssignableFrom(cls)) {
                 return cls;
             } else if (cls.getEnclosingClass() != null) {
-                return findParClass(cls.getEnclosingClass());
+                return findBundleClass(cls.getEnclosingClass());
             }
         }
 

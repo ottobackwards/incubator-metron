@@ -17,6 +17,18 @@
  */
 package org.apache.metron.parsers.topology;
 
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.metron.bundles.BundleThreadContextClassLoader;
+import org.apache.metron.bundles.BundleUnpacker;
+import org.apache.metron.bundles.ExtensionClassInitializer;
+import org.apache.metron.bundles.ExtensionManager;
+import org.apache.metron.bundles.bundle.Bundle;
+import org.apache.metron.bundles.bundle.BundleCoordinate;
+import org.apache.metron.bundles.util.BundleProperties;
+import org.apache.metron.bundles.util.HDFSFileUtilities;
+import org.apache.metron.bundles.util.VFSClassloaderUtil;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.Constants;
@@ -39,7 +51,7 @@ import org.json.simple.JSONObject;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.ZkHosts;
 
-import java.util.EnumMap;
+import java.util.*;
 
 /**
  * Builds a Storm topology that parses telemetry data received from a sensor.
@@ -76,6 +88,20 @@ public class ParserTopologyBuilder {
                                       EnumMap<SpoutConfigOptions, Object> kafkaSpoutConfig
   ) throws Exception {
 
+    // fetch the BundleProperties from zookeeper
+    Optional<BundleProperties> bundleProperties = getBundleProperties(zookeeperUrl);
+    if(bundleProperties.isPresent()){
+       // if we have the properties
+       // setup the bundles
+       BundleProperties props = bundleProperties.get();
+
+       if(props.getBundleLibraryDirectory().getScheme().toLowerCase().startsWith("hdfs")) {
+         FileSystem fileSystem = FileSystem.get(new Configuration());
+         // need to setup the filesystem from hdfs
+         ExtensionClassInitializer.initializeFileUtilities(new HDFSFileUtilities(fileSystem));
+       }
+    }
+
     // fetch configuration from zookeeper
     ParserConfigurations configs = new ParserConfigurations();
     SensorParserConfig parserConfig = getSensorParserConfig(zookeeperUrl, sensorType, configs);
@@ -87,7 +113,7 @@ public class ParserTopologyBuilder {
             .setNumTasks(spoutNumTasks);
 
     // create the parser bolt
-    ParserBolt parserBolt = createParserBolt(zookeeperUrl, brokerUrl, sensorType, configs, parserConfig);
+    ParserBolt parserBolt = createParserBolt(zookeeperUrl, brokerUrl, sensorType, configs, parserConfig, bundleProperties);
     builder.setBolt("parserBolt", parserBolt, parserParallelism)
             .setNumTasks(parserNumTasks)
             .shuffleGrouping("kafkaSpout");
@@ -131,10 +157,32 @@ public class ParserTopologyBuilder {
    * @param parserConfig
    * @return A Storm bolt that parses input from a sensor
    */
-  private static ParserBolt createParserBolt(String zookeeperUrl, String brokerUrl, String sensorType, ParserConfigurations configs, SensorParserConfig parserConfig) {
-
+  private static ParserBolt createParserBolt(String zookeeperUrl, String brokerUrl, String sensorType, ParserConfigurations configs, SensorParserConfig parserConfig, Optional<BundleProperties> bundleProperties) throws Exception {
+    MessageParser<JSONObject> parser = null;
     // create message parser
-    MessageParser<JSONObject> parser = ReflectionUtils.createInstance(parserConfig.getParserClassName());
+    if(bundleProperties.isPresent()){
+
+      BundleProperties props = bundleProperties.get();
+
+      FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(props.getArchiveExtension());
+
+      ArrayList<Class> classes = new ArrayList<>();
+      classes.add(MessageParser.class);
+      // future
+      //classes.add(StellarFunction.class);
+
+      ExtensionClassInitializer.initialize(classes);
+
+      // create a FileSystemManager
+      Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, props);
+      ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+
+      BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, props), props);
+      parser = BundleThreadContextClassLoader.createInstance(parserConfig.getParserClassName(),MessageParser.class,props);
+    }else {
+      parser = ReflectionUtils.createInstance(parserConfig.getParserClassName());
+    }
+
     parser.configure(parserConfig.getParserConfig());
 
     // create writer - if not configured uses a sensible default
@@ -192,6 +240,18 @@ public class ParserTopologyBuilder {
     }
     client.close();
     return parserConfig;
+  }
+
+  private static Optional<BundleProperties> getBundleProperties(String zookeeperUrl){
+    BundleProperties properties = null;
+    try(CuratorFramework client = ConfigurationsUtils.getClient(zookeeperUrl)){
+      client.start();
+
+      if(properties != null){
+        return Optional.of(properties);
+      }
+    }
+    return Optional.empty();
   }
 
   /**

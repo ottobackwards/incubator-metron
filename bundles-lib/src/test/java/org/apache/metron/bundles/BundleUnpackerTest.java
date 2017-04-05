@@ -23,7 +23,6 @@ import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.bundles.util.VFSClassloaderUtil;
 import org.apache.nifi.processor.Processor;
-import org.jcodings.util.Hash;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -104,7 +103,7 @@ public class BundleUnpackerTest {
         ArrayList<Class> classes = new ArrayList<>();
         classes.add(Processor.class);
         ExtensionClassInitializer.initialize(classes);
-        final ExtensionMapping extensionMapping = BundleUnpacker.unpackPars(fileSystemManager,ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
+        final ExtensionMapping extensionMapping = BundleUnpacker.unpackBundles(fileSystemManager,ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
 
         assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
@@ -143,7 +142,7 @@ public class BundleUnpackerTest {
         // create a FileSystemManager
         Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
         ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
-        final ExtensionMapping extensionMapping = BundleUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
+        final ExtensionMapping extensionMapping = BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties),properties);
 
         assertEquals(1, extensionMapping.getAllExtensionNames().size());
         assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
@@ -173,7 +172,7 @@ public class BundleUnpackerTest {
         // create a FileSystemManager
         Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
         ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
-        final ExtensionMapping extensionMapping = BundleUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
+        final ExtensionMapping extensionMapping = BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
         assertTrue(extensionMapping.getAllExtensionNames().keySet().contains(
                 "org.apache.nifi.processors.dummy.one"));
@@ -205,7 +204,7 @@ public class BundleUnpackerTest {
         // create a FileSystemManager
         Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
         ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
-        final ExtensionMapping extensionMapping = BundleUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
+        final ExtensionMapping extensionMapping = BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
         assertNull(extensionMapping);
     }

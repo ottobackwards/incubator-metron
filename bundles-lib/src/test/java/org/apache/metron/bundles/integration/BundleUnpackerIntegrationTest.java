@@ -110,7 +110,7 @@ public class BundleUnpackerIntegrationTest {
     Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
     ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
 
-    final ExtensionMapping extensionMapping = BundleUnpacker.unpackPars(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
+    final ExtensionMapping extensionMapping = BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, properties), properties);
 
     assertEquals(2, extensionMapping.getAllExtensionNames().size());
 
