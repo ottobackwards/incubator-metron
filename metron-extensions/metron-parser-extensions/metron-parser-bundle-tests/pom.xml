@@ -14,59 +14,45 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.apache.metron</groupId>
-		<artifactId>metron-extensions</artifactId>
+		<artifactId>metron-parser-extensions</artifactId>
 		<version>0.3.1</version>
 	</parent>
 	<groupId>org.apache.metron</groupId>
-	<artifactId>metron-parser-extensions</artifactId>
-	<packaging>pom</packaging>
-	<name>metron-parser-extensions</name>
+	<artifactId>metron-parser-bundle-tests</artifactId>
+	<packaging>jar</packaging>
+	<name>metron-parser-bundle-tests</name>
 	<version>0.3.1</version>
-
-	<description>Parser Extensions for Metron</description>
-	<url>https://metron.incubator.apache.org/</url>
-	<scm>
-		<connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-metron.git</connection>
-		<developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-metron.git</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://git-wip-us.apache.org/repos/asf/incubator-metron</url>
-	</scm>
-
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<modules>
-		<module>metron-parser-asa-extension</module>
-        <module>metron-parser-bro-extension</module>
-        <module>metron-parser-cef-extension</module>
-    	<module>metron-parser-fireeye-extension</module>
-    	<module>metron-parser-ise-extension</module>
-    	<module>metron-parser-lancope-extension</module>
-    	<module>metron-parser-logstash-extension</module>
-    	<module>metron-parser-paloalto-extension</module>
-    	<module>metron-parser-snort-extension</module>
-    	<module>metron-parser-sourcefire-extension</module>
-    	<module>metron-parser-websphere-extension</module>
-    	<module>metron-parser-squid-extension</module>
-    	<module>metron-parser-yaf-extension</module>
-		<module>metron-parser-bundle-tests</module>
-  </modules>
+	<description>Parser Extension bundle tests</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${global_slf4j_version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-common</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${global_slf4j_version}</version>
-			<scope>provided</scope>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-parsers</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>bundles-lib</artifactId>
+			<version>0.3.1</version>
+		</dependency>
+		<!-- testing -->
+		<dependency>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-parsers</artifactId>
+			<version>${project.parent.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-enrichment</artifactId>
+			<version>${project.parent.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -75,22 +61,53 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>1.6.6</version>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-test-utilities</artifactId>
+			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.6.6</version>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-integration-test</artifactId>
+			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.adrianwalker</groupId>
-			<artifactId>multiline-string</artifactId>
-			<version>0.1.2</version>
+			<groupId>org.apache.metron</groupId>
+			<artifactId>metron-parser-asa-bundle</artifactId>
+			<version>0.3.1</version>
+			<type>pom</type>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.10</artifactId>
+			<version>${global_kafka_version}</version>
+			<scope>test</scope>
+			<classifier>test</classifier>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>${global_kafka_version}</version>
+			<classifier>test</classifier>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 	<reporting>
@@ -134,14 +151,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.metron</groupId>
-				<artifactId>bundles-maven-plugin</artifactId>
-				<version>0.3.1</version>
-				<extensions>true</extensions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

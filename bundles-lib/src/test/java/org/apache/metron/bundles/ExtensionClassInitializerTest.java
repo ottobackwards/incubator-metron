@@ -22,7 +22,7 @@ import org.junit.Test;
 public class ExtensionClassInitializerTest {
   @Test(expected = NotInitializedException.class)
   public void testNotInitializedClassloader() throws Exception{
-    BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", null);
+    BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", null);
     BundleThreadContextClassLoader.createInstance(BundleThreadContextClassLoaderTest.WithPropertiesConstructor.class.getName(),
             BundleThreadContextClassLoaderTest.WithPropertiesConstructor.class, properties);
   }

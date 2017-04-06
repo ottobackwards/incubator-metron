@@ -38,7 +38,7 @@ public class BundleUtilTest {
     @Test
     public void testManifestWithVersioningAndBuildInfo() throws IOException , URISyntaxException{
 
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", additionalProperties);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -64,7 +64,7 @@ public class BundleUtilTest {
 
     @Test
     public void testManifestWithoutVersioningAndBuildInfo() throws IOException, URISyntaxException {
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties",  additionalProperties);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties",  additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -90,7 +90,7 @@ public class BundleUtilTest {
 
     @Test
     public void testManifestWithoutNarDependency() throws IOException, URISyntaxException {
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties",  additionalProperties);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties",  additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
@@ -114,7 +114,7 @@ public class BundleUtilTest {
 
     @Test(expected = IOException.class)
     public void testFromManifestWhenNarDirectoryDoesNotExist() throws IOException, URISyntaxException {
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", additionalProperties);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 

@@ -169,25 +169,10 @@ public abstract class BundleProperties {
         return getURI(getProperty(COMPONENT_DOCS_DIRECTORY, DEFAULT_COMPONENT_DOCS_DIRECTORY));
     }
 
-    public static BundleProperties createBasicParProperties(final String propertiesFilePath, final Map<String, String> additionalProperties) {
+    public static BundleProperties createBasicBundleProperties(final InputStream inStream, final Map<String, String> additionalProperties) {
         final Map<String, String> addProps = (additionalProperties == null) ? new HashMap<>() : additionalProperties;
         final Properties properties = new Properties();
-        final String bundlePropertiesFilePath = (propertiesFilePath == null)
-                ? System.getProperty(BundleProperties.PROPERTIES_FILE_PATH)
-                : propertiesFilePath;
-        if (bundlePropertiesFilePath != null) {
-            final File propertiesFile = new File(bundlePropertiesFilePath.trim());
-            if (!propertiesFile.exists()) {
-                throw new RuntimeException("Properties file doesn't exist \'"
-                        + propertiesFile.getAbsolutePath() + "\'");
-            }
-            if (!propertiesFile.canRead()) {
-                throw new RuntimeException("Properties file exists but cannot be read \'"
-                        + propertiesFile.getAbsolutePath() + "\'");
-            }
-            InputStream inStream = null;
             try {
-                inStream = new BufferedInputStream(new FileInputStream(propertiesFile));
                 properties.load(inStream);
             } catch (final Exception ex) {
                 throw new RuntimeException("Cannot load properties file due to "
@@ -203,7 +188,6 @@ public abstract class BundleProperties {
                     }
                 }
             }
-        }
         addProps.entrySet().stream().forEach((entry) -> {
             properties.setProperty(entry.getKey(), entry.getValue());
         });
@@ -224,5 +208,41 @@ public abstract class BundleProperties {
             }
 
         };
+
+    }
+    public static BundleProperties createBasicBundleProperties(final String propertiesFilePath, final Map<String, String> additionalProperties) {
+        final String bundlePropertiesFilePath = (propertiesFilePath == null)
+                ? System.getProperty(BundleProperties.PROPERTIES_FILE_PATH)
+                : propertiesFilePath;
+        if (bundlePropertiesFilePath != null) {
+            final File propertiesFile = new File(bundlePropertiesFilePath.trim());
+            if (!propertiesFile.exists()) {
+                throw new RuntimeException("Properties file doesn't exist \'"
+                        + propertiesFile.getAbsolutePath() + "\'");
+            }
+            if (!propertiesFile.canRead()) {
+                throw new RuntimeException("Properties file exists but cannot be read \'"
+                        + propertiesFile.getAbsolutePath() + "\'");
+            }
+            InputStream inStream = null;
+            try {
+                inStream = new BufferedInputStream(new FileInputStream(propertiesFile));
+                return createBasicBundleProperties(inStream,additionalProperties);
+            } catch (final Exception ex) {
+                throw new RuntimeException("Cannot load properties file due to "
+                        + ex.getLocalizedMessage(), ex);
+            } finally {
+                if (null != inStream) {
+                    try {
+                        inStream.close();
+                    } catch (final Exception ex) {
+                        /**
+                         * do nothing *
+                         */
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

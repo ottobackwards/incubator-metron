@@ -51,6 +51,7 @@ import org.json.simple.JSONObject;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.ZkHosts;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
 
 /**
@@ -242,16 +243,17 @@ public class ParserTopologyBuilder {
     return parserConfig;
   }
 
-  private static Optional<BundleProperties> getBundleProperties(String zookeeperUrl){
+  private static Optional<BundleProperties> getBundleProperties(String zookeeperUrl) throws Exception{
     BundleProperties properties = null;
     try(CuratorFramework client = ConfigurationsUtils.getClient(zookeeperUrl)){
       client.start();
-
-      if(properties != null){
-        return Optional.of(properties);
+      byte[] propBytes = ConfigurationsUtils.readFromZookeeper(Constants.ZOOKEEPER_ROOT + "/bundle.properties",client);
+      if(propBytes.length > 0 ) {
+        // read in the properties
+        properties = BundleProperties.createBasicBundleProperties(new ByteArrayInputStream(propBytes),new HashMap<>());
       }
+      return Optional.of(properties);
     }
-    return Optional.empty();
   }
 
   /**

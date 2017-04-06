@@ -28,10 +28,12 @@ import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.bundles.util.StringUtils;
 import org.apache.metron.bundles.annotation.behavior.RequiresInstanceClassLoading;
 
+import org.atteo.classindex.ClassIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -149,40 +151,36 @@ public class ExtensionManager {
     private static void loadExtensions(final Bundle bundle) throws NotInitializedException {
         checkInitialized();
         for (final Map.Entry<Class, Set<Class>> entry : definitionMap.entrySet()) {
-            /* OPF Extension
-            final boolean isControllerService = ControllerService.class.equals(entry.getKey());
-            final boolean isProcessor = Processor.class.equals(entry.getKey());
-            final boolean isReportingTask = ReportingTask.class.equals(entry.getKey());
-            */
-            final ServiceLoader<?> serviceLoader = ServiceLoader.load(entry.getKey(), bundle.getClassLoader());
-            for (final Object o : serviceLoader) {
-                // only consider extensions discovered directly in this bundle
-                boolean registerExtension = bundle.getClassLoader().equals(o.getClass().getClassLoader());
-
-                if (registerExtension) {
-                  /* OPF extension
-                    final Class extensionType = o.getClass();
-
-                    if (isControllerService && !checkControllerServiceEligibility(extensionType)) {
-                        registerExtension = false;
-                        logger.error(String.format(
-                                "Skipping Controller Service %s because it is bundled with its supporting APIs and requires instance class loading.", extensionType.getName()));
-                    }
-
-                    final boolean canReferenceControllerService = (isControllerService || isProcessor || isReportingTask) && o instanceof ConfigurableComponent;
-                    if (canReferenceControllerService && !checkControllerServiceReferenceEligibility((ConfigurableComponent) o, bundle.getClassLoader())) {
-                        registerExtension = false;
-                        logger.error(String.format(
-                                "Skipping component %s because it is bundled with its referenced Controller Service APIs and requires instance class loading.", extensionType.getName()));
-                    }
-                  */
-                    if (registerExtension) {
-                        registerServiceClass(o.getClass(), classNameBundleLookup, bundle, entry.getValue());
+            // this is another extention point
+            // what we care about here is getting the right classes from the classloader for the bundle
+            // this *could* be as a 'service' itself with different implementations
+            // The Nar system uses the ServiceLoader, but this chokes on abstract classes
+            // which there may be in the system.
+            // Changed to ClassIndex
+            Class clazz = entry.getKey();
+            ClassLoader cl = bundle.getClassLoader();
+            Iterable<Class<?>> it = ClassIndex.getSubclasses(clazz,cl);
+            for(Class<?> c : it) {
+                if(cl.equals(clazz.getClassLoader())){
+                    // check for abstract
+                    if(!Modifier.isAbstract(c.getModifiers())) {
+                        registerServiceClass(c, classNameBundleLookup, bundle, entry.getValue());
                     }
                 }
             }
+            it = ClassIndex.getAnnotated(clazz,cl);
+            for(Class<?> c : it) {
+                if(cl.equals(clazz.getClassLoader())){
+                    // check for abstract
+                    if(!Modifier.isAbstract(c.getModifiers())) {
+                        registerServiceClass(c, classNameBundleLookup, bundle, entry.getValue());
+                    }
+                }
+            }
+
         }
     }
+
 
     /**
      * Registers extension for the specified type from the specified Bundle.

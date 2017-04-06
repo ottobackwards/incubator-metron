@@ -40,7 +40,7 @@ public class BundleThreadContextClassLoaderTest {
 
     @Test
     public void validateWithPropertiesConstructor() throws Exception {
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", null);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", null);
         ArrayList<Class> classes = new ArrayList<>();
         classes.add(AbstractFoo.class);
         ExtensionClassInitializer.initialize(classes);
@@ -60,7 +60,7 @@ public class BundleThreadContextClassLoaderTest {
         ExtensionClassInitializer.initialize(classes);
         Map<String, String> additionalProperties = new HashMap<>();
         additionalProperties.put("fail", "true");
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", additionalProperties);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
         Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, properties);
@@ -71,7 +71,7 @@ public class BundleThreadContextClassLoaderTest {
 
     @Test
     public void validateWithDefaultConstructor() throws Exception {
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", null);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", null);
         ArrayList<Class> classes = new ArrayList<>();
         classes.add(AbstractFoo.class);
         ExtensionClassInitializer.initialize(classes);
@@ -87,7 +87,7 @@ public class BundleThreadContextClassLoaderTest {
     @Test(expected = IllegalStateException.class)
     public void validateWithWrongConstructor() throws Exception {
         ExtensionClassInitializer.initialize(new ArrayList<>());
-        BundleProperties properties = BundleProperties.createBasicParProperties("src/test/resources/bundle.properties", null);
+        BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", null);
         BundleThreadContextClassLoader.createInstance(WrongConstructor.class.getName(), WrongConstructor.class, properties);
     }
 

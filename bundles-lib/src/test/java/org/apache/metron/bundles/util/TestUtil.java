@@ -30,6 +30,6 @@ public class TestUtil {
       throw new RuntimeException("Cannot load properties file due to "
               + ex.getLocalizedMessage(), ex);
     }
-    return BundleProperties.createBasicParProperties(filePath, others);
+    return BundleProperties.createBasicBundleProperties(filePath, others);
   }
 }
