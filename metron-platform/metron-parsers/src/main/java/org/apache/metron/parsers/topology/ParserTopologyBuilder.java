@@ -86,19 +86,7 @@ public class ParserTopologyBuilder {
                                       EnumMap<SpoutConfigOptions, Object> kafkaSpoutConfig
   ) throws Exception {
 
-    // fetch the BundleProperties from zookeeper
-    Optional<BundleProperties> bundleProperties = getBundleProperties(zookeeperUrl);
-    if(bundleProperties.isPresent()){
-       // if we have the properties
-       // setup the bundles
-       BundleProperties props = bundleProperties.get();
 
-       if(props.getBundleLibraryDirectory().getScheme().toLowerCase().startsWith("hdfs")) {
-         FileSystem fileSystem = FileSystem.get(new Configuration());
-         // need to setup the filesystem from hdfs
-         ExtensionClassInitializer.initializeFileUtilities(new HDFSFileUtilities(fileSystem));
-       }
-    }
 
     // fetch configuration from zookeeper
     ParserConfigurations configs = new ParserConfigurations();
@@ -111,7 +99,7 @@ public class ParserTopologyBuilder {
             .setNumTasks(spoutNumTasks);
 
     // create the parser bolt
-    ParserBolt parserBolt = createParserBolt(zookeeperUrl, brokerUrl, sensorType, configs, parserConfig, bundleProperties);
+    ParserBolt parserBolt = createParserBolt(zookeeperUrl, brokerUrl, sensorType, configs, parserConfig);
     builder.setBolt("parserBolt", parserBolt, parserParallelism)
             .setNumTasks(parserNumTasks)
             .shuffleGrouping("kafkaSpout");
@@ -155,37 +143,7 @@ public class ParserTopologyBuilder {
    * @param parserConfig
    * @return A Storm bolt that parses input from a sensor
    */
-  private static ParserBolt createParserBolt(String zookeeperUrl, String brokerUrl, String sensorType, ParserConfigurations configs, SensorParserConfig parserConfig, Optional<BundleProperties> bundleProperties) throws Exception {
-    MessageParser<JSONObject> parser = null;
-    // create message parser
-    if(bundleProperties.isPresent()){
-
-      BundleProperties props = bundleProperties.get();
-
-      FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(props.getArchiveExtension());
-
-      ArrayList<Class> classes = new ArrayList<>();
-      classes.add(MessageParser.class);
-      // future
-      //classes.add(StellarFunction.class);
-
-      ExtensionClassInitializer.initialize(classes);
-
-      // create a FileSystemManager
-      Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, props);
-      ExtensionMapping mapping = BundleUnpacker.unpackBundles(fileSystemManager, systemBundle, props);
-      BundleClassLoaders.getInstance().init(fileSystemManager,fileSystemManager.resolveFile(props.getFrameworkWorkingDirectory()),fileSystemManager.resolveFile(props.getExtensionsWorkingDirectory()),props);
-
-      ExtensionManager.discoverExtensions(systemBundle, BundleClassLoaders.getInstance().getBundles());
-
-
-      parser = BundleThreadContextClassLoader.createInstance(parserConfig.getParserClassName(),MessageParser.class,props);
-    }else {
-      parser = ReflectionUtils.createInstance(parserConfig.getParserClassName());
-    }
-
-    parser.configure(parserConfig.getParserConfig());
-
+  private static ParserBolt createParserBolt(String zookeeperUrl, String brokerUrl, String sensorType, ParserConfigurations configs, SensorParserConfig parserConfig) throws Exception {
     // create writer - if not configured uses a sensible default
     AbstractWriter writer = parserConfig.getWriterClassName() == null ?
             new KafkaWriter(brokerUrl).withTopic(Constants.ENRICHMENT_TOPIC) :
@@ -195,7 +153,7 @@ public class ParserTopologyBuilder {
     // create a writer handler
     WriterHandler writerHandler = createWriterHandler(writer);
 
-    return new ParserBolt(zookeeperUrl, sensorType, parser, writerHandler);
+    return new ParserBolt(zookeeperUrl, sensorType, writerHandler);
   }
 
   /**
@@ -241,19 +199,6 @@ public class ParserTopologyBuilder {
     }
     client.close();
     return parserConfig;
-  }
-
-  private static Optional<BundleProperties> getBundleProperties(String zookeeperUrl) throws Exception{
-    BundleProperties properties = null;
-    try(CuratorFramework client = ConfigurationsUtils.getClient(zookeeperUrl)){
-      client.start();
-      byte[] propBytes = ConfigurationsUtils.readFromZookeeper(Constants.ZOOKEEPER_ROOT + "/bundle.properties",client);
-      if(propBytes.length > 0 ) {
-        // read in the properties
-        properties = BundleProperties.createBasicBundleProperties(new ByteArrayInputStream(propBytes),new HashMap<>());
-      }
-      return Optional.of(properties);
-    }
   }
 
   /**

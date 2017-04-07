@@ -126,9 +126,6 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
         LocatedFileStatus fileStat = files.next();
         System.out.println(fileStat.getPath().toString());
       }
-      ExtensionClassInitializer.initializeFileUtilities(new HDFSFileUtilities(fileSystem));
-
-
 
     } catch (IOException e) {
       throw new RuntimeException("Unable to start cluster", e);
