@@ -99,10 +99,6 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
 
       // copy the correct things in
       copyResources("./src/test/resources","./target/remote");
-      java.nio.file.Path bundlePath = Paths.get("../metron-parser-asa-extension/metron-parser-asa-bundle/target/metron-parser-asa-bundle-0.3.1.bundle");
-      java.nio.file.Path bundleTargetPath = Paths.get("./target/remote/metron/extension_lib");
-      Files.copy(bundlePath, bundleTargetPath.resolve("metron-parser-asa-bundle-0.3.1.bundle"), REPLACE_EXISTING);
-
 
       // we need to patch the properties file
       BundleProperties properties = BundleProperties.createBasicBundleProperties("./target/remote/zookeeper/bundle.properties",new HashMap<>());

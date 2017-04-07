@@ -67,9 +67,6 @@ public class ASABundleIntegrationTest extends BaseIntegrationTest{
   @BeforeClass
   public static void copyResources() throws IOException {
     copyResources("./src/test/resources","./target/local");
-    Path bundlePath = Paths.get("../metron-parser-asa-extension/metron-parser-asa-bundle/target/metron-parser-asa-bundle-0.3.1.bundle");
-    Path bundleTargetPath = Paths.get("./target/local/metron/extension_lib");
-    Files.copy(bundlePath, bundleTargetPath.resolve("metron-parser-asa-bundle-0.3.1.bundle"), REPLACE_EXISTING);
   }
 
   public static void copyResources(String source, String target) throws IOException {
