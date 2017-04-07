@@ -27,6 +27,8 @@ import java.util.Collection;
 
 public interface FileUtilities {
 
+  void close();
+
   /* Superseded by renamed class bellow */
   @Deprecated
   void ensureDirectoryExistAndCanAccess(FileObject dir) throws FileSystemException;

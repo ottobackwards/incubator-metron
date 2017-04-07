@@ -21,7 +21,10 @@ package org.apache.metron.parsers;
 import com.google.common.base.Function;
 import junit.framework.Assert;
 import org.apache.metron.TestConstants;
+import org.apache.metron.bundles.BundleClassLoaders;
 import org.apache.metron.bundles.ExtensionClassInitializer;
+import org.apache.metron.bundles.util.FileUtilities;
+import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.common.Constants;
 import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
 import org.apache.metron.integration.BaseIntegrationTest;
@@ -57,13 +60,15 @@ public class ASABundleIntegrationTest extends BaseIntegrationTest{
   @AfterClass
   public static void after(){
     ExtensionClassInitializer.reset();
+    BundleClassLoaders.reset();
+    FileUtils.reset();
   }
 
   @BeforeClass
   public static void copyResources() throws IOException {
-    copyResources("./src/test/resources","./target");
+    copyResources("./src/test/resources","./target/local");
     Path bundlePath = Paths.get("../metron-parser-asa-extension/metron-parser-asa-bundle/target/metron-parser-asa-bundle-0.3.1.bundle");
-    Path bundleTargetPath = Paths.get("./target/metron/extension_lib");
+    Path bundleTargetPath = Paths.get("./target/local/metron/extension_lib");
     Files.copy(bundlePath, bundleTargetPath.resolve("metron-parser-asa-bundle-0.3.1.bundle"), REPLACE_EXISTING);
   }
 
@@ -116,7 +121,7 @@ public class ASABundleIntegrationTest extends BaseIntegrationTest{
 
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
-            .withGlobalConfigsPath("./target/zookeeper/")
+            .withGlobalConfigsPath("./target/local/zookeeper/")
             .withParserConfigsPath("../metron-parser-asa-extension/metron-parser-asa/" + TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()

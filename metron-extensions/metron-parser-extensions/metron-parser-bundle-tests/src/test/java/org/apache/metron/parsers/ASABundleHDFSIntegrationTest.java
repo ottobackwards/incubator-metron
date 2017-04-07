@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.metron.TestConstants;
+import org.apache.metron.bundles.BundleClassLoaders;
 import org.apache.metron.bundles.ExtensionClassInitializer;
 import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.bundles.util.FileUtilities;
@@ -81,6 +82,8 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
     }catch(Exception e){}
     mrComponent.stop();
     ExtensionClassInitializer.reset();
+    BundleClassLoaders.reset();
+    FileUtils.reset();
   }
 
   static MRComponent mrComponent;
@@ -95,19 +98,19 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
     try {
 
       // copy the correct things in
-      copyResources("./src/test/resources","./target");
+      copyResources("./src/test/resources","./target/remote");
       java.nio.file.Path bundlePath = Paths.get("../metron-parser-asa-extension/metron-parser-asa-bundle/target/metron-parser-asa-bundle-0.3.1.bundle");
-      java.nio.file.Path bundleTargetPath = Paths.get("./target/metron/extension_lib");
+      java.nio.file.Path bundleTargetPath = Paths.get("./target/remote/metron/extension_lib");
       Files.copy(bundlePath, bundleTargetPath.resolve("metron-parser-asa-bundle-0.3.1.bundle"), REPLACE_EXISTING);
 
 
       // we need to patch the properties file
-      BundleProperties properties = BundleProperties.createBasicBundleProperties("./target/zookeeper/bundle.properties",new HashMap<>());
+      BundleProperties properties = BundleProperties.createBasicBundleProperties("./target/remote/zookeeper/bundle.properties",new HashMap<>());
       properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,configuration.get("fs.defaultFS") + "/extension_lib/");
       properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt",configuration.get("fs.defaultFS") + "/extension_contrib_lib/");
       properties.setProperty(BundleProperties.BUNDLE_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
       properties.setProperty(BundleProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
-      FileOutputStream fso = new FileOutputStream("./target/zookeeper/bundle.properties");
+      FileOutputStream fso = new FileOutputStream("./target/remote/zookeeper/bundle.properties");
       properties.storeProperties(fso,"HDFS UPDATE");
       fso.flush();
       fso.close();
@@ -116,9 +119,9 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
       if(!fileSystem.mkdirs(new Path("/work/"),new FsPermission(FsAction.READ_WRITE,FsAction.READ_WRITE,FsAction.READ_WRITE))){
         System.out.println("FAILED MAKE DIR");
       }
-      fileSystem.copyFromLocalFile(new Path("target/metron/extension_contrib_lib/"), new Path("/"));
-      fileSystem.copyFromLocalFile(new Path("target/metron/extension_lib/"), new Path("/"));
-      fileSystem.copyFromLocalFile(new Path("target/zookeeper/bundle.properties"), new Path("/work/"));
+      fileSystem.copyFromLocalFile(new Path("target/remote/metron/extension_contrib_lib/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("target/remote/metron/extension_lib/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("target/remote/zookeeper/bundle.properties"), new Path("/work/"));
 
       RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(new Path("/"),true);
       System.out.println("==============(BEFORE)==============");
@@ -181,7 +184,7 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
 
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
-            .withGlobalConfigsPath("./target/zookeeper/")
+            .withGlobalConfigsPath("./target/remote/zookeeper/")
             .withParserConfigsPath("../metron-parser-asa-extension/metron-parser-asa/" + TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()

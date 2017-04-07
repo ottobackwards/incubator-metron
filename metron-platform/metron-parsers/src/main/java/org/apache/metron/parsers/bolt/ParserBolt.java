@@ -18,6 +18,8 @@
 package org.apache.metron.parsers.bolt;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.bundles.util.FileUtilities;
+import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.bolt.ConfiguredParserBolt;
 import org.apache.metron.common.configuration.FieldTransformer;
@@ -88,6 +90,12 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
     return this;
   }
 
+  @Override
+  public void cleanup(){
+    FileUtils.reset();
+    super.cleanup();
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
   public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {

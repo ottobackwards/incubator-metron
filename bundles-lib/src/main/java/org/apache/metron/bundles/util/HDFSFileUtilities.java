@@ -32,9 +32,18 @@ public class HDFSFileUtilities extends VFSFileUtilities {
   public HDFSFileUtilities(FileSystem fileSystem){
     super();
     this.fileSystem = fileSystem;
+
     aclEnabled = Boolean.parseBoolean(fileSystem.getConf().get("dfs.namenode.acls.enabled"));
   }
-
+  @Override
+  public void close(){
+    if(fileSystem != null){
+      try {
+        fileSystem.close();
+      }catch(Exception e){}
+      fileSystem = null;
+    }
+  }
   @Override
   public void createFile(FileObject file, InputStream inputStream) throws FileSystemException{
     try{

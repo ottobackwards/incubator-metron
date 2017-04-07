@@ -30,6 +30,11 @@ import java.util.Collection;
 public class VFSFileUtilities implements FileUtilities{
   long MILLIS_BETWEEN_ATTEMPTS = 50L;
 
+  @Override
+  public void close(){
+
+  }
+
   /* Superseded by renamed class bellow */
   @Deprecated
   @Override

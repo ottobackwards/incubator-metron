@@ -35,6 +35,14 @@ public class FileUtils  {
     inited.set(true);
   }
 
+  public static void reset(){
+    if(utilities != null){
+      utilities.close();
+      utilities = null;
+    }
+    inited.set(false);
+  }
+
   /* Superseded by renamed class bellow */
   @Deprecated
   public static void ensureDirectoryExistAndCanAccess(FileObject dir) throws FileSystemException  {

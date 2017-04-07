@@ -76,6 +76,16 @@ public final class BundleClassLoaders {
         return result;
     }
 
+    public static void reset(){
+        getInstance().unInit();
+    }
+
+    private void unInit(){
+     synchronized (this){
+         initContext = null;
+     }
+    }
+
     /**
      * Initializes and loads the BundleClassLoaders. This method must be called
      * before the rest of the methods to access the classloaders are called and
