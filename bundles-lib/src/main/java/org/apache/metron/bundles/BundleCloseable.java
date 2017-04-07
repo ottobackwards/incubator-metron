@@ -28,7 +28,7 @@ public class BundleCloseable implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(BundleCloseable.class);
 
-    public static BundleCloseable withParLoader() throws NotInitializedException{
+    public static BundleCloseable withBundleLoader() throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(BundleThreadContextClassLoader.getInstance());
         return new BundleCloseable(current);
@@ -45,7 +45,7 @@ public class BundleCloseable implements Closeable {
      * @return BundleCloseable with the current thread context classloader jailed to the Par
      *              or instance class loader of the component
      */
-    public static BundleCloseable withComponentParLoader(final Class componentClass, final String componentIdentifier) throws NotInitializedException{
+    public static BundleCloseable withComponentBundleLoader(final Class componentClass, final String componentIdentifier) throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();
 
         ClassLoader componentClassLoader = ExtensionManager.getInstanceClassLoader(componentIdentifier);
@@ -58,7 +58,7 @@ public class BundleCloseable implements Closeable {
     }
 
     /**
-     * Sets the current thread context class loader to the provided class loader, and returns a NarCloseable that will
+     * Sets the current thread context class loader to the provided class loader, and returns a BundleCloseable that will
      * return the current thread context class loader to it's previous state.
      *
      * @param componentBundleLoader the class loader to set as the current thread context class loader
@@ -70,33 +70,6 @@ public class BundleCloseable implements Closeable {
         Thread.currentThread().setContextClassLoader(componentBundleLoader);
         return new BundleCloseable(current);
     }
-
-    /**
-     * Creates a Closeable object that can be used to to switch to current class
-     * loader to the framework class loader and will automatically set the
-     * ClassLoader back to the previous class loader when closed
-     *
-     * @return a BundleCloseable
-     */
-    public static BundleCloseable withFrameworkBundle() {
-        final ClassLoader frameworkClassLoader;
-        try {
-            frameworkClassLoader = BundleClassLoaders.getInstance().getFrameworkBundle().getClassLoader();
-        } catch (final Exception e) {
-            // This should never happen in a running instance, but it will occur in unit tests
-            logger.error("Unable to access Framework ClassLoader due to " + e + ". Will continue without changing ClassLoaders.");
-            if (logger.isDebugEnabled()) {
-                logger.error("", e);
-            }
-
-            return new BundleCloseable(null);
-        }
-
-        final ClassLoader current = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(frameworkClassLoader);
-        return new BundleCloseable(current);
-    }
-
     private final ClassLoader toSet;
 
     private BundleCloseable(final ClassLoader toSet) {

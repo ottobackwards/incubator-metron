@@ -116,7 +116,7 @@ public class ASABundleIntegrationTest extends BaseIntegrationTest{
 
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
-            .withGlobalConfigsPath("../../../metron-platform/metron-integration-test/src/main/config/zookeeper/")
+            .withGlobalConfigsPath("./target/zookeeper/")
             .withParserConfigsPath("../metron-parser-asa-extension/metron-parser-asa/" + TestConstants.THIS_PARSER_CONFIGS_PATH);
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()

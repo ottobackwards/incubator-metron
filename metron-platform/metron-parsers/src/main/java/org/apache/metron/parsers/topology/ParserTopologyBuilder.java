@@ -20,10 +20,7 @@ package org.apache.metron.parsers.topology;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.metron.bundles.BundleThreadContextClassLoader;
-import org.apache.metron.bundles.BundleUnpacker;
-import org.apache.metron.bundles.ExtensionClassInitializer;
-import org.apache.metron.bundles.ExtensionManager;
+import org.apache.metron.bundles.*;
 import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.bundle.BundleCoordinate;
 import org.apache.metron.bundles.util.BundleProperties;
@@ -176,9 +173,12 @@ public class ParserTopologyBuilder {
 
       // create a FileSystemManager
       Bundle systemBundle = ExtensionManager.createSystemBundle(fileSystemManager, props);
-      ExtensionManager.discoverExtensions(systemBundle, Collections.emptySet());
+      ExtensionMapping mapping = BundleUnpacker.unpackBundles(fileSystemManager, systemBundle, props);
+      BundleClassLoaders.getInstance().init(fileSystemManager,fileSystemManager.resolveFile(props.getFrameworkWorkingDirectory()),fileSystemManager.resolveFile(props.getExtensionsWorkingDirectory()),props);
 
-      BundleUnpacker.unpackBundles(fileSystemManager, ExtensionManager.createSystemBundle(fileSystemManager, props), props);
+      ExtensionManager.discoverExtensions(systemBundle, BundleClassLoaders.getInstance().getBundles());
+
+
       parser = BundleThreadContextClassLoader.createInstance(parserConfig.getParserClassName(),MessageParser.class,props);
     }else {
       parser = ReflectionUtils.createInstance(parserConfig.getParserClassName());

@@ -23,6 +23,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.jar.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
@@ -61,7 +63,7 @@ public final class BundleUnpacker {
             final URI frameworkWorkingDir = props.getFrameworkWorkingDirectory();
             final URI extensionsWorkingDir = props.getExtensionsWorkingDirectory();
             final URI docsWorkingDir = props.getComponentDocumentationWorkingDirectory();
-            final Map<FileObject, BundleCoordinate> unpackedPars = new HashMap<>();
+            final Map<FileObject, BundleCoordinate> unpackedBundles = new HashMap<>();
             archiveExtension = props.getArchiveExtension();
 
             FileObject unpackedFramework = null;
@@ -113,36 +115,16 @@ public final class BundleUnpacker {
                     final String bundleId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + BundleManifestEntry.PRE_ID.getManifestName());
                     final String groupId = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + BundleManifestEntry.PRE_GROUP.getManifestName());
                     final String version = manifest.getMainAttributes().getValue(props.getMetaIdPrefix() + BundleManifestEntry.PRE_VERSION.getManifestName());
-                        // determine if this is the framework
-                        /* OPF extension point */
-                        if (BundleClassLoaders.FRAMEWORK_PAR_ID.equals(bundleId)) {
-                            if (unpackedFramework != null) {
-                                throw new IllegalStateException(
-                                        "Multiple framework PARs discovered. Only one framework is permitted.");
-                            }
 
-                            unpackedFramework = unpackBundle(bundleFile, frameworkWorkingDirFO);
-                        } else {
+                    final FileObject unpackedExtension = unpackBundle(bundleFile, extensionsWorkingDirFO);
 
-                            final FileObject unpackedExtension = unpackBundle(bundleFile, extensionsWorkingDirFO);
+                    // record the current bundle
+                    unpackedBundles.put(unpackedExtension, new BundleCoordinate(groupId, bundleId, version));
 
-                            // record the current bundle
-                            unpackedPars.put(unpackedExtension, new BundleCoordinate(groupId, bundleId, version));
-
-                            // unpack the extension nar
-                            unpackedExtensions.add(unpackedExtension);
-                        }
+                    // unpack the extension bundle
+                    unpackedExtensions.add(unpackedExtension);
 
                 }
-
-                /*
-                // ensure we've found the framework bundle
-                if (unpackedFramework == null) {
-                    throw new IllegalStateException("No framework PAR found.");
-                } else if (!unpackedFramework.isReadable()) {
-                    throw new IllegalStateException("Framework PAR cannot be read.");
-                }
-                */
 
                 // Determine if any bundles no longer exist and delete their
                 // working directories. This happens
@@ -150,19 +132,17 @@ public final class BundleUnpacker {
                 // ensure no old framework are present
                 final FileObject[] frameworkWorkingDirContents = frameworkWorkingDirFO.getChildren();
                 if (frameworkWorkingDirContents != null) {
-                    for (final FileObject unpackedPar : frameworkWorkingDirContents) {
-                      // OPF  if (!unpackedFramework.equals(unpackedPar)) {
-                            FileUtils.deleteFile(unpackedPar, true);
-                      // OPF  }
+                    for (final FileObject unpackedBundle : frameworkWorkingDirContents) {
+                            FileUtils.deleteFile(unpackedBundle, true);
                     }
                 }
 
                 // ensure no old extensions are present
                 final FileObject[] extensionsWorkingDirContents = extensionsWorkingDirFO.getChildren();
                 if (extensionsWorkingDirContents != null) {
-                    for (final FileObject unpackedPar : extensionsWorkingDirContents) {
-                        if (!unpackedExtensions.contains(unpackedPar)) {
-                            FileUtils.deleteFile(unpackedPar, true);
+                    for (final FileObject unpackedBundle : extensionsWorkingDirContents) {
+                        if (!unpackedExtensions.contains(unpackedBundle)) {
+                            FileUtils.deleteFile(unpackedBundle, true);
                         }
                     }
                 }
@@ -180,7 +160,7 @@ public final class BundleUnpacker {
                 }
             }
             final ExtensionMapping extensionMapping = new ExtensionMapping();
-            mapExtensions(unpackedPars, docsWorkingDirFO, extensionMapping, props);
+            mapExtensions(unpackedBundles, docsWorkingDirFO, extensionMapping, props);
 
             // unpack docs for the system bundle which will catch any JARs directly in the lib directory that might have docs
             unpackBundleDocs(docsWorkingDirFO, extensionMapping, systemBundle.getBundleDetails().getCoordinate(), systemBundle.getBundleDetails().getWorkingDirectory(), props);
@@ -197,12 +177,12 @@ public final class BundleUnpacker {
         return null;
     }
 
-    private static void mapExtensions(final Map<FileObject, BundleCoordinate> unpackedNars, final FileObject docsDirectory, final ExtensionMapping mapping, BundleProperties props) throws IOException {
-        for (final Map.Entry<FileObject, BundleCoordinate> entry : unpackedNars.entrySet()) {
-            final FileObject unpackedNar = entry.getKey();
+    private static void mapExtensions(final Map<FileObject, BundleCoordinate> unpackedBundles, final FileObject docsDirectory, final ExtensionMapping mapping, BundleProperties props) throws IOException {
+        for (final Map.Entry<FileObject, BundleCoordinate> entry : unpackedBundles.entrySet()) {
+            final FileObject unpackedBundle = entry.getKey();
             final BundleCoordinate bundleCoordinate = entry.getValue();
 
-            final FileObject bundledDependencies = unpackedNar.resolveFile("META-INF/bundled-dependencies");
+            final FileObject bundledDependencies = unpackedBundle.resolveFile("META-INF/bundled-dependencies");
 
             unpackBundleDocs(docsDirectory, mapping, bundleCoordinate, bundledDependencies, props);
         }
@@ -273,8 +253,7 @@ public final class BundleUnpacker {
      */
     private static void unpack(final FileObject bundle, final FileObject workingDirectory, final byte[] hash)
             throws IOException {
-
-        try(JarInputStream jarFile = new JarInputStream(bundle.getContent().getInputStream())){
+       /* try(JarInputStream jarFile = new JarInputStream(bundle.getContent().getInputStream())){
             JarEntry je;
             while((je=jarFile.getNextJarEntry())!=null){
                 String name = je.getName();
@@ -286,6 +265,18 @@ public final class BundleUnpacker {
                 }
             }
             jarFile.close();
+            */
+        try(ZipInputStream jarFile = new ZipInputStream(bundle.getContent().getInputStream())){
+            ZipEntry je;
+            while((je=jarFile.getNextEntry())!=null){
+                String name = je.getName();
+                FileObject f = workingDirectory.resolveFile(name);
+                if (je.isDirectory()) {
+                    FileUtils.ensureDirectoryExistAndCanAccess(f);
+                } else {
+                    makeFile(jarFile, f);
+                }
+            }
         }
 
         final FileObject hashFile = workingDirectory.resolveFile(HASH_FILENAME);
@@ -352,7 +343,7 @@ public final class BundleUnpacker {
         final ExtensionMapping mapping = new ExtensionMapping();
 
             // The BundleProperties has configuration for the extension names and classnames
-            final Map<String,String> extensions = props.getParExtensionTypes();
+            final Map<String,String> extensions = props.getBundleExtensionTypes();
             if(extensions.isEmpty()){
                 logger.info("No Extensions configured in properties");
                 return mapping;

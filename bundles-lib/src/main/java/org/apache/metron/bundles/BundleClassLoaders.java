@@ -37,10 +37,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class BundleClassLoaders {
 
-    // OPF: This needs to be extendable or go
-    public static final String FRAMEWORK_PAR_ID = "nifi-framework-nar";
-    public static final String JETTY_PAR_ID = "nifi-jetty-bundle";
-
     private static volatile BundleClassLoaders ncl;
     private volatile InitContext initContext;
     private static final Logger logger = LoggerFactory.getLogger(BundleClassLoaders.class);
@@ -49,17 +45,14 @@ public final class BundleClassLoaders {
 
         private final FileObject frameworkWorkingDir;
         private final FileObject extensionWorkingDir;
-        private final Bundle frameworkBundle;
         private final Map<String, Bundle> bundles;
 
         private InitContext(
                 final FileObject frameworkDir,
                 final FileObject extensionDir,
-                final Bundle frameworkBundle,
                 final Map<String, Bundle> bundles) {
             this.frameworkWorkingDir = frameworkDir;
             this.extensionWorkingDir = extensionDir;
-            this.frameworkBundle = frameworkBundle;
             this.bundles = bundles;
         }
     }
@@ -124,12 +117,12 @@ public final class BundleClassLoaders {
         // get the system classloader
         final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 
-        // find all nar files and create class loaders for them.
-        final Map<String, Bundle> narDirectoryBundleLookup = new LinkedHashMap<>();
-        final Map<String, ClassLoader> narCoordinateClassLoaderLookup = new HashMap<>();
-        final Map<String, Set<BundleCoordinate>> narIdBundleLookup = new HashMap<>();
+        // find all bundle files and create class loaders for them.
+        final Map<String, Bundle> directoryBundleLookup = new LinkedHashMap<>();
+        final Map<String, ClassLoader> coordinateClassLoaderLookup = new HashMap<>();
+        final Map<String, Set<BundleCoordinate>> idBundleLookup = new HashMap<>();
 
-        // make sure the nar directory is there and accessible
+        // make sure the bundle directory is there and accessible
         FileUtils.ensureDirectoryExistAndCanReadAndWrite(frameworkWorkingDir);
         FileUtils.ensureDirectoryExistAndCanReadAndWrite(extensionsWorkingDir);
 
@@ -147,23 +140,23 @@ public final class BundleClassLoaders {
             final List<BundleDetails> bundleDetails = new ArrayList<>();
             final Map<String,String> bundleCoordinatesToWorkingDir = new HashMap<>();
 
-            // load the nar details which includes and nar dependencies
-            for (final FileObject unpackedPar : bundleWorkingDirContents) {
+            // load the bundle details which includes and nar dependencies
+            for (final FileObject unpackedBundle : bundleWorkingDirContents) {
                 BundleDetails bundleDetail = null;
                 try {
-                     bundleDetail = getBundleDetails(unpackedPar, props);
+                     bundleDetail = getBundleDetails(unpackedBundle, props);
                 } catch (IllegalStateException e) {
                     logger.warn("Unable to load PAR {} due to {}, skipping...",
-                            new Object[] {unpackedPar.getURL(), e.getMessage()});
+                            new Object[] {unpackedBundle.getURL(), e.getMessage()});
                 }
 
                 // prevent the application from starting when there are two PARs with same group, id, and version
                 final String bundleCoordinate = bundleDetail.getCoordinate().getCoordinate();
                 if (bundleCoordinatesToWorkingDir.containsKey(bundleCoordinate)) {
-                    final String existingParWorkingDir = bundleCoordinatesToWorkingDir.get(bundleCoordinate);
+                    final String existingBundleWorkingDir = bundleCoordinatesToWorkingDir.get(bundleCoordinate);
                     throw new IllegalStateException("Unable to load PAR with coordinates " + bundleCoordinate
                             + " and working directory " + bundleDetail.getWorkingDirectory()
-                            + " because another PAR with the same coordinates already exists at " + existingParWorkingDir);
+                            + " because another PAR with the same coordinates already exists at " + existingBundleWorkingDir);
                 }
 
                 bundleDetails.add(bundleDetail);
@@ -174,24 +167,8 @@ public final class BundleClassLoaders {
             ClassLoader jettyClassLoader = null;
             for (final Iterator<BundleDetails> bundleDetailsIter = bundleDetails.iterator(); bundleDetailsIter.hasNext();) {
                 final BundleDetails bundleDetail = bundleDetailsIter.next();
-
-                // look for the jetty bundle
-                if (JETTY_PAR_ID.equals(bundleDetail.getCoordinate().getId())) {
-                    // create the jetty classloader
-                    jettyClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), systemClassLoader);
-
-                    // remove the jetty nar since its already loaded
-                    narCoordinateClassLoaderLookup.put(bundleDetail.getCoordinate().getCoordinate(), jettyClassLoader);
-                    bundleDetailsIter.remove();
-                }
-
                 // populate bundle lookup
-                narIdBundleLookup.computeIfAbsent(bundleDetail.getCoordinate().getId(), id -> new HashSet<>()).add(bundleDetail.getCoordinate());
-            }
-
-            // ensure the jetty bundle was found
-            if (jettyClassLoader == null) {
-                throw new IllegalStateException("Unable to locate Jetty bundle.");
+                idBundleLookup.computeIfAbsent(bundleDetail.getCoordinate().getId(), id -> new HashSet<>()).add(bundleDetail.getCoordinate());
             }
 
             int bundleCount;
@@ -199,7 +176,7 @@ public final class BundleClassLoaders {
                 // record the number of bundles to be loaded
                 bundleCount = bundleDetails.size();
 
-                // attempt to create each nar class loader
+                // attempt to create each bundle class loader
                 for (final Iterator<BundleDetails> bundleDetailsIter = bundleDetails.iterator(); bundleDetailsIter.hasNext();) {
                     final BundleDetails bundleDetail = bundleDetailsIter.next();
                     final BundleCoordinate bundleDependencyCoordinate = bundleDetail.getDependencyCoordinate();
@@ -207,17 +184,17 @@ public final class BundleClassLoaders {
                     // see if this class loader is eligible for loading
                     ClassLoader potentialBundleClassLoader = null;
                     if (bundleDependencyCoordinate == null) {
-                        potentialBundleClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), jettyClassLoader);
+                        potentialBundleClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), ClassLoader.getSystemClassLoader() );
                     } else {
                         final String dependencyCoordinateStr = bundleDependencyCoordinate.getCoordinate();
 
                         // if the declared dependency has already been loaded
-                        if (narCoordinateClassLoaderLookup.containsKey(dependencyCoordinateStr)) {
-                            final ClassLoader bundleDependencyClassLoader = narCoordinateClassLoaderLookup.get(dependencyCoordinateStr);
+                        if (coordinateClassLoaderLookup.containsKey(dependencyCoordinateStr)) {
+                            final ClassLoader bundleDependencyClassLoader = coordinateClassLoaderLookup.get(dependencyCoordinateStr);
                             potentialBundleClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), bundleDependencyClassLoader);
                         } else {
                             // get all bundles that match the declared dependency id
-                            final Set<BundleCoordinate> coordinates = narIdBundleLookup.get(bundleDependencyCoordinate.getId());
+                            final Set<BundleCoordinate> coordinates = idBundleLookup.get(bundleDependencyCoordinate.getId());
 
                             // ensure there are known bundles that match the declared dependency id
                             if (coordinates != null && !coordinates.contains(bundleDependencyCoordinate)) {
@@ -227,23 +204,23 @@ public final class BundleClassLoaders {
                                     final BundleCoordinate coordinate = coordinates.stream().findFirst().get();
 
                                     // if that bundle is loaded, use it
-                                    if (narCoordinateClassLoaderLookup.containsKey(coordinate.getCoordinate())) {
+                                    if (coordinateClassLoaderLookup.containsKey(coordinate.getCoordinate())) {
                                         logger.warn(String.format("While loading '%s' unable to locate exact NAR dependency '%s'. Only found one possible match '%s'. Continuing...",
                                                 bundleDetail.getCoordinate().getCoordinate(), dependencyCoordinateStr, coordinate.getCoordinate()));
 
-                                        final ClassLoader narDependencyClassLoader = narCoordinateClassLoaderLookup.get(coordinate.getCoordinate());
-                                        potentialBundleClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), narDependencyClassLoader);
+                                        final ClassLoader bundleDependencyClassLoader = coordinateClassLoaderLookup.get(coordinate.getCoordinate());
+                                        potentialBundleClassLoader = createBundleClassLoader(fileSystemManager, bundleDetail.getWorkingDirectory(), bundleDependencyClassLoader);
                                     }
                                 }
                             }
                         }
                     }
 
-                    // if we were able to create the nar class loader, store it and remove the details
+                    // if we were able to create the bundle class loader, store it and remove the details
                     final ClassLoader bundleClassLoader = potentialBundleClassLoader;
                     if (bundleClassLoader != null) {
-                        narDirectoryBundleLookup.put(bundleDetail.getWorkingDirectory().getURL().toURI().toString(), new Bundle(bundleDetail, bundleClassLoader));
-                        narCoordinateClassLoaderLookup.put(bundleDetail.getCoordinate().getCoordinate(), bundleClassLoader);
+                        directoryBundleLookup.put(bundleDetail.getWorkingDirectory().getURL().toURI().toString(), new Bundle(bundleDetail, bundleClassLoader));
+                        coordinateClassLoaderLookup.put(bundleDetail.getCoordinate().getCoordinate(), bundleClassLoader);
                         bundleDetailsIter.remove();
                     }
                 }
@@ -251,19 +228,14 @@ public final class BundleClassLoaders {
                 // attempt to load more if some were successfully loaded this iteration
             } while (bundleCount != bundleDetails.size());
 
-            // see if any nars couldn't be loaded
-            for (final BundleDetails narDetail : bundleDetails) {
+            // see if any bundle couldn't be loaded
+            for (final BundleDetails bundleDetail : bundleDetails) {
                 logger.warn(String.format("Unable to resolve required dependency '%s'. Skipping PAR '%s'",
-                        narDetail.getDependencyCoordinate().getId(), narDetail.getWorkingDirectory().getURL().toURI().toString()));
+                        bundleDetail.getDependencyCoordinate().getId(), bundleDetail.getWorkingDirectory().getURL().toURI().toString()));
             }
         }
 
-        // find the framework bundle, NarUnpacker already checked that there was a framework NAR and that there was only one
-        final Bundle frameworkBundle = narDirectoryBundleLookup.values().stream()
-                .filter(b -> b.getBundleDetails().getCoordinate().getId().equals(FRAMEWORK_PAR_ID))
-                .findFirst().orElse(null);
-
-        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, frameworkBundle, new LinkedHashMap<>(narDirectoryBundleLookup));
+        return new InitContext(frameworkWorkingDir, extensionsWorkingDir, new LinkedHashMap<>(directoryBundleLookup));
     }
 
     /**
@@ -279,7 +251,7 @@ public final class BundleClassLoaders {
         logger.debug("Loading Bundle file: " + bundleDirectory.getURL());
         BundleClassLoader.Builder builder = new BundleClassLoader.Builder()
                 .withFileSystemManager(fileSystemManager)
-                .withParWorkingDirectory(bundleDirectory)
+                .withBundleWorkingDirectory(bundleDirectory)
                 .withParentClassloader(parentClassLoader);
         final ClassLoader bundleClassLoader = builder.build();
         logger.info("Loaded Bundle file: " + bundleDirectory.getURL() + " as class loader " + bundleClassLoader);
@@ -296,19 +268,6 @@ public final class BundleClassLoaders {
      */
     private static BundleDetails getBundleDetails(final FileObject bundleDirectory, BundleProperties props) throws FileSystemException {
         return BundleUtil.fromBundleDirectory(bundleDirectory, props);
-    }
-
-    /**
-     * @return the framework class Bundle
-     *
-     * @throws IllegalStateException if the frame Bundle has not been loaded
-     */
-    public Bundle getFrameworkBundle() {
-        if (initContext == null) {
-            throw new IllegalStateException("Framework bundle has not been loaded.");
-        }
-
-        return initContext.frameworkBundle;
     }
 
     /**

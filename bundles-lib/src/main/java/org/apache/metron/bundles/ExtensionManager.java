@@ -83,7 +83,7 @@ public class ExtensionManager {
     }
 
     /**
-     * Loads all extension class types that can be found on the bootstrap classloader and by creating classloaders for all NARs found within the classpath.
+     * Loads all extension class types that can be found on the bootstrap classloader and by creating classloaders for all BUNDLES found within the classpath.
      * @param bundles the bundles to scan through in search of extensions
      */
     public static void discoverExtensions(final Bundle systemBundle, final Set<Bundle> bundles) throws NotInitializedException {
@@ -92,13 +92,13 @@ public class ExtensionManager {
         ClassLoader currentContextClassLoader = Thread.currentThread().getContextClassLoader();
 
         // load the system bundle first so that any extensions found in JARs directly in lib will be registered as
-        // being from the system bundle and not from all the other NARs
+        // being from the system bundle and not from all the other Bundles
         loadExtensions(systemBundle);
         bundleCoordinateBundleLookup.put(systemBundle.getBundleDetails().getCoordinate(), systemBundle);
 
-        // consider each nar class loader
+        // consider each bundle class loader
         for (final Bundle bundle : bundles) {
-            // Must set the context class loader to the nar classloader itself
+            // Must set the context class loader to the bundle classloader itself
             // so that static initialization techniques that depend on the context class loader will work properly
             final ClassLoader ncl = bundle.getClassLoader();
             Thread.currentThread().setContextClassLoader(ncl);
@@ -154,14 +154,15 @@ public class ExtensionManager {
             // this is another extention point
             // what we care about here is getting the right classes from the classloader for the bundle
             // this *could* be as a 'service' itself with different implementations
-            // The Nar system uses the ServiceLoader, but this chokes on abstract classes
+            // The NAR system uses the ServiceLoader, but this chokes on abstract classes, because for some
+            // reason it feels compelled to instantiate the class,
             // which there may be in the system.
             // Changed to ClassIndex
             Class clazz = entry.getKey();
             ClassLoader cl = bundle.getClassLoader();
             Iterable<Class<?>> it = ClassIndex.getSubclasses(clazz,cl);
             for(Class<?> c : it) {
-                if(cl.equals(clazz.getClassLoader())){
+                if(cl.equals(c.getClassLoader())){
                     // check for abstract
                     if(!Modifier.isAbstract(c.getModifiers())) {
                         registerServiceClass(c, classNameBundleLookup, bundle, entry.getValue());
@@ -238,8 +239,7 @@ public class ExtensionManager {
      * @return true if the given class is a processor, controller service, or reporting task
      */
     private static boolean multipleVersionsAllowed(Class<?> type) {
-        // OPF SUPPORT?
-        //return Processor.class.isAssignableFrom(type) || ControllerService.class.isAssignableFrom(type) || ReportingTask.class.isAssignableFrom(type);
+        // we don't really need to support multiple versions at this time
         return false;
     }
 

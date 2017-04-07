@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * <p>
- * A <tt>ClassLoader</tt> for loading PARs (plugin archives). PARs are designed to
+ * A <tt>ClassLoader</tt> for loading BUNDLES (plugin archives). BUNDLEs are designed to
  * allow isolating bundles of code (comprising one-or-more
  * plugin classes and their
  * dependencies) from other such bundles; this allows for dependencies and
@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
  * definition. Specifically, this means that resources are loaded from the application's
  * <tt>conf</tt>
  * and <tt>lib</tt> directories first, and if they cannot be found there, are
- * loaded from the PAR.</p>
+ * loaded from the BUNDLE.</p>
  *
  * <p>
- * The packaging of a PAR is such that it is a ZIP file with the following
+ * The packaging of a BUNDLE is such that it is a ZIP file with the following
  * directory structure:
  *
  * <pre>
@@ -62,22 +62,22 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <p>
- * The {@code Par-Id} provides a unique identifier for this PAR.
+ * The {@code Par-Id} provides a unique identifier for this BUNDLE.
  * </p>
  *
  * <p>
  * The {@code Par-Dependency-Id} is optional. If provided, it indicates that
- * this PAR should inherit all of the dependencies of the PAR with the provided
- * ID. Often times, the PAR that is depended upon is referred to as the Parent.
+ * this BUNDLE should inherit all of the dependencies of the BUNDLE with the provided
+ * ID. Often times, the BUNDLE that is depended upon is referred to as the Parent.
  * This is because its ClassLoader will be the parent ClassLoader of the
- * dependent PAR.
+ * dependent BUNDLE.
  * </p>
  *
  * <p>
- * If a PAR is built using NiFi's Maven PAR Plugin, the {@code Par-Id} property
- * will be set to the artifactId of the PAR. The {@code Par-Dependency-Id} will
- * be set to the artifactId of the PAR that is depended upon. For example, if
- * PAR A is defined as such:
+ * If a BUNDLE is built using the Bundles Maven Plugin, the {@code Bundle-Id} property
+ * will be set to the artifactId of the BUNDLE. The {@code Bundle-Dependency-Id} will
+ * be set to the artifactId of the BUNDLE that is depended upon. For example, if
+ * BUNDLE A is defined as such:
  *
  * <pre>
  * ...
@@ -130,7 +130,7 @@ public class BundleClassLoader extends VFSClassLoader {
             return this;
         }
 
-        public Builder withParWorkingDirectory(FileObject bundleWorkingDirectory) {
+        public Builder withBundleWorkingDirectory(FileObject bundleWorkingDirectory) {
             this.bundleWorkingDirectory = bundleWorkingDirectory;
             return this;
         }
@@ -188,7 +188,7 @@ public class BundleClassLoader extends VFSClassLoader {
     };
 
     /**
-     * The PAR for which this <tt>ClassLoader</tt> is responsible.
+     * The BUNDLE for which this <tt>ClassLoader</tt> is responsible.
      */
     private final FileObject bundleWorkingDirectory;
 
@@ -201,7 +201,7 @@ public class BundleClassLoader extends VFSClassLoader {
      * API file for implementations.
      * @throws ClassNotFoundException if any of the
      * implementations defined by the Java Services API cannot be loaded.
-     * @throws FileSystemException if an error occurs while loading the PAR.
+     * @throws FileSystemException if an error occurs while loading the BUNDLE.
      */
     private BundleClassLoader(final FileSystemManager fileSystemManager, final FileObject bundleWorkingDirectory, final FileObject[] classPaths, final ClassLoader parentClassLoader) throws FileSystemException {
         super(classPaths,fileSystemManager,parentClassLoader);

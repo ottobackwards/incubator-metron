@@ -16,10 +16,9 @@
  */
 package org.apache.metron.bundles.util;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import org.apache.metron.bundles.bundle.Bundle;
+
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -60,6 +59,7 @@ public abstract class BundleProperties {
      */
     public abstract String getProperty(String key);
     public abstract void setProperty(String key, String value);
+    public abstract void storeProperties(OutputStream outputStream, String comments) throws IOException;
 
     /**
      * Retrieves all known property keys.
@@ -126,7 +126,7 @@ public abstract class BundleProperties {
         return bundleLibraryPaths;
     }
 
-    public Map<String,String> getParExtensionTypes(){
+    public Map<String,String> getBundleExtensionTypes(){
         HashMap<String,String> extensionTypeMap = new HashMap<>();
 
         // go through each property
@@ -207,6 +207,10 @@ public abstract class BundleProperties {
                 properties.setProperty(key,value);
             }
 
+            @Override
+            public void storeProperties(OutputStream outputStream, String comments) throws IOException{
+                properties.store(outputStream,comments);
+            }
         };
 
     }

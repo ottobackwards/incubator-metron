@@ -73,13 +73,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.metron</groupId>
-			<artifactId>metron-parser-asa-bundle</artifactId>
-			<version>0.3.1</version>
-			<type>pom</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.10</artifactId>
 			<version>${global_kafka_version}</version>

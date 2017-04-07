@@ -90,7 +90,7 @@ public class BundleUnpackerTest {
     }
 
     @Test
-    public void testUnpackPars() throws FileSystemException, URISyntaxException, NotInitializedException {
+    public void testUnpackBundles() throws FileSystemException, URISyntaxException, NotInitializedException {
 
         BundleProperties properties = loadSpecifiedProperties("/BundleUnpacker/conf/bundle.properties", EMPTY_MAP);
 
@@ -114,18 +114,18 @@ public class BundleUnpackerTest {
         final FileObject extensionsWorkingDir = fileSystemManager.resolveFile(properties.getExtensionsWorkingDirectory());
         FileObject[] extensionFiles = extensionsWorkingDir.getChildren();
 
-        Set<String> expectedPars = new HashSet<>();
-        expectedPars.add("dummy-one.foo-unpacked");
-        expectedPars.add("dummy-two.foo-unpacked");
-        assertEquals(expectedPars.size(), extensionFiles.length);
+        Set<String> expectedBundles = new HashSet<>();
+        expectedBundles.add("dummy-one.foo-unpacked");
+        expectedBundles.add("dummy-two.foo-unpacked");
+        assertEquals(expectedBundles.size(), extensionFiles.length);
 
         for (FileObject extensionFile : extensionFiles) {
-            Assert.assertTrue(expectedPars.contains(extensionFile.getName().getBaseName()));
+            Assert.assertTrue(expectedBundles.contains(extensionFile.getName().getBaseName()));
         }
     }
 
     @Test
-    public void testUnpackParsFromEmptyDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
+    public void testUnpackBundlesFromEmptyDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
 
         final File emptyDir = new File("./target/empty/dir");
         emptyDir.delete();
@@ -156,7 +156,7 @@ public class BundleUnpackerTest {
     }
 
     @Test
-    public void testUnpackParsFromNonExistantDir() throws FileSystemException, URISyntaxException, NotInitializedException {
+    public void testUnpackBundlesFromNonExistantDir() throws FileSystemException, URISyntaxException, NotInitializedException {
 
         final File nonExistantDir = new File("./target/this/dir/should/not/exist/");
         nonExistantDir.delete();
@@ -187,7 +187,7 @@ public class BundleUnpackerTest {
     }
 
     @Test
-    public void testUnpackParsFromNonDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
+    public void testUnpackBundlesFromNonDir() throws IOException, FileSystemException, URISyntaxException, NotInitializedException {
 
         final File nonDir = new File("./target/file.txt");
         nonDir.createNewFile();

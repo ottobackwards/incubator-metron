@@ -17,7 +17,7 @@
 package org.apache.metron.bundles;
 
 /**
- * Enumeration of entries that will be in a NAR MANIFEST file.
+ * Enumeration of entries that will be in a BUNDLE MANIFEST file.
  */
 public enum BundleManifestEntry {
 

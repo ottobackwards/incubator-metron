@@ -85,16 +85,16 @@ public class BundleUnpackerIntegrationTest {
   }
 
   @Test
-  public void testUnpackPars() throws Exception {
+  public void testUnpackBundles() throws Exception {
     // we unpack TWICE, because the code is different
     // if the files are there already
     // this still doesn't test what happens
     // if the HASH is different
 
-    unpackPars();
-    unpackPars();
+    unpackBundles();
+    unpackBundles();
   }
-  public void unpackPars() throws Exception {
+  public void unpackBundles() throws Exception {
     // setup properties
     BundleProperties properties = loadSpecifiedProperties("/BundleUnpacker/conf/bundle.properties", EMPTY_MAP);
     // get the port we ended up with and set the paths

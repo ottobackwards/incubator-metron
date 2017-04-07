@@ -42,24 +42,24 @@ public class BundleUtilTest {
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
-        final FileObject parDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-with-versioning"));
-        final BundleDetails narDetails = BundleUtil.fromBundleDirectory(parDir, properties);
-        assertEquals(parDir.getURL(), narDetails.getWorkingDirectory().getURL());
+        final FileObject bundleDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-with-versioning"));
+        final BundleDetails bundleDetails = BundleUtil.fromBundleDirectory(bundleDir, properties);
+        assertEquals(bundleDir.getURL(), bundleDetails.getWorkingDirectory().getURL());
 
-        assertEquals("org.apache.nifi", narDetails.getCoordinate().getGroup());
-        assertEquals("nifi-hadoop-nar", narDetails.getCoordinate().getId());
-        assertEquals("1.2.0", narDetails.getCoordinate().getVersion());
+        assertEquals("org.apache.nifi", bundleDetails.getCoordinate().getGroup());
+        assertEquals("nifi-hadoop-nar", bundleDetails.getCoordinate().getId());
+        assertEquals("1.2.0", bundleDetails.getCoordinate().getVersion());
 
-        assertEquals("org.apache.nifi.hadoop", narDetails.getDependencyCoordinate().getGroup());
-        assertEquals("nifi-hadoop-libraries-nar", narDetails.getDependencyCoordinate().getId());
-        assertEquals("1.2.1", narDetails.getDependencyCoordinate().getVersion());
+        assertEquals("org.apache.nifi.hadoop", bundleDetails.getDependencyCoordinate().getGroup());
+        assertEquals("nifi-hadoop-libraries-nar", bundleDetails.getDependencyCoordinate().getId());
+        assertEquals("1.2.1", bundleDetails.getDependencyCoordinate().getVersion());
 
-        assertEquals("NIFI-3380", narDetails.getBuildBranch());
-        assertEquals("1.8.0_74", narDetails.getBuildJdk());
-        assertEquals("a032175", narDetails.getBuildRevision());
-        assertEquals("HEAD", narDetails.getBuildTag());
-        assertEquals("2017-01-23T10:36:27Z", narDetails.getBuildTimestamp());
-        assertEquals("bbende", narDetails.getBuiltBy());
+        assertEquals("NIFI-3380", bundleDetails.getBuildBranch());
+        assertEquals("1.8.0_74", bundleDetails.getBuildJdk());
+        assertEquals("a032175", bundleDetails.getBuildRevision());
+        assertEquals("HEAD", bundleDetails.getBuildTag());
+        assertEquals("2017-01-23T10:36:27Z", bundleDetails.getBuildTimestamp());
+        assertEquals("bbende", bundleDetails.getBuiltBy());
     }
 
     @Test
@@ -68,52 +68,52 @@ public class BundleUtilTest {
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
-        final FileObject parDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-without-versioning"));
-        final BundleDetails parDetails = BundleUtil.fromBundleDirectory(parDir, properties);
-        assertEquals(parDir.getURL(), parDetails.getWorkingDirectory().getURL());
+        final FileObject bundleDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-without-versioning"));
+        final BundleDetails bundleDetails = BundleUtil.fromBundleDirectory(bundleDir, properties);
+        assertEquals(bundleDir.getURL(), bundleDetails.getWorkingDirectory().getURL());
 
-        assertEquals(BundleCoordinate.DEFAULT_GROUP, parDetails.getCoordinate().getGroup());
-        assertEquals("nifi-hadoop-nar", parDetails.getCoordinate().getId());
-        assertEquals(BundleCoordinate.DEFAULT_VERSION, parDetails.getCoordinate().getVersion());
+        assertEquals(BundleCoordinate.DEFAULT_GROUP, bundleDetails.getCoordinate().getGroup());
+        assertEquals("nifi-hadoop-nar", bundleDetails.getCoordinate().getId());
+        assertEquals(BundleCoordinate.DEFAULT_VERSION, bundleDetails.getCoordinate().getVersion());
 
-        assertEquals(BundleCoordinate.DEFAULT_GROUP, parDetails.getDependencyCoordinate().getGroup());
-        assertEquals("nifi-hadoop-libraries-nar", parDetails.getDependencyCoordinate().getId());
-        assertEquals(BundleCoordinate.DEFAULT_VERSION, parDetails.getDependencyCoordinate().getVersion());
+        assertEquals(BundleCoordinate.DEFAULT_GROUP, bundleDetails.getDependencyCoordinate().getGroup());
+        assertEquals("nifi-hadoop-libraries-nar", bundleDetails.getDependencyCoordinate().getId());
+        assertEquals(BundleCoordinate.DEFAULT_VERSION, bundleDetails.getDependencyCoordinate().getVersion());
 
-        assertNull(parDetails.getBuildBranch());
-        assertEquals("1.8.0_74", parDetails.getBuildJdk());
-        assertNull(parDetails.getBuildRevision());
-        assertNull(parDetails.getBuildTag());
-        assertNull(parDetails.getBuildTimestamp());
-        assertEquals("bbende", parDetails.getBuiltBy());
+        assertNull(bundleDetails.getBuildBranch());
+        assertEquals("1.8.0_74", bundleDetails.getBuildJdk());
+        assertNull(bundleDetails.getBuildRevision());
+        assertNull(bundleDetails.getBuildTag());
+        assertNull(bundleDetails.getBuildTimestamp());
+        assertEquals("bbende", bundleDetails.getBuiltBy());
     }
 
     @Test
-    public void testManifestWithoutNarDependency() throws IOException, URISyntaxException {
+    public void testManifestWithoutBundleDependency() throws IOException, URISyntaxException {
         BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties",  additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
 
-        final FileObject parDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-without-dependency"));
-        final BundleDetails parDetails = BundleUtil.fromBundleDirectory(parDir, properties);
-        assertEquals(parDir.getURL(), parDetails.getWorkingDirectory().getURL());
+        final FileObject bundleDir = fileSystemManager.resolveFile(BundleProperties.getURI("src/test/resources/utils-bundles/bundle-without-dependency"));
+        final BundleDetails bundleDetails = BundleUtil.fromBundleDirectory(bundleDir, properties);
+        assertEquals(bundleDir.getURL(), bundleDetails.getWorkingDirectory().getURL());
 
-        assertEquals("org.apache.nifi", parDetails.getCoordinate().getGroup());
-        assertEquals("nifi-hadoop-nar", parDetails.getCoordinate().getId());
-        assertEquals("1.2.0", parDetails.getCoordinate().getVersion());
+        assertEquals("org.apache.nifi", bundleDetails.getCoordinate().getGroup());
+        assertEquals("nifi-hadoop-nar", bundleDetails.getCoordinate().getId());
+        assertEquals("1.2.0", bundleDetails.getCoordinate().getVersion());
 
-        assertNull(parDetails.getDependencyCoordinate());
+        assertNull(bundleDetails.getDependencyCoordinate());
 
-        assertEquals("NIFI-3380", parDetails.getBuildBranch());
-        assertEquals("1.8.0_74", parDetails.getBuildJdk());
-        assertEquals("a032175", parDetails.getBuildRevision());
-        assertEquals("HEAD", parDetails.getBuildTag());
-        assertEquals("2017-01-23T10:36:27Z", parDetails.getBuildTimestamp());
-        assertEquals("bbende", parDetails.getBuiltBy());
+        assertEquals("NIFI-3380", bundleDetails.getBuildBranch());
+        assertEquals("1.8.0_74", bundleDetails.getBuildJdk());
+        assertEquals("a032175", bundleDetails.getBuildRevision());
+        assertEquals("HEAD", bundleDetails.getBuildTag());
+        assertEquals("2017-01-23T10:36:27Z", bundleDetails.getBuildTimestamp());
+        assertEquals("bbende", bundleDetails.getBuiltBy());
     }
 
     @Test(expected = IOException.class)
-    public void testFromManifestWhenNarDirectoryDoesNotExist() throws IOException, URISyntaxException {
+    public void testFromManifestWhenBundleDirectoryDoesNotExist() throws IOException, URISyntaxException {
         BundleProperties properties = BundleProperties.createBasicBundleProperties("src/test/resources/bundle.properties", additionalProperties);
         // create a FileSystemManager
         FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
