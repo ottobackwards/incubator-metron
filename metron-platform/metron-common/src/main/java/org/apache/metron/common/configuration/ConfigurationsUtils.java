@@ -71,6 +71,13 @@ public class ConfigurationsUtils {
     writeToZookeeper(GLOBAL.getZookeeperRoot(), globalConfig, client);
   }
 
+  public static void writeGlobalBundlePropertiesToZookeeper(byte[] bundleProperties, String zookeeperUrl) throws Exception{
+    try(CuratorFramework client = getClient(zookeeperUrl)){
+      client.start();
+      writeGlobalBundlePropertiesToZookeeper(bundleProperties,client);
+    }
+  }
+
   public static void writeGlobalBundlePropertiesToZookeeper(byte[] bundleProperties, CuratorFramework client) throws Exception{
     writeToZookeeper(Constants.ZOOKEEPER_ROOT + "/bundle.properties", bundleProperties, client);
   }

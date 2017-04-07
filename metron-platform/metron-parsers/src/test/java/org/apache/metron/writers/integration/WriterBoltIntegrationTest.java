@@ -22,8 +22,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.metron.TestConstants;
 import org.apache.metron.bundles.BundleClassLoaders;
 import org.apache.metron.bundles.ExtensionClassInitializer;
+import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -47,6 +49,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -120,10 +124,17 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
     }});
     topologyProperties.setProperty("kafka.broker", kafkaComponent.getBrokerList());
 
+    // we need to patch the properties file
+    BundleProperties properties = BundleProperties.createBasicBundleProperties(TestConstants.SAMPLE_CONFIG_PATH + "/bundle.properties",new HashMap<>());
+    ByteArrayOutputStream fso = new ByteArrayOutputStream();
+    properties.storeProperties(fso,"WriteBoltIntegrationTest");
+    fso.flush();
+
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
             .withGlobalConfig(globalConfig)
-            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class));
+            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class))
+            .withBundleProperties(fso.toByteArray());
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
             .withSensorType(sensorType)
