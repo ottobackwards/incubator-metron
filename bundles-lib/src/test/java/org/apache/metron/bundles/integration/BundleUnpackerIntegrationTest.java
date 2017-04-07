@@ -29,6 +29,7 @@ import org.apache.metron.bundles.*;
 import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.integration.components.MRComponent;
 import org.apache.metron.bundles.util.BundleProperties;
+import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.bundles.util.HDFSFileUtilities;
 import org.apache.metron.bundles.util.VFSClassloaderUtil;
 import org.junit.AfterClass;
@@ -82,6 +83,9 @@ public class BundleUnpackerIntegrationTest {
       }
     }catch(Exception e){}
     component.stop();
+    ExtensionClassInitializer.reset();
+    BundleClassLoaders.reset();
+    FileUtils.reset();
   }
 
   @Test

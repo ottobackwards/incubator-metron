@@ -21,6 +21,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.util.BundleProperties;
+import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.bundles.util.VFSClassloaderUtil;
 import org.apache.nifi.processor.Processor;
 import org.junit.AfterClass;
@@ -52,6 +53,9 @@ public class BundleUnpackerTest {
     @AfterClass
     public static void after(){
         ExtensionClassInitializer.reset();
+        BundleClassLoaders.reset();
+        FileUtils.reset();
+
     }
 
     @BeforeClass

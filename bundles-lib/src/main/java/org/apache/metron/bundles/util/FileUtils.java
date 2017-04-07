@@ -162,6 +162,7 @@ public class FileUtils  {
   public static void isInited() {
     if(inited.get() == false){
       utilities = new VFSFileUtilities();
+      inited.set(true);
     }
   }
 }
