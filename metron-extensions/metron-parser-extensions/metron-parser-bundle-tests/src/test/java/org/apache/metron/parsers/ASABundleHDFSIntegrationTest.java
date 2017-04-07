@@ -115,9 +115,9 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
       if(!fileSystem.mkdirs(new Path("/work/"),new FsPermission(FsAction.READ_WRITE,FsAction.READ_WRITE,FsAction.READ_WRITE))){
         System.out.println("FAILED MAKE DIR");
       }
-      fileSystem.copyFromLocalFile(new Path("target/remote/metron/extension_contrib_lib/"), new Path("/"));
-      fileSystem.copyFromLocalFile(new Path("target/remote/metron/extension_lib/"), new Path("/"));
-      fileSystem.copyFromLocalFile(new Path("target/remote/zookeeper/bundle.properties"), new Path("/work/"));
+      fileSystem.copyFromLocalFile(new Path("./target/remote/metron/extension_contrib_lib/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("./target/remote/metron/extension_lib/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("./target/remote/zookeeper/bundle.properties"), new Path("/work/"));
 
       RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(new Path("/"),true);
       System.out.println("==============(BEFORE)==============");

@@ -57,9 +57,9 @@ public class BundleUnpackerIntegrationTest {
     try {
       fileSystem = FileSystem.newInstance(configuration);
       fileSystem.mkdirs(new Path("/work/"),new FsPermission(FsAction.READ_WRITE,FsAction.READ_WRITE,FsAction.READ_WRITE));
-      fileSystem.copyFromLocalFile(new Path("src/test/resources/bundle.properties"), new Path("/work/"));
-      fileSystem.copyFromLocalFile(new Path("src/test/resources/BundleUnpacker/lib/"), new Path("/"));
-      fileSystem.copyFromLocalFile(new Path("src/test/resources/BundleUnpacker/lib2/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("./src/test/resources/bundle.properties"), new Path("/work/"));
+      fileSystem.copyFromLocalFile(new Path("./src/test/resources/BundleUnpacker/lib/"), new Path("/"));
+      fileSystem.copyFromLocalFile(new Path("./src/test/resources/BundleUnpacker/lib2/"), new Path("/"));
       RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(new Path("/"),true);
       System.out.println("==============(BEFORE)==============");
       while (files.hasNext()){
