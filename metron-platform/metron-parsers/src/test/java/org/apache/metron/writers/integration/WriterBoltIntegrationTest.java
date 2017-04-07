@@ -22,6 +22,9 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.metron.bundles.BundleClassLoaders;
+import org.apache.metron.bundles.ExtensionClassInitializer;
+import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.common.dsl.Context;
@@ -39,6 +42,7 @@ import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +54,12 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
   private static final String ERROR_TOPIC = "parser_error";
 
   public static class MockValidator implements FieldValidation{
+    @AfterClass
+    public static void after(){
+      ExtensionClassInitializer.reset();
+      BundleClassLoaders.reset();
+      FileUtils.reset();
+    }
 
     @Override
     public boolean isValid(Map<String, Object> input, Map<String, Object> validationConfig, Map<String, Object> globalConfig, Context context) {
