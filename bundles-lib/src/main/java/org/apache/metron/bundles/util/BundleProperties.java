@@ -36,6 +36,7 @@ public abstract class BundleProperties {
 
     // core properties
     public static final String PROPERTIES_FILE_PATH = "bundle.properties.file.path";
+    public static final String HDFS_PREFIX = "bundle.hdfs.prefix";
     public static final String BUNDLE_LIBRARY_DIRECTORY = "bundle.library.directory";
     public static final String BUNDLE_LIBRARY_DIRECTORY_PREFIX = "bundle.library.directory.";
     public static final String BUNDLE_WORKING_DIRECTORY = "bundle.working.directory";
@@ -76,7 +77,12 @@ public abstract class BundleProperties {
     // getters for core properties //
 
     public URI getBundleWorkingDirectory() throws URISyntaxException {
-            return getURI(getProperty(BUNDLE_WORKING_DIRECTORY, DEFAULT_BUNDLE_WORKING_DIR));
+        String hdfsPrefix = getProperty(HDFS_PREFIX);
+        String bwDir = getProperty(BUNDLE_WORKING_DIRECTORY,DEFAULT_BUNDLE_WORKING_DIR);
+        if(StringUtils.isBlank(hdfsPrefix)) {
+            return getURI(bwDir);
+        }
+        return getURI(hdfsPrefix + bwDir);
     }
 
     public URI getFrameworkWorkingDirectory() throws URISyntaxException{
@@ -99,7 +105,11 @@ public abstract class BundleProperties {
 
     public URI getBundleLibraryDirectory() throws URISyntaxException{
         String bundleLib = getProperty(BUNDLE_LIBRARY_DIRECTORY);
-        return getURI(bundleLib);
+        String hdfsPrefix = getProperty(HDFS_PREFIX);
+        if(StringUtils.isBlank(hdfsPrefix)) {
+            return getURI(bundleLib);
+        }
+        return getURI(hdfsPrefix + bundleLib);
     }
 
     public List<URI> getBundleLibraryDirectories() throws URISyntaxException{
@@ -113,8 +123,13 @@ public abstract class BundleProperties {
                     || BUNDLE_LIBRARY_DIRECTORY.equals(propertyName)) {
                 // attempt to resolve the path specified
                 String bundleLib = getProperty(propertyName);
+                String hdfsPrefix = getProperty(HDFS_PREFIX);
                 if (!StringUtils.isBlank(bundleLib)) {
-                    bundleLibraryPaths.add(getURI(bundleLib));
+                    if(StringUtils.isBlank(hdfsPrefix)) {
+                        bundleLibraryPaths.add(getURI(bundleLib));
+                    }else{
+                        bundleLibraryPaths.add(getURI(hdfsPrefix + bundleLib));
+                    }
                 }
             }
         }
@@ -166,7 +181,12 @@ public abstract class BundleProperties {
     }
 
     public URI getComponentDocumentationWorkingDirectory() throws URISyntaxException {
-        return getURI(getProperty(COMPONENT_DOCS_DIRECTORY, DEFAULT_COMPONENT_DOCS_DIRECTORY));
+        String compDocDir = getProperty(COMPONENT_DOCS_DIRECTORY,DEFAULT_COMPONENT_DOCS_DIRECTORY);
+        String hdfsPrefix = getProperty(HDFS_PREFIX);
+        if(StringUtils.isBlank(hdfsPrefix)) {
+            return getURI(compDocDir);
+        }
+        return getURI(hdfsPrefix + compDocDir);
     }
 
     public static BundleProperties createBasicBundleProperties(final InputStream inStream, final Map<String, String> additionalProperties) {

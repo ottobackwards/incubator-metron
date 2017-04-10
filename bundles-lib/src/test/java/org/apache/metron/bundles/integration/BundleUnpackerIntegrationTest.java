@@ -102,10 +102,11 @@ public class BundleUnpackerIntegrationTest {
     // setup properties
     BundleProperties properties = loadSpecifiedProperties("/BundleUnpacker/conf/bundle.properties", EMPTY_MAP);
     // get the port we ended up with and set the paths
-    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,configuration.get("fs.defaultFS") + "/lib/");
-    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt",configuration.get("fs.defaultFS") + "/lib2/");
-    properties.setProperty(BundleProperties.BUNDLE_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
-    properties.setProperty(BundleProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
+    properties.setProperty(BundleProperties.HDFS_PREFIX,configuration.get("fs.defaultFS"));
+    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, "/lib/");
+    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt","/lib2/");
+    properties.setProperty(BundleProperties.BUNDLE_WORKING_DIRECTORY, "/work/");
+    properties.setProperty(BundleProperties.COMPONENT_DOCS_DIRECTORY, "/work/docs/components/");
     FileSystemManager fileSystemManager = VFSClassloaderUtil.generateVfs(properties.getArchiveExtension());
     ArrayList<Class> classes = new ArrayList<>();
     classes.add(AbstractFoo.class);

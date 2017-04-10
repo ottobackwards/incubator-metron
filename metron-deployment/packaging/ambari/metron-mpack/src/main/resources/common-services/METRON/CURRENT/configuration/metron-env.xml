@@ -37,7 +37,7 @@
         <display-name>Metron Extensions:Parsers Etc</display-name>
     </property>
     <property>
-        <name>metron_extension_lib</name>
+        <name>local_metron_extension_lib</name>
         <value>/usr/metron/${metron.version}/extension_lib</value>
         <description>Metron Extensions lib directory</description>
         <display-name>Metron Extensions Etc</display-name>
@@ -59,6 +59,30 @@
         <value>{{metron_apps_hdfs_dir}}/extensions</value>
         <description>Home for Metron extensions</description>
         <display-name>Metron apps extensions HDFS dir</display-name>
+    </property>
+    <property>
+        <name>metron_apps_extensions_lib_hdfs_dir</name>
+        <value>{{metron_apps_extensions_hdfs_dir}}/lib</value>
+        <description>Home for Metron extensions libraries</description>
+        <display-name>Metron apps extensions libraries HDFS dir</display-name>
+    </property>
+    <property>
+        <name>metron_apps_extensions_working_hdfs_dir</name>
+        <value>{{metron_apps_extensions_hdfs_dir}}/working</value>
+        <description>Home for Metron extensions working dir</description>
+        <display-name>Metron apps extensions working HDFS dir</display-name>
+    </property>
+    <property>
+        <name>metron_apps_extensions_alt_hdfs_dir</name>
+        <value>{{metron_apps_hdfs_dir}}/extensions_alt</value>
+        <description>Home for Metron alternate extensions</description>
+        <display-name>Metron apps alternate extensions HDFS dir</display-name>
+    </property>
+    <property>
+        <name>metron_apps_extensions_alt_lib_hdfs_dir</name>
+        <value>{{metron_apps_extensions_alt_hdfs_dir}}/lib</value>
+        <description>Home for Metron alternate extensions libraries</description>
+        <display-name>Metron apps alternate extensions libraries HDFS dir</display-name>
     </property>
     <property>
         <name>metron_zookeeper_config_dir</name>

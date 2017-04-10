@@ -28,6 +28,7 @@ import org.apache.metron.bundles.util.HDFSFileUtilities;
 import org.apache.metron.bundles.util.VFSClassloaderUtil;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.ConfigurationsUtils;
+import org.apache.metron.common.configuration.FieldValidator;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.json.simple.JSONObject;
@@ -51,11 +52,28 @@ public class ParserLoader {
         // if we have the properties
         // setup the bundles
         BundleProperties props = bundleProperties.get();
+        Configuration fsConf = new Configuration();
         URI uri = props.getBundleLibraryDirectory();
-        if (uri.getScheme().toLowerCase().startsWith("hdfs")) {
-          Configuration fsConf = new Configuration();
-          fsConf.set("fs.defaultFS", String.format("%s://%s",uri.getScheme(),uri.getAuthority()));
+        boolean isHDFS = false;
 
+        // We may have a situation, from testing or other configuration where
+        // we will have a miss-match between the properties configuration and the hdfs
+        // configuration
+        // We will try to handle that here
+        if (uri.getScheme().toLowerCase().startsWith("hdfs")) {
+          // we have hdfs URIs, we need to make sure the file system
+          // is setup to match
+          if(!fsConf.get("fs.defaultFS").toLowerCase().startsWith("hdfs")) {
+            fsConf.set("fs.defaultFS", String.format("%s://%s", uri.getScheme(), uri.getAuthority()));
+          }
+          isHDFS = true;
+        }else if(fsConf.get("fs.defaultFS").toLowerCase().startsWith("hdfs")){
+          // we have HDFS system but the urls are not hdfs, setting the prefix
+          // will get the uris correctly generated
+          props.setProperty(BundleProperties.HDFS_PREFIX,fsConf.get("fs.defaultFS"));
+          isHDFS = true;
+        }
+        if(isHDFS){
           FileSystem fileSystem = FileSystem.get(fsConf);
           // need to setup the filesystem from hdfs
           ExtensionClassInitializer.initializeFileUtilities(new HDFSFileUtilities(fileSystem));

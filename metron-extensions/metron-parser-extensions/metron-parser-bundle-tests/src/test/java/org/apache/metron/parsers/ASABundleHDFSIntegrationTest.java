@@ -102,10 +102,11 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
 
       // we need to patch the properties file
       BundleProperties properties = BundleProperties.createBasicBundleProperties("./target/remote/zookeeper/bundle.properties",new HashMap<>());
-      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,configuration.get("fs.defaultFS") + "/extension_lib/");
-      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt",configuration.get("fs.defaultFS") + "/extension_contrib_lib/");
-      properties.setProperty(BundleProperties.BUNDLE_WORKING_DIRECTORY,configuration.get("fs.defaultFS") + "/work/");
-      properties.setProperty(BundleProperties.COMPONENT_DOCS_DIRECTORY,configuration.get("fs.defaultFS") + "/work/docs/components/");
+      properties.setProperty(BundleProperties.HDFS_PREFIX,configuration.get("fs.defaultFS"));
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, "/extension_lib/");
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt", "/extension_contrib_lib/");
+      properties.setProperty(BundleProperties.BUNDLE_WORKING_DIRECTORY,"/work/");
+      properties.setProperty(BundleProperties.COMPONENT_DOCS_DIRECTORY,"/work/docs/components/");
       FileOutputStream fso = new FileOutputStream("./target/remote/zookeeper/bundle.properties");
       properties.storeProperties(fso,"HDFS UPDATE");
       fso.flush();

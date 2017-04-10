@@ -34,6 +34,7 @@ class ParserCommands:
     __params = None
     __parser_list = None
     __all_parsers_list = None
+    __all_alt_parses_list = None
     __configured = False
 
     def __init__(self, params):
@@ -42,6 +43,7 @@ class ParserCommands:
         self.__params = params
         self.__parser_list = self.__get_parsers(params)
         self.__all_parsers_list = self.__get_all_parsers(params)
+        self.__all_alt_parses_list = self.__get_all_alt_parsers(params)
         self.__configured = os.path.isfile(self.__params.parsers_configured_flag_file)
 
     # get list of parsers
@@ -50,6 +52,9 @@ class ParserCommands:
 
     def __get_all_parsers(self, params):
         return params.all_parsers.replace(' ', '').split(',')
+
+    def __get_all_alt_parsers(self, params):
+        return params.all_alt_parsers.replace(' ', '').split(',')
 
     def is_configured(self):
         return self.__configured
@@ -64,6 +69,7 @@ class ParserCommands:
         Logger.info(
             "Copying grok patterns from local directory '{0}' to HDFS '{1}'".format(self.__params.local_grok_patterns_dir,
                                                                                     self.__params.hdfs_grok_patterns_dir))
+        # copy the global patterns
         self.__params.HdfsResource(self.__params.hdfs_grok_patterns_dir,
                                    type="directory",
                                    action="create_on_execute",
@@ -73,19 +79,42 @@ class ParserCommands:
 
         parsers = self.get_all_parsers_list()
 
+        # each parser extension may have patterns as well
         for parser in parsers:
-            if not os.path.exists(self.__params.metron_extension_etc_parsers + '/' + parser + '/patterns'):
+            if not os.path.exists(self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns'):
                 continue
 
             Logger.info(
-                "Copying {0} grok patterns from local directory '{1}' to HDFS '{2}'".format(parser,self.__params.metron_extension_etc_parsers + '/' + parser + '/patterns',
+                "Copying {0} grok patterns from local directory '{1}' to HDFS '{2}'".format(parser,self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns',
                                                                                             self.__params.hdfs_grok_patterns_dir + '/' + parser))
             self.__params.HdfsResource(self.__params.hdfs_grok_patterns_dir + '/' + parser,
                                        type="directory",
                                        action="create_on_execute",
                                        owner=self.__params.metron_user,
                                        mode=0775,
-                                       source=self.__params.metron_extension_etc_parsers + '/' + parser + '/patterns')
+                                       source=self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns')
+
+        Logger.info("Copying extension lib from local directory '{0}' to HDFS '{1}'").format(self.__params.local_metron_extensions_lib,self.__params.hdfs_metron_extensions_lib)
+        self.__params.HdfsResource(self.__params.hdfs_metron_extensions_lib,
+                           type="directory",
+                           action="create_on_execute",
+                           owner=self.__params.metron_user,
+                           mode=0775,
+                           source=self.__params.local_metron_extension_lib)
+
+        Logger.info("Creating the extensions alt lib dir in HDFS {0}").format(self.__params.hdfs_metron_extensions_alt_lib)
+        self.__params.HdfsResource(self.__params.hdfs_metron_extension_alt_lib,
+                                   type="directory",
+                                   action="create_on_execute",
+                                   owner=self.__params.metron_user,
+                                   mode=0775)
+
+        Logger.info("Creating the extensions working dir in HDFS {0}".format(self.__params.hdfs_metron_extensions_working))
+        self.__params.HdfsResource(self.__params.hdfs_metron_extension_working,
+                               type="directory",
+                               action="create_on_execute",
+                               owner=self.__params.metron_user,
+                               mode=0775)
 
         Logger.info("Done initializing parser configuration")
 
@@ -94,6 +123,9 @@ class ParserCommands:
 
     def get_all_parsers_list(self):
         return self.__all_parsers_list
+
+    def get_all_alt_parsers_list(self):
+        return self.__all_alt_parses_list
 
     def setup_repo(self):
         def local_repo():

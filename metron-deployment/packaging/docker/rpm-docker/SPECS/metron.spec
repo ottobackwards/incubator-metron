@@ -30,8 +30,11 @@
 %define metron_root         %{_prefix}/%{base_name}
 %define metron_home         %{metron_root}/%{full_version}
 %define metron_extensions_lib %{metron_home}/extension_lib
+%define metron_extensions_alt_lib %{metron_home}/extension_alt_lib
 %define metron_extensions_etc %{metron_home}/extension_etc
 %define metron_extensions_etc_parsers %{metron_extensions_etc}/parsers
+%define metron_extensions_alt_etc %{metron_home}/extension_alt_etc
+%define metron_extensions_alt_etc_parsers %{metron_extensions_alt_etc}/parsers
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -182,6 +185,12 @@ This package installs the Metron Parser files
 %dir %{metron_home}/config/zookeeper/parsers
 %dir %{metron_home}/patterns
 %dir %{metron_home}/lib
+%dir %{metron_extensions_etc}
+%dir %{metron_extensions_etc_parsers}
+%dir %{metron_extensions_lib}
+%dir %{metron_extensions_alt_etc}
+%dir %{metron_extensions_alt_etc_parsers}
+%dir %{metron_extensions_alt_lib}
 %{metron_home}/bin/start_parser_topology.sh
 %{metron_home}/config/zookeeper/parsers/jsonMap.json
 %{metron_home}/patterns/common
