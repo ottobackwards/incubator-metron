@@ -29,7 +29,7 @@ def init_config(params):
     Logger.info('Loading Metron config into ZooKeeper')
 
     Logger.info('Creating bundle.properties from template')
-    File(ambari_format("{metron_config_path}/bundle.properties"),
+    File(ambari_format("{metron_zookeeper_config_path}/bundle.properties"),
          content=Template("bundle.properties.j2"),
          owner=params.metron_user,
          group=params.metron_group
