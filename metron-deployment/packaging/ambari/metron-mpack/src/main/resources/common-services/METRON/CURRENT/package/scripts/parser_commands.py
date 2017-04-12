@@ -74,6 +74,7 @@ class ParserCommands:
                                    type="directory",
                                    action="create_on_execute",
                                    owner=self.__params.metron_user,
+                                   group=self.__params.hadoop_group,
                                    mode=0775,
                                    source=self.__params.local_grok_patterns_dir)
 
@@ -91,6 +92,7 @@ class ParserCommands:
                                        type="directory",
                                        action="create_on_execute",
                                        owner=self.__params.metron_user,
+                                       group=self.__params.hadoop_group,
                                        mode=0775,
                                        source=self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns')
 
@@ -99,6 +101,7 @@ class ParserCommands:
                            type="directory",
                            action="create_on_execute",
                            owner=self.__params.metron_user,
+                           group=self.__params.hadoop_group,
                            mode=0775,
                            source=self.__params.local_metron_extensions_lib)
 
@@ -107,6 +110,7 @@ class ParserCommands:
                                    type="directory",
                                    action="create_on_execute",
                                    owner=self.__params.metron_user,
+                                   group=self.__params.hadoop_group,
                                    mode=0775)
 
         Logger.info("Creating the extensions working dir in HDFS {0}".format(self.__params.hdfs_metron_apps_extensions_working))
@@ -114,6 +118,7 @@ class ParserCommands:
                                type="directory",
                                action="create_on_execute",
                                owner=self.__params.metron_user,
+                               group=self.__params.hadoop_group,
                                mode=0775)
 
         Logger.info("Done initializing parser configuration")
