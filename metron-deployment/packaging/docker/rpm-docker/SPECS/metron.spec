@@ -93,6 +93,9 @@ mkdir -p %{buildroot}%{metron_home}
 mkdir -p %{buildroot}%{metron_extensions_lib}
 mkdir -p %{buildroot}%{metron_extensions_etc}
 mkdir -p %{buildroot}%{metron_extensions_etc_parsers}
+mkdir -p %{buildroot}%{metron_extensions_alt_lib}
+mkdir -p %{buildroot}%{metron_extensions_alt_etc}
+mkdir -p %{buildroot}%{metron_extensions_alt_etc_parsers}
 mkdir -p %{buildroot}%{metron_extensions_etc_parsers}/asa
 mkdir -p %{buildroot}%{metron_extensions_etc_parsers}/bro
 mkdir -p %{buildroot}%{metron_extensions_etc_parsers}/cef

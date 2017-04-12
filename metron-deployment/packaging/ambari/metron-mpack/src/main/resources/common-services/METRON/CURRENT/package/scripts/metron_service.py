@@ -45,15 +45,20 @@ def init_config(params):
     alt_parsers_list = params.all_alt_parsers.replace(' ', '').split(',')
 
     for parser in parsers_list:
-        Execute(ambari_format(
-            "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i " + params.metron_extension_etc_parsers + "/" + parser + "/{metron_zookeeper_config_dir} -z {zookeeper_quorum}"),
-            path=ambari_format("{java_home}/bin")
-        )
+        if params:
+            Execute(ambari_format(
+                "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i " + params.metron_extensions_etc_parsers + "/" + parser + "/{metron_zookeeper_config_dir} -z {zookeeper_quorum}"),
+                path=ambari_format("{java_home}/bin")
+            )
+
 
     for parser in alt_parsers_list:
+        if not parser:
+            break
+
         Execute(ambari_format(
-        "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i " + params.metron_extension_alt_etc_parsers + "/" + parser + "/{metron_zookeeper_config_dir} -z {zookeeper_quorum}"),
-        path=ambari_format("{java_home}/bin")
+            "{metron_home}/bin/zk_load_configs.sh --mode PUSH -i " + params.metron_extensions_alt_etc_parsers + "/" + parser + "/{metron_zookeeper_config_dir} -z {zookeeper_quorum}"),
+            path=ambari_format("{java_home}/bin")
     )
 
 

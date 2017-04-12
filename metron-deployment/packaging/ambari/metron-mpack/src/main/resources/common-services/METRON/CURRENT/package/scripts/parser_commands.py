@@ -94,23 +94,23 @@ class ParserCommands:
                                        mode=0775,
                                        source=self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns')
 
-        Logger.info("Copying extension lib from local directory '{0}' to HDFS '{1}'").format(self.__params.local_metron_extensions_lib,self.__params.hdfs_metron_extensions_lib)
-        self.__params.HdfsResource(self.__params.hdfs_metron_extensions_lib,
+        Logger.info("Copying extension lib from local directory '{0}' to HDFS '{1}'".format(self.__params.local_metron_extensions_lib,self.__params.hdfs_metron_apps_extensions_lib))
+        self.__params.HdfsResource(self.__params.hdfs_metron_apps_extensions_lib,
                            type="directory",
                            action="create_on_execute",
                            owner=self.__params.metron_user,
                            mode=0775,
-                           source=self.__params.local_metron_extension_lib)
+                           source=self.__params.local_metron_extensions_lib)
 
-        Logger.info("Creating the extensions alt lib dir in HDFS {0}").format(self.__params.hdfs_metron_extensions_alt_lib)
-        self.__params.HdfsResource(self.__params.hdfs_metron_extension_alt_lib,
+        Logger.info("Creating the extensions alt lib dir in HDFS {0}".format(self.__params.hdfs_metron_apps_extensions_alt_lib))
+        self.__params.HdfsResource(self.__params.hdfs_metron_apps_extensions_alt_lib,
                                    type="directory",
                                    action="create_on_execute",
                                    owner=self.__params.metron_user,
                                    mode=0775)
 
-        Logger.info("Creating the extensions working dir in HDFS {0}".format(self.__params.hdfs_metron_extensions_working))
-        self.__params.HdfsResource(self.__params.hdfs_metron_extension_working,
+        Logger.info("Creating the extensions working dir in HDFS {0}".format(self.__params.hdfs_metron_apps_extensions_working))
+        self.__params.HdfsResource(self.__params.hdfs_metron_apps_extensions_working,
                                type="directory",
                                action="create_on_execute",
                                owner=self.__params.metron_user,
