@@ -31,6 +31,7 @@ import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.common.configuration.FieldValidator;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.storm.hdfs.common.security.HdfsSecurityUtil;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +40,12 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class ParserLoader {
   private static final Logger LOG = LoggerFactory.getLogger(ParserBolt.class);
-  public static Optional<MessageParser<JSONObject>> loadParser(CuratorFramework client, SensorParserConfig parserConfig){
+  public static Optional<MessageParser<JSONObject>> loadParser(Map stormConfig, CuratorFramework client, SensorParserConfig parserConfig){
     MessageParser<JSONObject> parser = null;
     try {
       // fetch the BundleProperties from zookeeper
@@ -74,6 +76,7 @@ public class ParserLoader {
           isHDFS = true;
         }
         if(isHDFS){
+          HdfsSecurityUtil.login(stormConfig, fsConf);
           FileSystem fileSystem = FileSystem.get(fsConf);
           // need to setup the filesystem from hdfs
           ExtensionClassInitializer.initializeFileUtilities(new HDFSFileUtilities(fileSystem));

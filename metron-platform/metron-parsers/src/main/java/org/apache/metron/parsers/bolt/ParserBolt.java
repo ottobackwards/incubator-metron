@@ -104,7 +104,7 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
     this.collector = collector;
 
     if(this.parser == null) {
-      Optional<MessageParser<JSONObject>> optParser = ParserLoader.loadParser(client, getSensorParserConfig());
+      Optional<MessageParser<JSONObject>> optParser = ParserLoader.loadParser(stormConf,client, getSensorParserConfig());
       if (optParser.isPresent()) {
         this.parser = optParser.get();
         this.parser.configure(getSensorParserConfig().getParserConfig());
