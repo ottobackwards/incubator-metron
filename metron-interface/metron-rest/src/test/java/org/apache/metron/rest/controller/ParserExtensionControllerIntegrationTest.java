@@ -19,6 +19,7 @@ package org.apache.metron.rest.controller;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.metron.rest.service.HdfsService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +80,10 @@ public class ParserExtensionControllerIntegrationTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
 
     }
+    @After
+    public void takeDown() throws Exception{
+
+    }
     @Test
     public void testSecurity() throws Exception {
         this.mockMvc.perform(post(parserExtUrl).with(csrf()).contentType(MediaType.parseMediaType("text/plain;charset=UTF-8")).content(fileContents))
@@ -101,19 +106,8 @@ public class ParserExtensionControllerIntegrationTest {
         MediaType mediaType = new MediaType("multipart", "form-data", contentTypeParams);
 
         this.mockMvc.perform(MockMvcRequestBuilders.fileUpload(parserExtUrl).file(multipartFile).with(httpBasic(user,password)).contentType(mediaType))
-                .andDo(print())
                 .andExpect(status().isOk());
-       /*
-        this.mockMvc.perform(MockMvcRequestBuilders.fileUpload(parserExtUrl)
-                .file("extensionTgz", multipartFile.getBytes())
-                .contentType(mediaType)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-        this.mockMvc.perform(post(parserExtUrl).with(httpBasic(user,password)).with(csrf())
-                .requestAttr("extensionTgz", multipartFile.getBytes())
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE).content(fileContents))
-                .andExpect(status().isCreated());
-*/
+
     }
 
 }
