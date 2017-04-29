@@ -55,6 +55,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.web.client.RestTemplate;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
