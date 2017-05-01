@@ -34,4 +34,5 @@ public interface HdfsService {
 
     boolean delete(Path path, boolean recursive) throws RestException;
 
+    boolean ensureDirectory(Path path) throws RestException;
  }
