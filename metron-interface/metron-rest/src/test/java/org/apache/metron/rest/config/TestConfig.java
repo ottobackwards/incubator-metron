@@ -21,6 +21,7 @@ import kafka.admin.AdminUtils$;
 import kafka.utils.ZKStringSerializer$;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.commons.io.FileUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -42,6 +43,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -89,7 +91,10 @@ public class TestConfig {
   public static void copyResources(String source, String target) throws IOException {
     final java.nio.file.Path sourcePath = Paths.get(source);
     final java.nio.file.Path targetPath = Paths.get(target);
-
+    final java.io.File tDir = new File(target);
+    if(tDir.exists()){
+      FileUtils.deleteDirectory(tDir);
+    }
     Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
 
       @Override
