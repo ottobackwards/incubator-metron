@@ -180,7 +180,6 @@ public abstract class IndexingIntegrationTest extends BaseIntegrationTest {
             .withMillisecondsBetweenAttempts(1500)
             .withNumRetries(100)
             .withMaxTimeMS(150000)
-            .withCustomShutdownOrder(new String[] {"search","storm","config","kafka","zk"})
             .build();
     runner.start();
 

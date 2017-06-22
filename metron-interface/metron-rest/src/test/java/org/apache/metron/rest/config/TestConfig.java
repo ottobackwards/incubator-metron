@@ -68,7 +68,6 @@ public class TestConfig {
     ComponentRunner runner = new ComponentRunner.Builder()
             .withComponent("zk", zkServerComponent)
             .withComponent("kafka", kafkaWithZKComponent)
-            .withCustomShutdownOrder(new String[] {"kafka","zk"})
             .build();
     try {
       runner.start();

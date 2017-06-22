@@ -100,7 +100,6 @@ public class SimpleHbaseEnrichmentWriterIntegrationTest extends BaseIntegrationT
             .withComponent("config", configUploadComponent)
             .withComponent("org/apache/storm", parserTopologyComponent)
             .withMillisecondsBetweenAttempts(5000)
-            .withCustomShutdownOrder(new String[]{"org/apache/storm","config","kafka","zk"})
             .withNumRetries(10)
             .build();
     try {

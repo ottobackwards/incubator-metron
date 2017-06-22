@@ -18,6 +18,13 @@
 package org.apache.metron.integration;
 
 
+import org.apache.metron.integration.components.FluxTopologyComponent;
+import org.apache.metron.integration.components.KafkaComponent;
+import org.apache.metron.integration.components.MRComponent;
+import org.apache.metron.integration.components.YarnComponent;
+import org.apache.metron.integration.components.ZKServerComponent;
+
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,7 +32,23 @@ public class ComponentRunner {
     public static class Builder {
         LinkedHashMap<String, InMemoryComponent> components;
         String[] startupOrder;
-        String[] shutdownOrder;
+        ComponentClassification[] shutdownOrder;
+        // the default shutdown order by classication
+        //
+        // note: there may be more than one
+        // item with a certain classifcation running
+        // the assumption is that within a classification, there is no ordering
+        static ComponentClassification[] defaultShutdownOrder = new ComponentClassification [] {
+
+                ComponentClassification.SEARCH,
+                ComponentClassification.JOBS,
+                ComponentClassification.STORAGE,
+                ComponentClassification.ZK,
+                ComponentClassification.TOPOLOGY,
+                ComponentClassification.KAFKA,
+                ComponentClassification.OTHER
+       };
+
         long timeBetweenAttempts = 1000;
         int numRetries = 5;
         long maxTimeMS = 120000;
@@ -52,7 +75,7 @@ public class ComponentRunner {
             this.startupOrder = startupOrder;
             return this;
         }
-        public Builder withCustomShutdownOrder(String[] shutdownOrder) {
+        public Builder withCustomShutdownOrder(ComponentClassification[] shutdownOrder) {
             this.shutdownOrder = shutdownOrder;
             return this;
         }
@@ -70,8 +93,9 @@ public class ComponentRunner {
         }
         public ComponentRunner build() {
             if(shutdownOrder == null) {
-                shutdownOrder = toOrderedList(components);
+                shutdownOrder = defaultShutdownOrder;
             }
+
             if(startupOrder == null) {
                 startupOrder = toOrderedList(components);
             }
@@ -82,13 +106,13 @@ public class ComponentRunner {
 
     LinkedHashMap<String, InMemoryComponent> components;
     String[] startupOrder;
-    String[] shutdownOrder;
+    ComponentClassification[] shutdownOrder;
     long timeBetweenAttempts;
     int numRetries;
     long maxTimeMS;
     public ComponentRunner( LinkedHashMap<String, InMemoryComponent> components
                           , String[] startupOrder
-                          , String[] shutdownOrder
+                          , ComponentClassification[] shutdownOrder
                           , long timeBetweenAttempts
                           , int numRetries
                           , long maxTimeMS
@@ -111,13 +135,31 @@ public class ComponentRunner {
     }
 
     public void start() throws UnableToStartException {
-        for(String componentName : startupOrder) {
-            components.get(componentName).start();
+      for(String key : components.keySet()){
+        boolean matched = false;
+        InMemoryComponent component = components.get(key);
+        for(ComponentClassification classifiction : shutdownOrder ){
+          if(classifiction.equals(component.getClassification())){
+            matched = true;
+            break;
+          }
         }
+        if(!matched){
+          throw new UnableToStartException(String.format("Component %s : %s is not in the shutdown order!", key,component.getClassification().toString()));
+        }
+      }
+      for(String componentName : startupOrder) {
+        components.get(componentName).start();
+      }
     }
+
     public void stop() {
-        for(String componentName : shutdownOrder) {
-            components.get(componentName).stop();
+        for(ComponentClassification classification : shutdownOrder) {
+            for(InMemoryComponent component : components.values()) {
+              if(classification.equals(component.getClassification())) {
+                component.stop();
+              }
+            }
         }
     }
 

@@ -20,4 +20,5 @@ package org.apache.metron.integration;
 public interface InMemoryComponent {
     public void start() throws UnableToStartException;
     public void stop();
+    public ComponentClassification getClassification();
 }

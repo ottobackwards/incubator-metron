@@ -17,7 +17,7 @@
  */
 package org.apache.metron.parsers.integration.components;
 
-import com.google.common.collect.ImmutableMap;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.topology.TopologyBuilder;
@@ -28,12 +28,6 @@ import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static org.apache.metron.integration.components.FluxTopologyComponent.assassinateSlots;
@@ -75,6 +69,8 @@ public class ParserTopologyComponent implements InMemoryComponent {
     this.sensorType = sensorType;
   }
 
+  @Override
+  public ComponentClassification getClassification() {return ComponentClassification.TOPOLOGY;}
 
   @Override
   public void start() throws UnableToStartException {

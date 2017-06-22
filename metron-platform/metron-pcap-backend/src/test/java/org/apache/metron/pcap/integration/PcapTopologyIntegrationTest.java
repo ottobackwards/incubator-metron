@@ -241,7 +241,6 @@ public class PcapTopologyIntegrationTest {
             .withMaxTimeMS(-1)
             .withMillisecondsBetweenAttempts(2000)
             .withNumRetries(10)
-            .withCustomShutdownOrder(new String[]{"storm","kafka","zk","mr"})
             .build();
     try {
       runner.start();

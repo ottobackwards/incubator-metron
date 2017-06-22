@@ -18,6 +18,7 @@
 package org.apache.metron.elasticsearch.integration.components;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.elasticsearch.ElasticsearchTimeoutException;
@@ -80,6 +81,10 @@ public class ElasticSearchComponent implements InMemoryComponent {
         this.indexDir = indexDir;
         this.extraElasticSearchSettings = extraElasticSearchSettings;
     }
+
+    @Override
+    public ComponentClassification getClassification(){return ComponentClassification.SEARCH;}
+
     public Client getClient() {
         return client;
     }

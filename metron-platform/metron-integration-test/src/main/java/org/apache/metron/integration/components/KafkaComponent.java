@@ -35,6 +35,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import kafka.utils.*;
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.wrapper.AdminUtilsWrapper;
 import org.apache.metron.integration.wrapper.TestUtilsWrapper;
@@ -48,7 +49,6 @@ import java.util.logging.Level;
 
 
 public class KafkaComponent implements InMemoryComponent {
-
   protected static final Logger LOG = LoggerFactory.getLogger(KafkaComponent.class);
 
   public static class Topic {
@@ -100,6 +100,9 @@ public class KafkaComponent implements InMemoryComponent {
     this.topics = topics;
     return this;
   }
+
+  @Override
+  public ComponentClassification getClassification(){ return ComponentClassification.KAFKA;}
 
   public List<Topic> getTopics() {
     return topics;

@@ -18,6 +18,7 @@
 package org.apache.metron.solr.integration.components;
 
 import com.google.common.base.Function;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.solr.writer.MetronSolrClient;
@@ -83,6 +84,9 @@ public class SolrComponent implements InMemoryComponent {
     this.collections = collections;
     this.postStartCallback = postStartCallback;
   }
+
+  @Override
+  public ComponentClassification getClassification() { return ComponentClassification.SEARCH;}
 
   @Override
   public void start() throws UnableToStartException {

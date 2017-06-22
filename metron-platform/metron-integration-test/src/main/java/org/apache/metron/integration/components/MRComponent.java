@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class MRComponent implements InMemoryComponent {
     basePath = new Path(path);
     return this;
   }
+
+  @Override
+  public ComponentClassification getClassification(){ return ComponentClassification.STORAGE;}
 
   public Configuration getConfiguration() {
     return configuration;

@@ -19,6 +19,7 @@ package org.apache.metron.enrichment.integration.components;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.integration.components.ZKServerComponent;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.apache.metron.common.configuration.ConfigurationsUtils.*;
 
@@ -121,6 +121,9 @@ public class ConfigUploadComponent implements InMemoryComponent {
   public Map<String, SensorParserConfig> getParserSensorConfigs() {
     return parserSensorConfigs;
   }
+
+  @Override
+  public ComponentClassification getClassification(){return ComponentClassification.OTHER;}
 
   @Override
   public void start() throws UnableToStartException {

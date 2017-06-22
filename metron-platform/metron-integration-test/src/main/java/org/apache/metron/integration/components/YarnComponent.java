@@ -24,8 +24,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.JarFinder;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
-import org.apache.hadoop.yarn.server.nodemanager.NodeManager;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 
@@ -48,6 +48,9 @@ public class YarnComponent implements InMemoryComponent{
         this.testName = name;
         return this;
     }
+
+    @Override
+    public ComponentClassification getClassification(){ return ComponentClassification.JOBS;}
 
     public String getAppMasterJar(){
         return appmasterJar;

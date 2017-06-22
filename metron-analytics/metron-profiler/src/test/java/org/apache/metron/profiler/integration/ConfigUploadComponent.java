@@ -20,6 +20,7 @@
 package org.apache.metron.profiler.integration;
 
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.integration.components.ZKServerComponent;
@@ -41,6 +42,9 @@ public class ConfigUploadComponent implements InMemoryComponent {
   private Properties topologyProperties;
   private String globalConfiguration;
   private String profilerConfiguration;
+
+  @Override
+  public ComponentClassification getClassification(){ return ComponentClassification.OTHER;}
 
   @Override
   public void start() throws UnableToStartException {

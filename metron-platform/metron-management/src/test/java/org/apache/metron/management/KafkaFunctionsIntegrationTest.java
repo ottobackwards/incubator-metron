@@ -71,7 +71,6 @@ public class KafkaFunctionsIntegrationTest extends BaseIntegrationTest {
             .withComponent("kafka", kafkaComponent)
             .withMillisecondsBetweenAttempts(5000)
             .withNumRetries(5)
-            .withCustomShutdownOrder(new String[]{"kafka","zk"})
             .build();
     runner.start();
   }

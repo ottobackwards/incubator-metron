@@ -20,13 +20,12 @@ package org.apache.metron.integration.components;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.imps.CuratorFrameworkImpl;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.metron.integration.ComponentClassification;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.generated.KillOptions;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.generated.TopologyInfo;
 import org.apache.metron.integration.InMemoryComponent;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.storm.flux.FluxBuilder;
@@ -49,7 +48,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 public class FluxTopologyComponent implements InMemoryComponent {
 
@@ -87,11 +85,22 @@ public class FluxTopologyComponent implements InMemoryComponent {
     }
   }
 
+  // KillOptions to pass to the local cluster when killing the topology
+  // Alternatively, we could use the LocalTopology from storm and call close
+  public static final KillOptions KILL_NOW = new KillOptions();
+  static {
+    KILL_NOW.set_wait_secs(0);
+  }
+
+
   public FluxTopologyComponent(String topologyName, File topologyLocation, Properties topologyProperties) {
     this.topologyName = topologyName;
     this.topologyLocation = topologyLocation;
     this.topologyProperties = topologyProperties;
   }
+
+  @Override
+  public ComponentClassification getClassification() {return ComponentClassification.TOPOLOGY;}
 
   public LocalCluster getStormCluster() {
     return stormCluster;
@@ -158,7 +167,8 @@ public class FluxTopologyComponent implements InMemoryComponent {
     if (stormCluster != null) {
       try {
         try {
-          stormCluster.killTopology(topologyName);
+          // KILL_NOW will make the delay for stopping the topology 0
+          stormCluster.killTopologyWithOpts(topologyName, KILL_NOW);
         }catch(Exception ex) {
           LOG.error("Killing the topology directly didn't work, uh oh: " + ex.getMessage(), ex);
         }
