@@ -62,7 +62,7 @@ import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 /**
  * An integration test of the Profiler topology.
  */
-public class ProfilerIntegrationTest extends BaseIntegrationTest {
+public abstract class ProfilerIntegrationTest extends BaseIntegrationTest {
 
   private static final String TEST_RESOURCES = "../../metron-analytics/metron-profiler/src/test";
   private static final String FLUX_PATH = "../metron-profiler/src/main/flux/profiler/remote.yaml";
@@ -130,7 +130,6 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
   /**
    * Tests the first example contained within the README.
    */
-  @Test
   public void testExample1() throws Exception {
 
     setup(TEST_RESOURCES + "/config/zookeeper/readme-example-1");
@@ -155,7 +154,6 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
   /**
    * Tests the second example contained within the README.
    */
-  @Test
   public void testExample2() throws Exception {
 
     setup(TEST_RESOURCES + "/config/zookeeper/readme-example-2");
@@ -188,7 +186,6 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
   /**
    * Tests the third example contained within the README.
    */
-  @Test
   public void testExample3() throws Exception {
 
     setup(TEST_RESOURCES + "/config/zookeeper/readme-example-3");
@@ -213,7 +210,6 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
   /**
    * Tests the fourth example contained within the README.
    */
-  @Test
   public void testExample4() throws Exception {
 
     setup(TEST_RESOURCES + "/config/zookeeper/readme-example-4");
@@ -236,7 +232,6 @@ public class ProfilerIntegrationTest extends BaseIntegrationTest {
     ));
   }
 
-  @Test
   public void testPercentiles() throws Exception {
 
     setup(TEST_RESOURCES + "/config/zookeeper/percentiles");
