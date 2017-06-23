@@ -161,7 +161,7 @@ public class KafkaComponent implements InMemoryComponent {
     // do not proceed until the broker is up
     TestUtilsWrapper.waitUntilBrokerIsRunning(kafkaServer,"Timed out waiting for RunningAsBroker State",100000);
     // and... wait until it is registered in zookeeper
-    if(zkClient.countChildren("/brokers/ids/") == 0){
+    if(zkClient.countChildren("/brokers/ids") == 0){
       LOG.error("BROKER IS UP, BUT NOT IN ZOOKEEPER");
     }
 
@@ -264,7 +264,7 @@ public class KafkaComponent implements InMemoryComponent {
     try {
       UnitTestHelper.setJavaLoggingLevel(Level.OFF);
       zkUtils = ZkUtils.apply(zookeeperConnectString, 30000, 30000, false);
-      if(zkClient.countChildren("/brokers/ids/") == 0){
+      if(zkClient.countChildren("/brokers/ids") == 0){
         LOG.error("BROKER IS UP, BUT NOT IN ZOOKEEPER STILL -> AND WE ARE TRYING TO CREATE A TOPIC");
       }
       AdminUtilsWrapper.createTopic(zkUtils, name, numPartitions, 1, new Properties());
