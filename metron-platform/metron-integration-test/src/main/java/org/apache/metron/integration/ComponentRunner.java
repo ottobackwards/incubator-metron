@@ -43,10 +43,10 @@ public class ComponentRunner {
                 ComponentClassification.SEARCH,
                 ComponentClassification.JOBS,
                 ComponentClassification.STORAGE,
-                ComponentClassification.ZK,
                 ComponentClassification.TOPOLOGY,
                 ComponentClassification.KAFKA,
-                ComponentClassification.OTHER
+                ComponentClassification.OTHER,
+                ComponentClassification.ZK,
        };
 
         long timeBetweenAttempts = 1000;

@@ -167,12 +167,6 @@ public class FluxTopologyComponent implements InMemoryComponent {
     if (stormCluster != null) {
       try {
         try {
-          // KILL_NOW will make the delay for stopping the topology 0
-          stormCluster.killTopologyWithOpts(topologyName, KILL_NOW);
-        }catch(Exception ex) {
-          LOG.error("Killing the topology directly didn't work, uh oh: " + ex.getMessage(), ex);
-        }
-        try {
           stormCluster.shutdown();
         } catch (IllegalStateException ise) {
           if (!(ise.getMessage().contains("It took over") && ise.getMessage().contains("to shut down slot"))) {
