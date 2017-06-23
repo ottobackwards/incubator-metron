@@ -211,6 +211,7 @@ public class FluxTopologyComponent implements InMemoryComponent {
 
   private void startTopology(String topologyName, File topologyLoc, Properties properties) throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, TException, NoSuchFieldException{
     TopologyDef topologyDef = loadYaml(topologyName, topologyLoc, properties);
+    topologyDef.getConfig().put(Config.TOPOLOGY_MAX_TASK_PARALLELISM,1);
     Config conf = FluxBuilder.buildConfig(topologyDef);
     ExecutionContext context = new ExecutionContext(topologyDef, conf);
     StormTopology topology = FluxBuilder.buildTopology(context);
