@@ -213,6 +213,7 @@ public class KafkaComponent implements InMemoryComponent {
   public ConsumerIterator<byte[], byte[]> getStreamIterator(String topic) {
     return getStreamIterator(topic, "group0", "consumer0");
   }
+
   public ConsumerIterator<byte[], byte[]> getStreamIterator(String topic, String group, String consumerName) {
     // setup simple consumer
     Properties consumerProperties = TestUtils.createConsumerProperties(zookeeperConnectString, group, consumerName, -1);
@@ -246,24 +247,16 @@ public class KafkaComponent implements InMemoryComponent {
     createTopic(name, 1, true);
   }
 
-  public void waitUntilMetadataIsPropagated(String topic, int numPartitions) {
+  public void createTopic(String name, int numPartitions, boolean waitUntilMetadataIsPropagated) throws InterruptedException {
+    Level oldLevel = UnitTestHelper.getJavaLoggingLevel();
+    ZkUtils zkUtils = null;
     List<KafkaServer> servers = new ArrayList<>();
     servers.add(kafkaServer);
-    for(int part = 0;part < numPartitions;++part) {
-      TestUtils.waitUntilMetadataIsPropagated(scala.collection.JavaConversions.asScalaBuffer(servers), topic, part, 5000);
-    }
-  }
 
-  public void createTopic(String name, int numPartitions, boolean waitUntilMetadataIsPropagated) throws InterruptedException {
-    ZkUtils zkUtils = null;
-    Level oldLevel = UnitTestHelper.getJavaLoggingLevel();
     try {
       UnitTestHelper.setJavaLoggingLevel(Level.OFF);
       zkUtils = ZkUtils.apply(zkClient,false);
-      AdminUtilsWrapper.createTopic(zkUtils, name, numPartitions, 1, new Properties());
-      if (waitUntilMetadataIsPropagated) {
-        waitUntilMetadataIsPropagated(name, numPartitions);
-      }
+      TestUtils.createTopic(zkUtils,name,numPartitions,1,scala.collection.JavaConversions.asScalaBuffer(servers),new Properties());
     }catch(TopicExistsException tee) {
     }finally {
       UnitTestHelper.setJavaLoggingLevel(oldLevel);
