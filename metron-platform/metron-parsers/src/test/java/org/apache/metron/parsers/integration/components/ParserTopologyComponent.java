@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.apache.metron.integration.components.FluxTopologyComponent.KILL_NOW;
 import static org.apache.metron.integration.components.FluxTopologyComponent.assassinateSlots;
 import static org.apache.metron.integration.components.FluxTopologyComponent.cleanupWorkerDir;
 
@@ -101,7 +102,9 @@ public class ParserTopologyComponent implements InMemoryComponent {
     if (stormCluster != null) {
       try {
         try {
-          stormCluster.killTopology(sensorType);
+          stormCluster.deactivate(sensorType);
+          Thread.sleep(1000L);
+          stormCluster.killTopologyWithOpts(sensorType, KILL_NOW);
         }catch(Exception ex) {
           LOG.error("Killing the topology directly didn't work, uh oh: " + ex.getMessage(), ex);
         }
@@ -118,6 +121,8 @@ public class ParserTopologyComponent implements InMemoryComponent {
                     "I gave them the old one-two-skadoo and killed the slots with prejudice.  " +
                     "If tests fail, we'll have to find a better way of killing them.", ise);
           }
+        }finally {
+          stormCluster = null;
         }
       }
       catch(Throwable t) {
