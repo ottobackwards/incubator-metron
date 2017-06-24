@@ -21,6 +21,7 @@ package org.apache.metron.integration.components;
 import com.google.common.base.Function;
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
+import kafka.cluster.Broker;
 import kafka.common.TopicExistsException;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -31,12 +32,14 @@ import kafka.javaapi.consumer.SimpleConsumer;
 import kafka.message.MessageAndOffset;
 import kafka.server.*;
 import kafka.utils.TestUtils;
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import kafka.utils.*;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.metron.integration.ComponentClassification;
 import org.apache.metron.integration.InMemoryComponent;
+import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.integration.wrapper.AdminUtilsWrapper;
 import org.apache.metron.integration.wrapper.TestUtilsWrapper;
 import org.apache.metron.test.utils.UnitTestHelper;
@@ -47,6 +50,9 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.logging.Level;
 
+import static com.google.code.tempusfugit.temporal.Duration.seconds;
+import static com.google.code.tempusfugit.temporal.Timeout.timeout;
+import static com.google.code.tempusfugit.temporal.WaitFor.waitOrTimeout;
 
 public class KafkaComponent implements InMemoryComponent {
   protected static final Logger LOG = LoggerFactory.getLogger(KafkaComponent.class);
@@ -143,7 +149,7 @@ public class KafkaComponent implements InMemoryComponent {
   }
 
   @Override
-  public void start() {
+  public void start() throws UnableToStartException{
     // setup Zookeeper
     zookeeperConnectString = topologyProperties.getProperty("kafka.zk");
 
@@ -158,8 +164,12 @@ public class KafkaComponent implements InMemoryComponent {
 
     org.apache.log4j.Level oldLevel = UnitTestHelper.getLog4jLevel(KafkaServer.class);
     UnitTestHelper.setLog4jLevel(KafkaServer.class, org.apache.log4j.Level.OFF);
-    // do not proceed until the broker is up
-    TestUtilsWrapper.waitUntilBrokerIsRunning(kafkaServer,"Timed out waiting for RunningAsBroker State",100000);
+
+    try {
+      ensureBrokersAreReady(kafkaServer, zkClient, 90);
+    }catch(Exception e){
+      throw new UnableToStartException("Failed to ensure brokers where ready in time", e);
+    }
 
     for(Topic topic : getTopics()) {
       try {
@@ -189,6 +199,14 @@ public class KafkaComponent implements InMemoryComponent {
     if(zkClient != null) {
       zkClient.close();
     }
+  }
+
+  public static void ensureBrokersAreReady(KafkaServer kafkaServer, ZkClient zkClient, int timeoutSeconds)throws Exception{
+    // do not proceed until the broker is up
+    TestUtilsWrapper.waitUntilBrokerIsRunning(kafkaServer,"Timed out waiting for RunningAsBroker State",(timeoutSeconds * 1000));
+    // and... they are registered in zookeeper
+    waitOrTimeout(() -> zkClient.countChildren("/brokers/ids") > 0,
+            timeout(seconds(timeoutSeconds)));
   }
 
   public List<byte[]> readMessages(String topic) {
