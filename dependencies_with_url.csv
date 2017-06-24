@@ -119,6 +119,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:jar:2.8.1:compile,ASLv2,htt
 com.fasterxml:classmate:jar:1.3.1:compile,ASLv2,http://github.com/cowtowncoder/java-classmate
 com.google.code.gson:gson:jar:2.2.4:compile,The Apache Software License, Version 2.0,http://code.google.com/p/google-gson/
 com.google.code.gson:gson:jar:2.7:compile,The Apache Software License, Version 2.0,http://code.google.com/p/google-gson/
+com.google.code.tempus-fugit:tempus-fugit:jar:1.2-SNAPSHOT:compile,The Apache Software License, Version 2.0,https://github.com/tobyweston/tempus-fugit
 com.google.guava:guava:jar:11.0.2:compile,ASLv2,
 com.google.guava:guava:jar:12.0.1:compile,ASLv2,
 com.google.guava:guava:jar:12.0:compile,ASLv2,
