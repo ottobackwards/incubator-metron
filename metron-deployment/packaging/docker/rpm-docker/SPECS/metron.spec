@@ -216,7 +216,7 @@ This package installs the Metron Solr files
 %{metron_home}/config/solr.properties
 %attr(0644,root,root) %{metron_home}/lib/metron-solr-%{full_version}-uber.jar
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 
 %package        enrichment
 Summary:        Metron Enrichment Files
@@ -248,7 +248,7 @@ This package installs the Metron Enrichment files
 %exclude %{metron_home}/flux/enrichment/test.yaml
 %attr(0644,root,root) %{metron_home}/lib/metron-enrichment-%{full_version}-uber.jar
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 
 %package        indexing
 Summary:        Metron Indexing Files
@@ -277,23 +277,6 @@ This package installs the Metron Indexing files
 %{metron_home}/config/zeppelin/metron/metron-connection-volume-report.json
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
-
-%package        metron-management
-Summary:        Metron Management Libary
-Group:          Applications/Internet
-Provides:       metron-management = %{version}
-
-%description    metron-management
-This package installs the Metron Management Library
-
-%files          metron-management
-%defattr(-,root,root,755)
-%dir %{metron_root}
-%dir %{metron_home}/lib
-%attr(0644,root,root) %{metron_home}/lib/metron-management-%{full_version}.jar
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %package        metron-management
 Summary:        Metron Management Libary
