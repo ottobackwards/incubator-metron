@@ -30,6 +30,8 @@ The query language supports the following:
 * Simple comparison operations `<`, `>`, `<=`, `>=`
 * Simple equality comparison operations `==`, `!=`
 * if/then/else comparisons (i.e. `if var1 < 10 then 'less than 10' else '10 or more'`)
+* if/then comparisons (i.e. `if var1 < 10 then 'less than 10'`)
+  * this is the short equivalent of `if var1 < 10 then 'less than 10' else null`
 * Determining whether a field exists (via `exists`)
 * An `in` operator that works like the `in` in Python
 * The ability to have parenthesis to make order of operations explicit

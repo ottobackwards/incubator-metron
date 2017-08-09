@@ -283,6 +283,46 @@ public class BasicStellarTest {
   }
 
   @Test
+  public void testIfThen(){
+    {
+      String query = "if STARTS_WITH(casey, 'case') then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("casey", "casey")));
+    }
+    {
+      String query = "if 1 < 2 then 'one'";
+      Assert.assertEquals("one", run(query, new HashMap<>()));
+    }
+    {
+      String query = "if 1 + 1 <= 2 AND 1 + 2 in [3] then 'one'";
+      Assert.assertEquals("one", run(query, new HashMap<>()));
+    }
+    {
+      String query = "if 1 + 1 <= 2 AND (1 + 2 in [3]) then 'one'";
+      Assert.assertEquals("one", run(query, new HashMap<>()));
+    }
+    {
+      String query = "if one < two then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("one", 1, "two", 2)));
+    }
+    {
+      String query = "if one == very_nearly_one OR one != very_nearly_one then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("one", 1, "very_nearly_one", 1.0000001)));
+    }
+    {
+      String query = "if one != very_nearly_one OR one == very_nearly_one then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("one", 1, "very_nearly_one", 1.0000001)));
+    }
+    {
+      String query = "if 'foo' in ['foo'] OR one == very_nearly_one then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("one", 1, "very_nearly_one", 1.0000001)));
+    }
+    {
+      String query = "if ('foo' in ['foo']) OR one == very_nearly_one then 'one'";
+      Assert.assertEquals("one", run(query, ImmutableMap.of("one", 1, "very_nearly_one", 1.0000001)));
+    }
+  }
+
+  @Test
   public void testIfThenElse() {
     {
       String query = "if STARTS_WITH(casey, 'case') then 'one' else 'two'";

@@ -181,6 +181,18 @@ public class StellarBaseListener implements StellarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTernaryWithIfNoElse(StellarParser.TernaryWithIfNoElseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTernaryWithIfNoElse(StellarParser.TernaryWithIfNoElseContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTernaryFuncWithIf(StellarParser.TernaryFuncWithIfContext ctx) { }
 	/**
 	 * {@inheritDoc}

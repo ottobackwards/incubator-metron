@@ -153,6 +153,7 @@ else_expr:
 
 conditional_expr :
   if_expr QUESTION then_expr COLON else_expr #TernaryFuncWithoutIf
+  | IF if_expr THEN then_expr #TernaryWithIfNoElse
   | IF if_expr THEN then_expr ELSE else_expr #TernaryFuncWithIf
   ;
 

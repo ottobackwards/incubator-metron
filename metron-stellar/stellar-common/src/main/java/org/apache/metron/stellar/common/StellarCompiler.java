@@ -150,6 +150,12 @@ public class StellarCompiler extends StellarBaseListener {
                   Token<?> t = it.next();
                   if(t.getUnderlyingType() == ElseExpr.class) {
                     break;
+                  } else if (t.getUnderlyingType() == EndConditional.class) {
+                    // there is no else, but there is an end conditional
+                    // so we have if x then y, and x is false
+                    // the defined behavior is to return null
+
+                    instanceDeque.push(new Token<>(null, Object.class, curr.getMultiArgContext()));
                   }
                 }
               }
@@ -306,6 +312,11 @@ public class StellarCompiler extends StellarBaseListener {
   @Override
   public void enterThen_expr(StellarParser.Then_exprContext ctx) {
     expression.tokenDeque.push(new Token<>(new ThenExpr(), ThenExpr.class, getArgContext()));
+  }
+
+  @Override
+  public void exitTernaryWithIfNoElse(StellarParser.TernaryWithIfNoElseContext ctx){
+    expression.tokenDeque.push(new Token<>(new EndConditional(), EndConditional.class, getArgContext()));
   }
 
   @Override

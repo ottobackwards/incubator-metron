@@ -165,6 +165,18 @@ public interface StellarListener extends ParseTreeListener {
 	 */
 	void exitTernaryFuncWithoutIf(StellarParser.TernaryFuncWithoutIfContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code TernaryWithIfNoElse}
+	 * labeled alternative in {@link StellarParser#conditional_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterTernaryWithIfNoElse(StellarParser.TernaryWithIfNoElseContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code TernaryWithIfNoElse}
+	 * labeled alternative in {@link StellarParser#conditional_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitTernaryWithIfNoElse(StellarParser.TernaryWithIfNoElseContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code TernaryFuncWithIf}
 	 * labeled alternative in {@link StellarParser#conditional_expr}.
 	 * @param ctx the parse tree
