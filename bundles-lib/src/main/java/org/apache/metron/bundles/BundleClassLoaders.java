@@ -46,14 +46,20 @@ public final class BundleClassLoaders {
 
     private final List<FileObject> extensionDirs;
     private final Map<String, Bundle> bundles;
+    private final Map<String, ClassLoader> coordinateClassLoaderLookup;
+    private final Map<String, Set<BundleCoordinates>> idBundleLookup;
     private final BundleProperties properties;
 
     private InitContext(
         final List<FileObject> extensionDirs,
         final Map<String, Bundle> bundles,
+        final Map<String, ClassLoader> coordinateClassLoaderLookup,
+        final Map<String, Set<BundleCoordinates>> idBundleLookup,
         final BundleProperties properties) {
       this.extensionDirs = extensionDirs;
       this.bundles = bundles;
+      this.coordinateClassLoaderLookup = coordinateClassLoaderLookup;
+      this.idBundleLookup = idBundleLookup;
       this.properties = properties;
     }
   }
@@ -80,8 +86,8 @@ public final class BundleClassLoaders {
 
   /**
    * Uninitializes the BundleClassloaders.  After calling this <code>init</code> must be called
-   * before the rest of the methods are called afterwards.
-   * This is for TESTING ONLY at this time.  Reset does not unload or clear any loaded classloaders.
+   * before the rest of the methods are called afterwards. This is for TESTING ONLY at this time.
+   * Reset does not unload or clear any loaded classloaders.
    */
 
   public static void reset() {
@@ -96,16 +102,17 @@ public final class BundleClassLoaders {
 
   /**
    * Initializes and loads the BundleClassLoaders. This method must be called before the rest of the
-   * methods to access the classloaders are called.  Multiple calls to this method will have no effect,
-   * unless a different set of extension directories is passed, which will result in an <code>IllegaStateException</code>
+   * methods to access the classloaders are called.  Multiple calls to this method will have no
+   * effect, unless a different set of extension directories is passed, which will result in an
+   * <code>IllegaStateException</code>
    *
    * @param fileSystemManager the FileSystemManager
    * @param extensionsDirs where to find extension artifacts
    * @param props BundleProperties
    * @throws FileSystemException if any issue occurs while working with the bundle files.
    * @throws java.lang.ClassNotFoundException if unable to load class definition
-   * @throws IllegalStateException when already initialized with a given set of extension directories
-   * and extensionDirs does not match
+   * @throws IllegalStateException when already initialized with a given set of extension
+   * directories and extensionDirs does not match
    */
   public void init(final FileSystemManager fileSystemManager, final List<FileObject> extensionsDirs,
       BundleProperties props)
@@ -153,7 +160,8 @@ public final class BundleClassLoaders {
       FileUtils.ensureDirectoryExistAndCanRead(extensionsDir);
 
       final List<FileObject> bundleDirContents = new ArrayList<>();
-      FileObject[] dirFiles = extensionsDir.findFiles(new BundleSelector(props.getArchiveExtension()));
+      FileObject[] dirFiles = extensionsDir
+          .findFiles(new BundleSelector(props.getArchiveExtension()));
       if (dirFiles != null) {
         List<FileObject> fileList = Arrays.asList(dirFiles);
         bundleDirContents.addAll(fileList);
@@ -165,7 +173,7 @@ public final class BundleClassLoaders {
 
         // load the bundle details which includes bundle dependencies
         for (final FileObject bundleFile : bundleDirContents) {
-          if(!bundleFile.exists() || !bundleFile.isFile()) {
+          if (!bundleFile.exists() || !bundleFile.isFile()) {
             continue;
           }
           BundleDetails bundleDetail = null;
@@ -199,96 +207,98 @@ public final class BundleClassLoaders {
           // populate bundle lookup
           idBundleLookup.computeIfAbsent(bundleDetail.getCoordinates().getId(),
               id -> new HashSet<>()).add(bundleDetail.getCoordinates());
-        }
-
-        int bundleCount;
-        do {
-          // record the number of bundles to be loaded
-          bundleCount = bundleDetails.size();
-
-          // attempt to create each bundle class loader
-          for (final Iterator<BundleDetails> bundleDetailsIter = bundleDetails.iterator();
-              bundleDetailsIter.hasNext(); ) {
-            final BundleDetails bundleDetail = bundleDetailsIter.next();
-            final BundleCoordinates bundleDependencyCoordinate = bundleDetail
-                .getDependencyCoordinates();
-
-            // see if this class loader is eligible for loading
-            ClassLoader potentialBundleClassLoader = null;
-            if (bundleDependencyCoordinate == null) {
-              potentialBundleClassLoader = createBundleClassLoader(fileSystemManager,
-                  bundleDetail.getBundleFile(), ClassLoader.getSystemClassLoader());
-            } else {
-              final String dependencyCoordinateStr = bundleDependencyCoordinate
-                  .getCoordinates();
-
-              // if the declared dependency has already been loaded
-              if (coordinateClassLoaderLookup.containsKey(dependencyCoordinateStr)) {
-                final ClassLoader bundleDependencyClassLoader = coordinateClassLoaderLookup
-                    .get(dependencyCoordinateStr);
-                potentialBundleClassLoader = createBundleClassLoader(
-                    fileSystemManager, bundleDetail.getBundleFile(),
-                    bundleDependencyClassLoader);
-              } else {
-                // get all bundles that match the declared dependency id
-                final Set<BundleCoordinates> coordinates = idBundleLookup
-                    .get(bundleDependencyCoordinate.getId());
-
-                // ensure there are known bundles that match the declared dependency id
-                if (coordinates != null && !coordinates
-                    .contains(bundleDependencyCoordinate)) {
-                  // ensure the declared dependency only has one possible bundle
-                  if (coordinates.size() == 1) {
-                    // get the bundle with the matching id
-                    final BundleCoordinates coordinate = coordinates.stream()
-                        .findFirst().get();
-
-                    // if that bundle is loaded, use it
-                    if (coordinateClassLoaderLookup
-                        .containsKey(coordinate.getCoordinates())) {
-                      logger.warn(String.format(
-                          "While loading '%s' unable to locate exact BUNDLE dependency '%s'. Only found one possible match '%s'. Continuing...",
-                          bundleDetail.getCoordinates().getCoordinates(),
-                          dependencyCoordinateStr,
-                          coordinate.getCoordinates()));
-
-                      final ClassLoader bundleDependencyClassLoader = coordinateClassLoaderLookup
-                          .get(coordinate.getCoordinates());
-                      potentialBundleClassLoader = createBundleClassLoader(
-                          fileSystemManager, bundleDetail.getBundleFile(),
-                          bundleDependencyClassLoader);
-                    }
-                  }
-                }
-              }
-            }
-
-            // if we were able to create the bundle class loader, store it and remove the details
-            final ClassLoader bundleClassLoader = potentialBundleClassLoader;
-            if (bundleClassLoader != null) {
-              directoryBundleLookup
-                  .put(bundleDetail.getBundleFile().getURL().toURI().toString(),
-                      new Bundle(bundleDetail, bundleClassLoader));
-              coordinateClassLoaderLookup
-                  .put(bundleDetail.getCoordinates().getCoordinates(),
-                      bundleClassLoader);
-              bundleDetailsIter.remove();
-            }
-          }
-
-          // attempt to load more if some were successfully loaded this iteration
-        } while (bundleCount != bundleDetails.size());
-
-        // see if any bundle couldn't be loaded
-        for (final BundleDetails bundleDetail : bundleDetails) {
-          logger.warn(String
-              .format("Unable to resolve required dependency '%s'. Skipping BUNDLE '%s'",
-                  bundleDetail.getDependencyCoordinates().getId(),
-                  bundleDetail.getBundleFile().getURL().toURI().toString()));
+          directoryBundleLookup
+              .put(bundleDetail.getBundleFile().getURL().toURI().toString(),
+                  new Bundle(bundleDetail));
         }
       }
     }
-    return new InitContext(extensionsDirs, new LinkedHashMap<>(directoryBundleLookup), props);
+      return new InitContext(extensionsDirs, new LinkedHashMap<>(directoryBundleLookup),
+          new LinkedHashMap<>(coordinateClassLoaderLookup), new LinkedHashMap<>(idBundleLookup),
+          props);
+  }
+
+  public ClassLoader createClassLoaderForBundle(Bundle bundle) {
+    if(bundle.getClassLoader() != null) {
+      return bundle.getClassLoader();
+    }
+
+    try {
+      final FileObject bundleFile = bundle.getBundleDetails().getBundleFile();
+      if (!bundleFile.exists() || !bundleFile.isFile()) {
+        return null;
+      }
+      FileSystemManager fileSystemManager = bundleFile.getFileSystem().getFileSystemManager();
+      final BundleDetails bundleDetail = bundle.getBundleDetails();
+      final BundleCoordinates bundleDependencyCoordinate = bundleDetail
+          .getDependencyCoordinates();
+
+      // see if this class loader is eligible for loading
+      ClassLoader potentialBundleClassLoader = null;
+      if (bundleDependencyCoordinate == null) {
+        potentialBundleClassLoader = createBundleClassLoader(fileSystemManager,
+            bundleDetail.getBundleFile(), ClassLoader.getSystemClassLoader());
+      } else {
+        final String dependencyCoordinateStr = bundleDependencyCoordinate
+            .getCoordinates();
+
+        // if the declared dependency has already been loaded
+        if (initContext.coordinateClassLoaderLookup.containsKey(dependencyCoordinateStr)) {
+          final ClassLoader bundleDependencyClassLoader = initContext.coordinateClassLoaderLookup
+              .get(dependencyCoordinateStr);
+          potentialBundleClassLoader = createBundleClassLoader(
+              fileSystemManager, bundleDetail.getBundleFile(),
+              bundleDependencyClassLoader);
+        } else {
+          // get all bundles that match the declared dependency id
+          final Set<BundleCoordinates> coordinates = initContext.idBundleLookup
+              .get(bundleDependencyCoordinate.getId());
+
+          // ensure there are known bundles that match the declared dependency id
+          if (coordinates != null && !coordinates
+              .contains(bundleDependencyCoordinate)) {
+            // ensure the declared dependency only has one possible bundle
+            if (coordinates.size() == 1) {
+              // get the bundle with the matching id
+              final BundleCoordinates coordinate = coordinates.stream()
+                  .findFirst().get();
+
+              // if that bundle is loaded, use it
+              if (initContext.coordinateClassLoaderLookup
+                  .containsKey(coordinate.getCoordinates())) {
+                logger.warn(String.format(
+                    "While loading '%s' unable to locate exact BUNDLE dependency '%s'. Only found one possible match '%s'. Continuing...",
+                    bundleDetail.getCoordinates().getCoordinates(),
+                    dependencyCoordinateStr,
+                    coordinate.getCoordinates()));
+
+                final ClassLoader bundleDependencyClassLoader = initContext.coordinateClassLoaderLookup
+                    .get(coordinate.getCoordinates());
+                potentialBundleClassLoader = createBundleClassLoader(
+                    fileSystemManager, bundleDetail.getBundleFile(),
+                    bundleDependencyClassLoader);
+              }
+            }
+          }
+        }
+      }
+
+      // if we were able to create the bundle class loader, store it and remove the details
+      final ClassLoader bundleClassLoader = potentialBundleClassLoader;
+      if (bundleClassLoader != null) {
+        bundle.setClassLoader(bundleClassLoader);
+        initContext.bundles
+            .put(bundleDetail.getBundleFile().getURL().toURI().toString(),
+                bundle);
+        initContext.coordinateClassLoaderLookup
+            .put(bundleDetail.getCoordinates().getCoordinates(),
+                bundleClassLoader);
+      }
+      return bundleClassLoader;
+
+    } catch (FileSystemException | ClassNotFoundException | URISyntaxException e) {
+      return null;
+    }
   }
 
   /**

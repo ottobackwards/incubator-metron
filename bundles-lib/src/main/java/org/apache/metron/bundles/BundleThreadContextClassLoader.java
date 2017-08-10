@@ -185,7 +185,7 @@ public class BundleThreadContextClassLoader extends URLClassLoader {
             }
 
             final Bundle bundle = bundles.get(0);
-            final ClassLoader detectedClassLoaderForType = bundle.getClassLoader();
+            final ClassLoader detectedClassLoaderForType = BundleClassLoaders.getInstance().createClassLoaderForBundle(bundle);
             final Class<?> rawClass = Class.forName(implementationClassName, true, detectedClassLoaderForType);
 
             Thread.currentThread().setContextClassLoader(detectedClassLoaderForType);

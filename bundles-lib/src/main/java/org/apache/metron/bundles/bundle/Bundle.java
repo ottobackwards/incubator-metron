@@ -21,28 +21,32 @@ package org.apache.metron.bundles.bundle;
  */
 public class Bundle {
 
-    private final BundleDetails bundleDetails;
+  private final BundleDetails bundleDetails;
 
-    private final ClassLoader classLoader;
+  private ClassLoader classLoader;
 
-    public Bundle(final BundleDetails bundleDetails, final ClassLoader classLoader) {
-        this.bundleDetails = bundleDetails;
-        this.classLoader = classLoader;
+  public Bundle(final BundleDetails bundleDetails) {
+    this(bundleDetails, null);
+  }
 
-        if (this.bundleDetails == null) {
-            throw new IllegalStateException("BundleDetails cannot be null");
-        }
+  public Bundle(final BundleDetails bundleDetails, final ClassLoader classLoader) {
+    this.bundleDetails = bundleDetails;
+    this.classLoader = classLoader;
 
-        if (this.classLoader == null) {
-            throw new IllegalStateException("ClassLoader cannot be null");
-        }
+    if (this.bundleDetails == null) {
+      throw new IllegalStateException("BundleDetails cannot be null");
     }
+  }
 
-    public BundleDetails getBundleDetails() {
-        return bundleDetails;
-    }
+  public BundleDetails getBundleDetails() {
+    return bundleDetails;
+  }
 
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
+  public ClassLoader getClassLoader() {
+    return classLoader;
+  }
+
+  public void setClassLoader(ClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
 }

@@ -24,6 +24,7 @@ import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.bundle.BundleCoordinates;
 import org.apache.metron.bundles.bundle.BundleDetails;
 import org.apache.metron.bundles.util.BundleProperties;
+import org.apache.metron.bundles.util.ClassIndexUtil;
 import org.apache.metron.bundles.util.FileUtils;
 import org.apache.metron.bundles.util.StringUtils;
 import org.apache.metron.bundles.annotation.behavior.RequiresInstanceClassLoading;
@@ -57,7 +58,7 @@ public class ExtensionManager {
       BundleCoordinates.DEFAULT_GROUP, "system", BundleCoordinates.DEFAULT_VERSION);
 
   // Maps a service definition (interface) to those classes that implement the interface
-  private static final Map<Class, Set<Class>> definitionMap = new HashMap<>();
+  private static final Map<Class, Set<String>> definitionMap = new HashMap<>();
 
   private static final Map<String, List<Bundle>> classNameBundleLookup = new HashMap<>();
   private static final Map<BundleCoordinates, Bundle> bundleCoordinateBundleLookup = new HashMap<>();
@@ -102,19 +103,10 @@ public class ExtensionManager {
 
     // consider each bundle class loader
     for (final Bundle bundle : bundles) {
-      // Must set the context class loader to the bundle classloader itself
-      // so that static initialization techniques that depend on the context class loader will work properly
-      final ClassLoader ncl = bundle.getClassLoader();
-      Thread.currentThread().setContextClassLoader(ncl);
       loadExtensions(bundle);
 
       // Create a look-up from withCoordinates to bundle
       bundleCoordinateBundleLookup.put(bundle.getBundleDetails().getCoordinates(), bundle);
-    }
-
-    // restore the current context class loader if appropriate
-    if (currentContextClassLoader != null) {
-      Thread.currentThread().setContextClassLoader(currentContextClassLoader);
     }
   }
 
@@ -158,7 +150,7 @@ public class ExtensionManager {
   @SuppressWarnings("unchecked")
   private static void loadExtensions(final Bundle bundle) throws NotInitializedException {
     checkInitialized();
-    for (final Map.Entry<Class, Set<Class>> entry : definitionMap.entrySet()) {
+    for (final Map.Entry<Class, Set<String>> entry : definitionMap.entrySet()) {
       // this is another extention point
       // what we care about here is getting the right classes from the classloader for the bundle
       // this *could* be as a 'service' itself with different implementations
@@ -167,26 +159,25 @@ public class ExtensionManager {
       // which there may be in the system.
       // Changed to ClassIndex
       Class clazz = entry.getKey();
-      ClassLoader cl = bundle.getClassLoader();
-      Iterable<Class<?>> it = ClassIndex.getSubclasses(clazz, cl);
-      for (Class<?> c : it) {
-        if (cl.equals(c.getClassLoader())) {
-          // check for abstract
-          if (!Modifier.isAbstract(c.getModifiers())) {
-            registerServiceClass(c, classNameBundleLookup, bundle, entry.getValue());
-          }
-        }
-      }
-      it = ClassIndex.getAnnotated(clazz, cl);
-      for (Class<?> c : it) {
-        if (cl.equals(clazz.getClassLoader())) {
-          // check for abstract
-          if (!Modifier.isAbstract(c.getModifiers())) {
-            registerServiceClass(c, classNameBundleLookup, bundle, entry.getValue());
-          }
-        }
-      }
+      Iterable<String> subIt = null;
+      Iterable<String> annotIt = null;
 
+      if(bundle.getClassLoader() == null) {
+        FileObject bundleFile = bundle.getBundleDetails().getBundleFile();
+        subIt = ClassIndexUtil.getSubclassesNames(clazz, bundleFile);
+        annotIt = ClassIndexUtil.getAnnotatedNames(clazz, bundleFile);
+
+      } else {
+        subIt = ClassIndexUtil.getSubclassesNames(clazz,bundle.getClassLoader());
+        annotIt = ClassIndexUtil.getAnnotatedNames(clazz, bundle.getClassLoader());
+      }
+      for (String className : subIt) {
+        // check for abstract
+        registerServiceClass(className, classNameBundleLookup, bundle, entry.getValue());
+      }
+      for (String className : annotIt) {
+        registerServiceClass(className, classNameBundleLookup, bundle, entry.getValue());
+      }
     }
   }
 
@@ -194,15 +185,14 @@ public class ExtensionManager {
   /**
    * Registers extension for the specified type from the specified Bundle.
    *
-   * @param type the extension type
+   * @param className the extension type name
    * @param classNameBundleMap mapping of classname to Bundle
    * @param bundle the Bundle being mapped to
    * @param classes to map to this classloader but which come from its ancestors
    */
-  private static void registerServiceClass(final Class<?> type,
+  private static void registerServiceClass(final String className,
       final Map<String, List<Bundle>> classNameBundleMap, final Bundle bundle,
-      final Set<Class> classes) {
-    final String className = type.getName();
+      final Set<String> classes) {
 
     // get the bundles that have already been registered for the class name
     List<Bundle> registeredBundles = classNameBundleMap.get(className);
@@ -222,27 +212,18 @@ public class ExtensionManager {
         alreadyRegistered = true;
         break;
       }
-
-      // if the type wasn't loaded from an ancestor, and the type isn't a parsers, cs, or reporting task, then
-      // fail registration because we don't support multiple versions of any other types
-      if (!multipleVersionsAllowed(type)) {
-        throw new IllegalStateException("Attempt was made to load " + className + " from "
-            + bundle.getBundleDetails().getCoordinates().getCoordinates()
-            + " but that class name is already loaded/registered from " + registeredBundle
-            .getBundleDetails().getCoordinates()
-            + " and multiple versions are not supported for this type"
-        );
-      }
+      throw new IllegalStateException("Attempt was made to load " + className + " from "
+          + bundle.getBundleDetails().getCoordinates().getCoordinates()
+          + " but that class name is already loaded/registered from " + registeredBundle
+          .getBundleDetails().getCoordinates()
+          + " and multiple versions are not supported for this type"
+      );
     }
 
     // if none of the above was true then register the new bundle
     if (!alreadyRegistered) {
       registeredBundles.add(bundle);
-      classes.add(type);
-
-      if (type.isAnnotationPresent(RequiresInstanceClassLoading.class)) {
-        requiresInstanceClassLoading.add(className);
-      }
+      classes.add(className);
     }
   }
 
@@ -392,12 +373,12 @@ public class ExtensionManager {
     return classLoaderBundleLookup.get(classLoader);
   }
 
-  public static Set<Class> getExtensions(final Class<?> definition) {
+  public static Set<String> getExtensions(final Class<?> definition) {
     if (definition == null) {
       throw new IllegalArgumentException("Class cannot be null");
     }
-    final Set<Class> extensions = definitionMap.get(definition);
-    return (extensions == null) ? Collections.<Class>emptySet() : extensions;
+    final Set<String> extensions = definitionMap.get(definition);
+    return (extensions == null) ? Collections.<String>emptySet() : extensions;
   }
 
   public static void logClassLoaderMapping() throws NotInitializedException {
@@ -405,14 +386,14 @@ public class ExtensionManager {
     final StringBuilder builder = new StringBuilder();
 
     builder.append("Extension Type Mapping to Bundle:");
-    for (final Map.Entry<Class, Set<Class>> entry : definitionMap.entrySet()) {
+    for (final Map.Entry<Class, Set<String>> entry : definitionMap.entrySet()) {
       builder.append("\n\t=== ").append(entry.getKey().getSimpleName()).append(" Type ===");
 
-      for (final Class type : entry.getValue()) {
-        final List<Bundle> bundles = classNameBundleLookup.containsKey(type.getName())
-            ? classNameBundleLookup.get(type.getName()) : Collections.emptyList();
+      for (final String type : entry.getValue()) {
+        final List<Bundle> bundles = classNameBundleLookup.containsKey(type)
+            ? classNameBundleLookup.get(type) : Collections.emptyList();
 
-        builder.append("\n\t").append(type.getName());
+        builder.append("\n\t").append(type);
 
         for (final Bundle bundle : bundles) {
           final String coordinate = bundle.getBundleDetails().getCoordinates().getCoordinates();
