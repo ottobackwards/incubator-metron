@@ -159,23 +159,16 @@ public class ExtensionManager {
       // which there may be in the system.
       // Changed to ClassIndex
       Class clazz = entry.getKey();
-      Iterable<String> subIt = null;
-      Iterable<String> annotIt = null;
+      Iterable<String> it = null;
 
       if(bundle.getClassLoader() == null) {
         FileObject bundleFile = bundle.getBundleDetails().getBundleFile();
-        subIt = ClassIndexUtil.getSubclassesNames(clazz, bundleFile);
-        annotIt = ClassIndexUtil.getAnnotatedNames(clazz, bundleFile);
+        it = ClassIndexUtil.getAllclassesNames(clazz, bundleFile);
 
       } else {
-        subIt = ClassIndexUtil.getSubclassesNames(clazz,bundle.getClassLoader());
-        annotIt = ClassIndexUtil.getAnnotatedNames(clazz, bundle.getClassLoader());
+        it = ClassIndexUtil.getAllclassesNames(clazz, bundle.getClassLoader());
       }
-      for (String className : subIt) {
-        // check for abstract
-        registerServiceClass(className, classNameBundleLookup, bundle, entry.getValue());
-      }
-      for (String className : annotIt) {
+      for (String className : it) {
         registerServiceClass(className, classNameBundleLookup, bundle, entry.getValue());
       }
     }

@@ -22,9 +22,11 @@ import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.vfs2.FileObject;
 import org.atteo.classindex.IndexAnnotated;
@@ -36,18 +38,14 @@ import org.atteo.classindex.processor.ClassIndexProcessor;
 /**
  * Access to the compile-time generated index of classes.
  * <p/>
- * <p>
- * Use &#064;{@link IndexAnnotated} and &#064;{@link IndexSubclasses} annotations to force the classes to be indexed.
- * </p>
+ * <p> Use &#064;{@link IndexAnnotated} and &#064;{@link IndexSubclasses} annotations to force the
+ * classes to be indexed. </p>
  * <p/>
- * <p>
- * Keep in mind that the class is indexed only when it is compiled with
- * classindex.jar file in classpath.
- * </p>
+ * <p> Keep in mind that the class is indexed only when it is compiled with classindex.jar file in
+ * classpath. </p>
  * <p/>
- * <p>
- * Also to preserve class-index data when creating shaded jar you should use the following
- * Maven configuration:
+ * <p> Also to preserve class-index data when creating shaded jar you should use the following Maven
+ * configuration:
  * <pre>
  * {@code
  * <build>
@@ -83,11 +81,11 @@ import org.atteo.classindex.processor.ClassIndexProcessor;
  * This utility class is adapted from the original : https://github.com/ottobackwards/classindex/blob/master/classindex/src/main/java/org/atteo/classindex/ClassIndex.java
  * for the Apache Metron project.
  *
- * This adaptation introduces VFS support for Bundles, allowing use to read the ClassIndex information
- * without creating classloaders
- *
+ * This adaptation introduces VFS support for Bundles, allowing use to read the ClassIndex
+ * information without creating classloaders
  */
 public class ClassIndexUtil {
+
   public static final String SUBCLASS_INDEX_PREFIX = "META-INF/services/";
   public static final String ANNOTATED_INDEX_PREFIX = "META-INF/annotations/";
   public static final String PACKAGE_INDEX_NAME = "jaxb.index";
@@ -97,13 +95,50 @@ public class ClassIndexUtil {
 
   }
 
+
+  /**
+   * Retrieves Both the subclass and annotated classes for a given class.
+   * @param superClass the class to find subclasses for
+   * @param classLoader the classloader
+   * @param <T>
+   * @return
+   */
+  public static <T> Iterable<String> getAllclassesNames(Class<T> superClass, ClassLoader classLoader) {
+    Map<String, Iterable<String>> map = readIndexFile(classLoader,
+        new String[]{SUBCLASS_INDEX_PREFIX + superClass.getCanonicalName(),
+            ANNOTATED_INDEX_PREFIX + superClass.getCanonicalName()});
+    ArrayList<String> list = new ArrayList<>();
+    for (Iterable<String> iterable : map.values()) {
+      iterable.forEach(list::add);
+    }
+    return list;
+  }
+
+  /**
+   * Retrieves Both the subclass and annotated classes for a given class.
+   * @param superClass the class to find subclasses for
+   * @param bundleFile the bundleFile
+   * @param <T>
+   * @return
+   */
+  public static <T> Iterable<String> getAllclassesNames(Class<T> superClass,
+       FileObject bundleFile) {
+    Map<String, Iterable<String>> map = readIndexFile(bundleFile,
+        new String[]{SUBCLASS_INDEX_PREFIX + superClass.getCanonicalName(),
+            ANNOTATED_INDEX_PREFIX + superClass.getCanonicalName()});
+    ArrayList<String> list = new ArrayList<>();
+    for (Iterable<String> iterable : map.values()) {
+      iterable.forEach(list::add);
+    }
+    return list;
+  }
+
+
   /**
    * Retrieves a list of subclasses of the given class.
    * <p/>
-   * <p>
-   * The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
-   * at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
+   * at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param superClass class to find subclasses for
    * @return list of subclasses
@@ -116,17 +151,16 @@ public class ClassIndexUtil {
   /**
    * Retrieves a list of subclasses of the given class.
    * <p/>
-   * <p>
-   * The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
-   * at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
+   * at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param superClass class to find subclasses for
    * @param classLoader classloader for loading classes
    * @return list of subclasses
    */
   @SuppressWarnings("unchecked")
-  public static <T> Iterable<Class<? extends T>> getSubclasses(Class<T> superClass, ClassLoader classLoader) {
+  public static <T> Iterable<Class<? extends T>> getSubclasses(Class<T> superClass,
+      ClassLoader classLoader) {
     Iterable<String> entries = getSubclassesNames(superClass, classLoader);
     Set<Class<?>> classes = new HashSet<>();
     findClasses(classLoader, classes, entries);
@@ -144,10 +178,8 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of subclasses of the given class.
    * <p/>
-   * <p>
-   * The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
-   * at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
+   * at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param superClass class to find subclasses for
    * @return names of subclasses
@@ -160,44 +192,40 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of subclasses of the given class.
    * <p/>
-   * <p>
-   * The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
-   * at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
+   * at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param superClass class to find subclasses for
    * @param classLoader classloader for loading index file
    * @return names of subclasses
    */
   @SuppressWarnings("unchecked")
-  public static <T> Iterable<String> getSubclassesNames(Class<T> superClass, ClassLoader classLoader) {
+  public static <T> Iterable<String> getSubclassesNames(Class<T> superClass,
+      ClassLoader classLoader) {
     return readIndexFile(classLoader, SUBCLASS_INDEX_PREFIX + superClass.getCanonicalName());
   }
 
   /**
    * Retrieves names of subclasses of the given class.
    * <p/>
-   * <p>
-   * The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
-   * at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The class must be annotated with {@link IndexSubclasses} for it's subclasses to be indexed
+   * at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param superClass class to find subclasses for
    * @param bundleFile the bundle file with jars to inspect
    * @return names of subclasses
    */
   @SuppressWarnings("unchecked")
-  public static <T> Iterable<String> getSubclassesNames(Class<T> superClass, FileObject bundleFile) {
+  public static <T> Iterable<String> getSubclassesNames(Class<T> superClass,
+      FileObject bundleFile) {
     return readIndexFile(bundleFile, SUBCLASS_INDEX_PREFIX + superClass.getCanonicalName());
   }
 
   /**
    * Retrieves a list of classes from given package.
    * <p/>
-   * <p>
-   * The package must be annotated with {@link IndexSubclasses} for the classes inside
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The package must be annotated with {@link IndexSubclasses} for the classes inside to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param packageName name of the package to search classes for
    * @return list of classes from package
@@ -209,17 +237,16 @@ public class ClassIndexUtil {
   /**
    * Retrieves a list of classes from given package.
    * <p/>
-   * <p>
-   * The package must be annotated with {@link IndexSubclasses} for the classes inside
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The package must be annotated with {@link IndexSubclasses} for the classes inside to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param packageName name of the package to search classes for
    * @param classLoader classloader for loading classes
    * @return list of classes from package
    */
   public static Iterable<Class<?>> getPackageClasses(String packageName, ClassLoader classLoader) {
-    Iterable<String> entries = readIndexFile(classLoader, packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
+    Iterable<String> entries = readIndexFile(classLoader,
+        packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
 
     Set<Class<?>> classes = new HashSet<>();
     findClassesInPackage(classLoader, packageName, classes, entries);
@@ -233,10 +260,8 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of classes from given package.
    * <p/>
-   * <p>
-   * The package must be annotated with {@link IndexSubclasses} for the classes inside
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The package must be annotated with {@link IndexSubclasses} for the classes inside to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param packageName name of the package to search classes for
    * @return names of classes from package
@@ -248,17 +273,17 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of classes from given package.
    * <p/>
-   * <p>
-   * The package must be annotated with {@link IndexSubclasses} for the classes inside
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The package must be annotated with {@link IndexSubclasses} for the classes inside to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param packageName name of the package to search classes for
    * @param classLoader classloader for loading index file
    * @return names of classes from package
    */
-  public static Iterable<String> getPackageClassesNames(String packageName, ClassLoader classLoader) {
-    Iterable<String> entries = readIndexFile(classLoader, packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
+  public static Iterable<String> getPackageClassesNames(String packageName,
+      ClassLoader classLoader) {
+    Iterable<String> entries = readIndexFile(classLoader,
+        packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
     List<String> result = new ArrayList<>();
     for (String simpleName : entries) {
       result.add(packageName + "." + simpleName);
@@ -269,17 +294,16 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of classes from given package.
    * <p/>
-   * <p>
-   * The package must be annotated with {@link IndexSubclasses} for the classes inside
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The package must be annotated with {@link IndexSubclasses} for the classes inside to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param packageName name of the package to search classes for
    * @param bundleFile the Bundle for loading index file
    * @return names of classes from package
    */
   public static Iterable<String> getPackageClassesNames(String packageName, FileObject bundleFile) {
-    Iterable<String> entries = readIndexFile(bundleFile, packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
+    Iterable<String> entries = readIndexFile(bundleFile,
+        packageName.replace(".", "/") + "/" + PACKAGE_INDEX_NAME);
     List<String> result = new ArrayList<>();
     for (String simpleName : entries) {
       result.add(packageName + "." + simpleName);
@@ -290,10 +314,8 @@ public class ClassIndexUtil {
   /**
    * Retrieves a list of classes annotated by given annotation.
    * <p/>
-   * <p>
-   * The annotation must be annotated with {@link IndexAnnotated} for annotated classes
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The annotation must be annotated with {@link IndexAnnotated} for annotated classes to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param annotation annotation to search class for
    * @return list of annotated classes
@@ -305,16 +327,15 @@ public class ClassIndexUtil {
   /**
    * Retrieves a list of classes annotated by given annotation.
    * <p/>
-   * <p>
-   * The annotation must be annotated with {@link IndexAnnotated} for annotated classes
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
+   * <p> The annotation must be annotated with {@link IndexAnnotated} for annotated classes to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p>
    *
    * @param annotation annotation to search class for
    * @param classLoader classloader for loading classes
    * @return list of annotated classes
    */
-  public static Iterable<Class<?>> getAnnotated(Class<? extends Annotation> annotation, ClassLoader classLoader) {
+  public static Iterable<Class<?>> getAnnotated(Class<? extends Annotation> annotation,
+      ClassLoader classLoader) {
     Iterable<String> entries = getAnnotatedNames(annotation, classLoader);
     Set<Class<?>> classes = new HashSet<>();
     findClasses(classLoader, classes, entries);
@@ -324,14 +345,11 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of classes annotated by given annotation.
    * <p/>
-   * <p>
-   * The annotation must be annotated with {@link IndexAnnotated} for annotated classes
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
-   * <p>
-   * Please note there is no verification if the class really exists. It can be missing when incremental
-   * compilation is used. Use {@link #getAnnotated(Class) } if you need the verification.
-   * </p>
+   * <p> The annotation must be annotated with {@link IndexAnnotated} for annotated classes to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p> <p> Please note there is no
+   * verification if the class really exists. It can be missing when incremental compilation is
+   * used. Use {@link #getAnnotated(Class) } if you need the verification. </p>
+   *
    * @param annotation annotation to search class for
    * @return names of annotated classes
    */
@@ -342,73 +360,61 @@ public class ClassIndexUtil {
   /**
    * Retrieves names of classes annotated by given annotation.
    * <p/>
-   * <p>
-   * The annotation must be annotated with {@link IndexAnnotated} for annotated classes
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
-   * <p>
-   * Please note there is no verification if the class really exists. It can be missing when incremental
-   * compilation is used. Use {@link #getAnnotated(Class, ClassLoader) } if you need the verification.
-   * </p>
+   * <p> The annotation must be annotated with {@link IndexAnnotated} for annotated classes to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p> <p> Please note there is no
+   * verification if the class really exists. It can be missing when incremental compilation is
+   * used. Use {@link #getAnnotated(Class, ClassLoader) } if you need the verification. </p>
+   *
    * @param annotation annotation to search class for
    * @param classLoader classloader for loading the index file
    * @return names of annotated classes
    */
-  public static Iterable<String> getAnnotatedNames(Class<? extends Annotation> annotation, ClassLoader classLoader) {
+  public static Iterable<String> getAnnotatedNames(Class<? extends Annotation> annotation,
+      ClassLoader classLoader) {
     return readIndexFile(classLoader, ANNOTATED_INDEX_PREFIX + annotation.getCanonicalName());
   }
 
   /**
    * Retrieves names of classes annotated by given annotation.
    * <p/>
-   * <p>
-   * The annotation must be annotated with {@link IndexAnnotated} for annotated classes
-   * to be indexed at compile-time by {@link ClassIndexProcessor}.
-   * </p>
-   * <p>
-   * Please note there is no verification if the class really exists. It can be missing when incremental
-   * compilation is used. Use {@link #getAnnotated(Class, ClassLoader) } if you need the verification.
-   * </p>
+   * <p> The annotation must be annotated with {@link IndexAnnotated} for annotated classes to be
+   * indexed at compile-time by {@link ClassIndexProcessor}. </p> <p> Please note there is no
+   * verification if the class really exists. It can be missing when incremental compilation is
+   * used. Use {@link #getAnnotated(Class, ClassLoader) } if you need the verification. </p>
+   *
    * @param annotation annotation to search class for
    * @param bundleFile Bundle for loading the index file
    * @return names of annotated classes
    */
-  public static Iterable<String> getAnnotatedNames(Class<? extends Annotation> annotation, FileObject bundleFile) {
+  public static Iterable<String> getAnnotatedNames(Class<? extends Annotation> annotation,
+      FileObject bundleFile) {
     return readIndexFile(bundleFile, ANNOTATED_INDEX_PREFIX + annotation.getCanonicalName());
   }
 
   /**
-   * Returns the Javadoc summary for given class.
-   * <p>
-   * Javadoc summary is the first sentence of a Javadoc.
-   * </p>
-   * <p>
-   * You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link IndexAnnotated#storeJavadoc()}
-   * set to true.
-   * </p>
+   * Returns the Javadoc summary for given class. <p> Javadoc summary is the first sentence of a
+   * Javadoc. </p> <p> You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link
+   * IndexAnnotated#storeJavadoc()} set to true. </p>
    *
    * @param klass class to retrieve summary for
    * @return summary for given class, or null if it does not exists
-   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing doc comments</a>
+   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing
+   * doc comments</a>
    */
   public static String getClassSummary(Class<?> klass) {
     return getClassSummary(klass, Thread.currentThread().getContextClassLoader());
   }
 
   /**
-   * Returns the Javadoc summary for given class.
-   * <p>
-   * Javadoc summary is the first sentence of a Javadoc.
-   * </p>
-   * <p>
-   * You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link IndexAnnotated#storeJavadoc()}
-   * set to true.
-   * </p>
+   * Returns the Javadoc summary for given class. <p> Javadoc summary is the first sentence of a
+   * Javadoc. </p> <p> You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link
+   * IndexAnnotated#storeJavadoc()} set to true. </p>
    *
-   * @param klass       class to retrieve summary for
+   * @param klass class to retrieve summary for
    * @param classLoader classloader for loading classes
    * @return summary for given class, or null if it does not exists
-   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing doc comments</a>
+   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing
+   * doc comments</a>
    */
   public static String getClassSummary(Class<?> klass, ClassLoader classLoader) {
     URL resource = classLoader.getResource(JAVADOC_PREFIX + klass.getCanonicalName());
@@ -416,7 +422,8 @@ public class ClassIndexUtil {
       return null;
     }
     try {
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream(), "UTF-8"))) {
+      try (BufferedReader reader = new BufferedReader(
+          new InputStreamReader(resource.openStream(), "UTF-8"))) {
         StringBuilder builder = new StringBuilder();
         String line = reader.readLine();
         while (line != null) {
@@ -440,27 +447,25 @@ public class ClassIndexUtil {
   }
 
   /**
-   * Returns the Javadoc summary for given class.
-   * <p>
-   * Javadoc summary is the first sentence of a Javadoc.
-   * </p>
-   * <p>
-   * You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link IndexAnnotated#storeJavadoc()}
-   * set to true.
-   * </p>
+   * Returns the Javadoc summary for given class. <p> Javadoc summary is the first sentence of a
+   * Javadoc. </p> <p> You need to use {@link IndexSubclasses} or {@link IndexAnnotated} with {@link
+   * IndexAnnotated#storeJavadoc()} set to true. </p>
    *
-   * @param klass       class to retrieve summary for
+   * @param klass class to retrieve summary for
    * @param bundleFile Bundle for loading classes
    * @return summary for given class, or null if it does not exists
-   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing doc comments</a>
+   * @see <a href="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html#writingdoccomments">Writing
+   * doc comments</a>
    */
   public static String getClassSummary(Class<?> klass, FileObject bundleFile) {
-    FileObject resource = BundleClassIndexUtil.getResource(bundleFile, JAVADOC_PREFIX + klass.getCanonicalName());
+    FileObject resource = BundleClassIndexUtil
+        .getResource(bundleFile, JAVADOC_PREFIX + klass.getCanonicalName());
     if (resource == null) {
       return null;
     }
     try {
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getContent().getInputStream(), "UTF-8"))) {
+      try (BufferedReader reader = new BufferedReader(
+          new InputStreamReader(resource.getContent().getInputStream(), "UTF-8"))) {
         StringBuilder builder = new StringBuilder();
         String line = reader.readLine();
         while (line != null) {
@@ -485,26 +490,37 @@ public class ClassIndexUtil {
 
 
   private static Iterable<String> readIndexFile(ClassLoader classLoader, String resourceFile) {
-    Set<String> entries = new HashSet<>();
+    return readIndexFile(classLoader, new String[]{resourceFile}).get(resourceFile);
+  }
+
+  private static Map<String, Iterable<String>> readIndexFile(ClassLoader classLoader,
+      String[] resourceFiles) {
+    Map<String, Iterable<String>> entries = new HashMap<>();
+
+    for (String resourceFile : resourceFiles) {
+      entries.put(resourceFile, new HashSet<>());
+    }
 
     try {
-      Enumeration<URL> resources = classLoader.getResources(resourceFile);
+      for (String resourceFile : resourceFiles) {
+        Enumeration<URL> resources = classLoader.getResources(resourceFile);
+        while (resources.hasMoreElements()) {
+          URL resource = resources.nextElement();
+          try (BufferedReader reader = new BufferedReader(
+              new InputStreamReader(resource.openStream(), "UTF-8"))) {
 
-      while (resources.hasMoreElements()) {
-        URL resource = resources.nextElement();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.openStream(), "UTF-8"))) {
-
-          String line = reader.readLine();
-          while (line != null) {
-            entries.add(line);
-            line = reader.readLine();
+            String line = reader.readLine();
+            while (line != null) {
+              ((Set<String>) entries.get(resourceFile)).add(line);
+              line = reader.readLine();
+            }
+          } catch (FileNotFoundException e) {
+            // When executed under Tomcat started from Eclipse with "Serve modules without
+            // publishing" option turned on, getResources() method above returns the same
+            // resource two times: first with incorrect path and second time with correct one.
+            // So ignore the one which does not exist.
+            // See: https://github.com/atteo/classindex/issues/5
           }
-        } catch (FileNotFoundException e) {
-          // When executed under Tomcat started from Eclipse with "Serve modules without
-          // publishing" option turned on, getResources() method above returns the same
-          // resource two times: first with incorrect path and second time with correct one.
-          // So ignore the one which does not exist.
-          // See: https://github.com/atteo/classindex/issues/5
         }
       }
     } catch (IOException e) {
@@ -514,29 +530,42 @@ public class ClassIndexUtil {
   }
 
   private static Iterable<String> readIndexFile(FileObject bundleFile, String resourceFile) {
-    Set<String> entries = new HashSet<>();
+    return readIndexFile(bundleFile, new String[]{resourceFile}).get(resourceFile);
+  }
+
+  private static Map<String, Iterable<String>> readIndexFile(FileObject bundleFile,
+      String[] resourceFiles) {
+    Map<String, Iterable<String>> entries = new HashMap<>();
+
+    for (String resourceFile : resourceFiles) {
+      entries.put(resourceFile, new HashSet<>());
+    }
 
     try {
-      Iterable<FileObject> resources = BundleClassIndexUtil.getResources(bundleFile, resourceFile);
-      Iterator<FileObject> it = resources.iterator();
-      while (it.hasNext()) {
-        FileObject resource = it.next();
-        if(!resource.exists()) {
-          continue;
-        }
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getContent().getInputStream(), "UTF-8"))) {
-
-          String line = reader.readLine();
-          while (line != null) {
-            entries.add(line);
-            line = reader.readLine();
+      Map<String, Iterable<FileObject>> resources = BundleClassIndexUtil
+          .getResources(bundleFile, resourceFiles);
+      for (String resourceFile : resources.keySet()) {
+        Iterator<FileObject> it = resources.get(resourceFile).iterator();
+        while (it.hasNext()) {
+          FileObject resource = it.next();
+          if (!resource.exists()) {
+            continue;
           }
-        } catch (FileNotFoundException e) {
-          // When executed under Tomcat started from Eclipse with "Serve modules without
-          // publishing" option turned on, getResources() method above returns the same
-          // resource two times: first with incorrect path and second time with correct one.
-          // So ignore the one which does not exist.
-          // See: https://github.com/atteo/classindex/issues/5
+          try (BufferedReader reader = new BufferedReader(
+              new InputStreamReader(resource.getContent().getInputStream(), "UTF-8"))) {
+
+            String line = reader.readLine();
+            while (line != null) {
+              ((Set<String>) entries.get(resourceFile)).add(line);
+              line = reader.readLine();
+            }
+          } catch (FileNotFoundException e) {
+            // When executed under Tomcat started from Eclipse with "Serve modules without
+            // publishing" option turned on, getResources() method above returns the same
+            // resource two times: first with incorrect path and second time with correct one.
+            // So ignore the one which does not exist.
+            // See: https://github.com/atteo/classindex/issues/5
+          }
         }
       }
     } catch (IOException e) {
@@ -545,7 +574,8 @@ public class ClassIndexUtil {
     return entries;
   }
 
-  private static void findClasses(ClassLoader classLoader, Set<Class<?>> classes, Iterable<String> entries) {
+  private static void findClasses(ClassLoader classLoader, Set<Class<?>> classes,
+      Iterable<String> entries) {
     for (String entry : entries) {
       Class<?> klass;
       try {
@@ -557,7 +587,8 @@ public class ClassIndexUtil {
     }
   }
 
-  private static void findClassesInPackage(ClassLoader classLoader, String packageName, Set<Class<?>> classes,
+  private static void findClassesInPackage(ClassLoader classLoader, String packageName,
+      Set<Class<?>> classes,
       Iterable<String> entries) {
     for (String entry : entries) {
       if (entry.contains(".")) {

@@ -18,11 +18,12 @@
 package org.apache.metron.bundles.util;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -52,22 +53,63 @@ public class BundleClassIndexUtil {
           }
         }
       }
-      for ( FileObject resource : resources){
+      for (FileObject resource : resources) {
         FileObject thisResourceFile = resource.resolveFile(resourceFile);
-        if(thisResourceFile.exists()) {
+        if (thisResourceFile.exists()) {
           resourceFiles.add(thisResourceFile);
         }
       }
-    }catch (FileSystemException fse) {
+    } catch (FileSystemException fse) {
       resourceFiles.clear();
     }
 
     return resourceFiles;
   }
 
+  @SuppressWarnings("unchecked")
+  public static Map<String, Iterable<FileObject>> getResources(FileObject bundleFile,
+      String[] resourceFiles) {
+    Set<FileObject> resources = new HashSet<>();
+    Map<String, Iterable<FileObject>> resourcesMap = new HashMap<>();
+    for (String resourceFile : resourceFiles) {
+      resourcesMap.put(resourceFile, new ArrayList<>());
+    }
+    FileSystemManager manager = bundleFile.getFileSystem().getFileSystemManager();
+    try {
+      if (manager.canCreateFileSystem(bundleFile)) {
+        // create a Jar filesystem from the bundle
+        FileObject fsBundleFile = manager.createFileSystem(bundleFile);
+
+        // resolve the dependency directory within the bundle
+        FileObject deps = fsBundleFile.resolveFile(VFSBundleClassLoader.DEPENDENCY_PATH);
+        if (deps.exists() && deps.isFolder()) {
+          FileObject[] depJars = deps.getChildren();
+          for (FileObject jarFileObject : depJars) {
+            // create a filesystem from each jar and add it as
+            // a resource
+            jarFileObject = manager.createFileSystem(jarFileObject);
+            resources.add(jarFileObject);
+          }
+        }
+      }
+      for (FileObject resource : resources) {
+        for (String resourceFile : resourceFiles) {
+          FileObject thisResourceFile = resource.resolveFile(resourceFile);
+          if (thisResourceFile.exists()) {
+            ((List) resourcesMap.get(resourceFile)).add(thisResourceFile);
+          }
+        }
+      }
+    } catch (FileSystemException fse) {
+      resourcesMap.clear();
+    }
+
+    return resourcesMap;
+  }
+
   public static FileObject getResource(FileObject bundleFile, String resourceFile) {
-    Iterable<FileObject> resources = getResources(bundleFile,resourceFile);
-    if(resources != null && resources.iterator().hasNext()) {
+    Iterable<FileObject> resources = getResources(bundleFile, resourceFile);
+    if (resources != null && resources.iterator().hasNext()) {
       Iterator<FileObject> it = resources.iterator();
       return it.next();
     }
