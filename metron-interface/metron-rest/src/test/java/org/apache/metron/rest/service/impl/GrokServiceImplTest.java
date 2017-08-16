@@ -17,8 +17,12 @@
  */
 package org.apache.metron.rest.service.impl;
 
+import javax.security.auth.Subject;
 import oi.thekraken.grok.api.Grok;
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
@@ -27,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.env.Environment;
@@ -61,7 +66,7 @@ public class GrokServiceImplTest {
   public void setUp() throws Exception {
     environment = mock(Environment.class);
     grok = mock(Grok.class);
-    grokService = new GrokServiceImpl(environment, grok);
+    grokService = new GrokServiceImpl(environment, grok, new Configuration());
   }
 
   @Test
@@ -231,19 +236,5 @@ public class GrokServiceImplTest {
     exception.expectMessage("A grokStatement must be provided");
 
     grokService.saveTemporary(null, "squid");
-  }
-
-  @Test
-  public void getStatementFromClasspathShouldReturnStatement() throws Exception {
-    String expected = FileUtils.readFileToString(new File("../../metron-platform/metron-parsers/src/main/resources/patterns/common"));
-    assertEquals(expected, grokService.getStatementFromClasspath("/patterns/common"));
-  }
-
-  @Test
-  public void getStatementFromClasspathShouldThrowRestException() throws Exception {
-    exception.expect(RestException.class);
-    exception.expectMessage("Could not find a statement at path /bad/path");
-
-    grokService.getStatementFromClasspath("/bad/path");
   }
 }

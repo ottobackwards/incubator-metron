@@ -17,11 +17,18 @@
  */
 package org.apache.metron.rest.service.impl;
 
+import java.io.InputStream;
+import java.util.HashMap;
 import oi.thekraken.grok.api.Grok;
 import oi.thekraken.grok.api.Match;
 import org.apache.commons.io.IOUtils;
 import org.apache.directory.api.util.Strings;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.metron.parsers.grok.GrokBuilder;
+import org.apache.metron.parsers.grok.GrokParser;
+import org.apache.metron.common.utils.ResourceLoader;
+import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
@@ -44,13 +51,18 @@ import static org.apache.metron.rest.MetronRestConstants.GROK_TEMP_PATH_SPRING_P
 public class GrokServiceImpl implements GrokService {
 
     private Environment environment;
-
     private Grok commonGrok;
+    private Configuration configuration;
+    private Map<String,Object> configurationMap;
 
     @Autowired
-    public GrokServiceImpl(Environment environment, Grok commonGrok) {
+    public GrokServiceImpl(Environment environment, Grok commonGrok, Configuration configuration) {
         this.environment = environment;
         this.commonGrok = commonGrok;
+        this.configuration = configuration;
+
+        configurationMap = new HashMap<>();
+        configurationMap.put("metron.apps.hdfs.dir",environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT));
     }
 
     @Override
@@ -68,11 +80,14 @@ public class GrokServiceImpl implements GrokService {
             if (Strings.isEmpty(grokValidation.getStatement())) {
               throw new RestException("Grok statement is required");
             }
-            Grok grok = new Grok();
-            grok.addPatternFromReader(new InputStreamReader(getClass().getResourceAsStream("/patterns/common")));
-            grok.addPatternFromReader(new StringReader(grokValidation.getStatement()));
-            String grokPattern = "%{" + grokValidation.getPatternLabel() + "}";
-            grok.compile(grokPattern);
+
+            Grok grok = new GrokBuilder().withPatternLabel(grokValidation.getPatternLabel())
+                .withLoadCommon(false)
+                .withReader(
+                    new InputStreamReader(GrokParser.class.getResourceAsStream("/patterns/common")))
+                .withReader(new StringReader(grokValidation.getStatement()))
+                .build();
+
             Match gm = grok.match(grokValidation.getSampleData());
             gm.captures();
             results = gm.toMap();
@@ -111,12 +126,21 @@ public class GrokServiceImpl implements GrokService {
       return new Path(grokTempPath, authentication.getName()).toString();
     }
 
-    public String getStatementFromClasspath(String path) throws RestException {
-      try {
-        return IOUtils.toString(getClass().getResourceAsStream(path));
-      } catch (Exception e) {
+    public String getStatement(String path) throws RestException {
+        try {
+            try (ResourceLoader resourceLoader = new ResourceLoader.Builder()
+                .withFileSystemConfiguration(configuration)
+                .withConfiguration(configurationMap).build()) {
+                Map<String, InputStream> resources = resourceLoader.getResources(path);
+                for (String resourceName : resources.keySet()) {
+                    if (!resourceName.equals("common")) {
+                        return IOUtils.toString(resources.get(resourceName));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RestException("Could not find a statement at path " + path, e);
+        }
         throw new RestException("Could not find a statement at path " + path);
-      }
     }
-
 }

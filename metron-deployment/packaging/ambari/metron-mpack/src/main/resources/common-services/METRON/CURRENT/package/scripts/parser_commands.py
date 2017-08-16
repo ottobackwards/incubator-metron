@@ -88,7 +88,8 @@ class ParserCommands:
                                    owner=self.__params.metron_user,
                                    group=self.__params.hadoop_group,
                                    mode=0775,
-                                   source=self.__params.local_grok_patterns_dir)
+                                   source=self.__params.local_grok_patterns_dir,
+                                   recursive_chown=True)
 
         parsers = self.get_all_parsers_list()
 
@@ -106,7 +107,8 @@ class ParserCommands:
                                        owner=self.__params.metron_user,
                                        group=self.__params.hadoop_group,
                                        mode=0775,
-                                       source=self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns')
+                                       source=self.__params.metron_extensions_etc_parsers + '/' + parser + '/patterns',
+                                       recursive_chown=True)
 
         Logger.info("Copying extension lib from local directory '{0}' to HDFS '{1}'".format(self.__params.local_metron_extensions_lib,self.__params.hdfs_metron_apps_extensions_lib))
         self.__params.HdfsResource(self.__params.hdfs_metron_apps_extensions_lib,
@@ -115,7 +117,8 @@ class ParserCommands:
                            owner=self.__params.metron_user,
                            group=self.__params.hadoop_group,
                            mode=0775,
-                           source=self.__params.local_metron_extensions_lib)
+                           source=self.__params.local_metron_extensions_lib,
+                           recursive_chown=True)
 
         Logger.info("Creating the extensions alt lib dir in HDFS {0}".format(self.__params.hdfs_metron_apps_extensions_alt_lib))
         self.__params.HdfsResource(self.__params.hdfs_metron_apps_extensions_alt_lib,
@@ -123,7 +126,8 @@ class ParserCommands:
                                    action="create_on_execute",
                                    owner=self.__params.metron_user,
                                    group=self.__params.hadoop_group,
-                                   mode=0775)
+                                   mode=0775,
+                                   recursive_chown=True)
 
         Logger.info("Done initializing parser configuration")
 

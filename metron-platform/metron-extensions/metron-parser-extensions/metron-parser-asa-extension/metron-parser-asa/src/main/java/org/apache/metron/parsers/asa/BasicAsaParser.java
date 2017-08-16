@@ -35,6 +35,7 @@ import oi.thekraken.grok.api.exception.GrokException;
 import org.apache.metron.common.Constants;
 import org.apache.metron.parsers.BasicParser;
 import org.apache.metron.parsers.ParseException;
+import org.apache.metron.parsers.grok.GrokBuilder;
 import org.apache.metron.parsers.utils.SyslogUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -45,9 +46,10 @@ public class BasicAsaParser extends BasicParser {
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   protected Clock deviceClock;
-  private String syslogPattern = "%{CISCO_TAGGED_SYSLOG}";
+  private String syslogPattern = "CISCO_TAGGED_SYSLOG";
 
   private Grok syslogGrok;
+  private Map<String,Object> parserConfiguration;
 
   private static final Map<String, String> patternMap = ImmutableMap.<String, String> builder()
       .put("ASA-2-106001", "CISCOFW106001")
@@ -96,6 +98,8 @@ public class BasicAsaParser extends BasicParser {
 
   @Override
   public void configure(Map<String, Object> parserConfig) {
+    this.parserConfiguration = new HashMap(parserConfig);
+    this.parserConfiguration.put("grokPath","/patterns/asa");
     String timeZone = (String) parserConfig.get("deviceTimeZone");
     if (timeZone != null)
       deviceClock = Clock.system(ZoneId.of(timeZone));
@@ -105,22 +109,18 @@ public class BasicAsaParser extends BasicParser {
     }
   }
 
-  private void addGrok(String key, String pattern) throws GrokException {
-    Grok grok = new Grok();
-    InputStream patternStream = this.getClass().getResourceAsStream("/patterns/asa");
-    grok.addPatternFromReader(new InputStreamReader(patternStream));
-    grok.compile("%{" + pattern + "}");
+  private void addGrok(String key, String pattern) throws GrokException, Exception {
+    parserConfiguration.put("patternLabel",pattern);
+    Grok grok = new GrokBuilder().withParserConfiguration(parserConfiguration).build();
     grokers.put(key, grok);
   }
 
   @Override
   public void init() {
-    syslogGrok = new Grok();
-    InputStream syslogStream = this.getClass().getResourceAsStream("/patterns/asa");
     try {
-      syslogGrok.addPatternFromReader(new InputStreamReader(syslogStream));
-      syslogGrok.compile(syslogPattern);
-    } catch (GrokException e) {
+      parserConfiguration.put("patternLabel",syslogPattern);
+      syslogGrok = new GrokBuilder().withParserConfiguration(parserConfiguration).build();
+    } catch (Exception e) {
       LOG.error("[Metron] Failed to load grok patterns from jar", e);
       throw new RuntimeException(e.getMessage(), e);
     }
@@ -128,7 +128,7 @@ public class BasicAsaParser extends BasicParser {
     for (Entry<String, String> pattern : patternMap.entrySet()) {
       try {
         addGrok(pattern.getKey(), pattern.getValue());
-      } catch (GrokException e) {
+      } catch (Exception e) {
         LOG.error("[Metron] Failed to load grok pattern {} for ASA tag {}", pattern.getValue(), pattern.getKey());
       }
     }

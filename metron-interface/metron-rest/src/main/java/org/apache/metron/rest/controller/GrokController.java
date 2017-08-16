@@ -59,6 +59,6 @@ public class GrokController {
     @ApiResponse(message = "Grok statement", code = 200)
     @RequestMapping(value = "/get/statement", method = RequestMethod.GET)
     ResponseEntity<String> get(@ApiParam(name = "path", value = "Path to classpath resource", required = true) @RequestParam String path) throws RestException {
-      return new ResponseEntity<>(grokService.getStatementFromClasspath(path), HttpStatus.OK);
+      return new ResponseEntity<>(grokService.getStatement(path), HttpStatus.OK);
     }
 }

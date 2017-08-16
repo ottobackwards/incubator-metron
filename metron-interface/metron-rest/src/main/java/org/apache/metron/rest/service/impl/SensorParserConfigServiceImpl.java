@@ -18,6 +18,9 @@
 package org.apache.metron.rest.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.configuration.ConfigurationType;
 import org.apache.metron.common.configuration.ConfigurationsUtils;
@@ -154,22 +157,28 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
     } else {
       MessageParser<JSONObject> parser;
       try {
-        parser = (MessageParser<JSONObject>) Class.forName(sensorParserConfig.getParserClassName()).newInstance();
+        parser = (MessageParser<JSONObject>) Class.forName(sensorParserConfig.getParserClassName())
+            .newInstance();
+
+        File temporaryGrokFile = null;
+        if (isGrokConfig(sensorParserConfig)) {
+          temporaryGrokFile = grokService.saveTemporary(parseMessageRequest.getGrokStatement(),
+              parseMessageRequest.getSensorParserConfig().getSensorTopic());
+          // NOTE: this parse will happen with the common grok file from the metron-parsers
+          // classloader
+          sensorParserConfig.getParserConfig()
+              .put(MetronRestConstants.GROK_PATH_KEY, temporaryGrokFile.toString());
+        }
+        parser.configure(sensorParserConfig.getParserConfig());
+        parser.init();
+        JSONObject results = parser.parse(parseMessageRequest.getSampleData().getBytes()).get(0);
+        if (isGrokConfig(sensorParserConfig) && temporaryGrokFile != null) {
+          temporaryGrokFile.delete();
+        }
+        return results;
       } catch (Exception e) {
         throw new RestException(e.toString(), e.getCause());
       }
-      File temporaryGrokFile = null;
-      if (isGrokConfig(sensorParserConfig)) {
-        temporaryGrokFile = grokService.saveTemporary(parseMessageRequest.getGrokStatement(), parseMessageRequest.getSensorParserConfig().getSensorTopic());
-        sensorParserConfig.getParserConfig().put(MetronRestConstants.GROK_PATH_KEY, temporaryGrokFile.toString());
-      }
-      parser.configure(sensorParserConfig.getParserConfig());
-      parser.init();
-      JSONObject results = parser.parse(parseMessageRequest.getSampleData().getBytes()).get(0);
-      if (isGrokConfig(sensorParserConfig) && temporaryGrokFile != null) {
-        temporaryGrokFile.delete();
-      }
-      return results;
     }
   }
 

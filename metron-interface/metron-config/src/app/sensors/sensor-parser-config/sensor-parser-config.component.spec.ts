@@ -97,7 +97,7 @@ class MockSensorParserConfigService extends SensorParserConfigService {
     return Observable.create(observer => {
       observer.next({
         'Bro': 'org.apache.metron.parsers.bro.BasicBroParser',
-        'Grok': 'org.apache.metron.parsers.GrokParser'
+        'Grok': 'org.apache.metron.parsers.grok.GrokParser'
       });
       observer.complete();
     });
@@ -451,7 +451,7 @@ describe('Component: SensorParserConfig', () => {
   let router: MockRouter;
 
   let squidSensorParserConfig: any = {
-    'parserClassName': 'org.apache.metron.parsers.GrokParser',
+    'parserClassName': 'org.apache.metron.parsers.grok.GrokParser',
     'sensorTopic': 'squid',
     'parserConfig': {
       'grokPath': '/apps/metron/patterns/squid',
@@ -586,7 +586,7 @@ describe('Component: SensorParserConfig', () => {
     component.getAvailableParsers();
     expect(component.availableParsers).toEqual({
       'Bro': 'org.apache.metron.parsers.bro.BasicBroParser',
-      'Grok': 'org.apache.metron.parsers.GrokParser'
+      'Grok': 'org.apache.metron.parsers.grok.GrokParser'
     });
     expect(component.availableParserNames).toEqual(['Bro', 'Grok']);
 
@@ -597,7 +597,7 @@ describe('Component: SensorParserConfig', () => {
     component.init('new');
 
     let expectedSensorParserConfig = new SensorParserConfig();
-    expectedSensorParserConfig.parserClassName = 'org.apache.metron.parsers.GrokParser';
+    expectedSensorParserConfig.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
     expect(component.sensorParserConfig).toEqual(expectedSensorParserConfig);
     expect(component.sensorEnrichmentConfig).toEqual(new SensorEnrichmentConfig());
     expect(component.indexingConfigurations).toEqual(new IndexingConfigurations());
@@ -610,7 +610,7 @@ describe('Component: SensorParserConfig', () => {
         Object.assign(new SensorEnrichmentConfig(), squidSensorEnrichmentConfig));
     sensorIndexingConfigService.setSensorIndexingConfig('squid',
         Object.assign(new IndexingConfigurations(), squidIndexingConfigurations));
-    hdfsService.setContents('/apps/metron/patterns/squid', 'SQUID_DELIMITED grok statement');
+    grokValidationService.setContents('/apps/metron/patterns/squid', 'SQUID_DELIMITED grok statement');
 
     component.init('squid');
     expect(component.sensorParserConfig).toEqual(Object.assign(new SensorParserConfig(), squidSensorParserConfig));
@@ -688,7 +688,7 @@ describe('Component: SensorParserConfig', () => {
     expect(component.hidePane).not.toHaveBeenCalled();
     expect(component.isConfigValid).toHaveBeenCalled();
 
-    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.GrokParser';
+    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
     component.onParserTypeChange();
     expect(component.parserClassValid).toEqual(true);
     expect(component.hidePane).not.toHaveBeenCalled();
@@ -724,7 +724,7 @@ describe('Component: SensorParserConfig', () => {
     component.isConfigValid();
     expect(component.configValid).toEqual(true);
 
-    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.GrokParser';
+    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
     component.isConfigValid();
     expect(component.configValid).toEqual(false);
 
@@ -774,11 +774,11 @@ describe('Component: SensorParserConfig', () => {
 
     component.onSaveGrokStatement('grok statement');
     expect(component.grokStatement).toEqual('grok statement');
-    expect(component.sensorParserConfig.parserConfig['grokPath']).toEqual('/apps/metron/patterns/squid');
+    expect(component.sensorParserConfig.parserConfig['grokPath']).toEqual('/patterns/squid/squid');
 
     component.sensorParserConfig.parserConfig['grokPath'] = '/patterns/squid';
     component.onSaveGrokStatement('grok statement');
-    expect(component.sensorParserConfig.parserConfig['grokPath']).toEqual('/apps/metron/patterns/squid');
+    expect(component.sensorParserConfig.parserConfig['grokPath']).toEqual('/patterns/squid/squid');
 
     component.sensorParserConfig.parserConfig['grokPath'] = '/custom/grok/path';
     component.onSaveGrokStatement('grok statement');
@@ -814,7 +814,7 @@ describe('Component: SensorParserConfig', () => {
     });
     let sensorParserConfigSave: SensorParserConfig = new SensorParserConfig();
     sensorParserConfigSave.sensorTopic = 'squid';
-    sensorParserConfigSave.parserClassName = 'org.apache.metron.parsers.GrokParser';
+    sensorParserConfigSave.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
     sensorParserConfigSave.parserConfig['grokPath'] = '/apps/metron/patterns/squid';
     sensorParserConfigSave.fieldTransformations = [fieldTransformer];
     activatedRoute.setNameForTest('new');
@@ -824,7 +824,7 @@ describe('Component: SensorParserConfig', () => {
     spyOn(metronAlerts, 'showErrorMessage');
 
     component.sensorParserConfig.sensorTopic = 'squid';
-    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.GrokParser';
+    component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
     component.sensorParserConfig.parserConfig['grokPath'] = '/apps/metron/patterns/squid';
     component.sensorParserConfig.fieldTransformations = [fieldTransformer];
 

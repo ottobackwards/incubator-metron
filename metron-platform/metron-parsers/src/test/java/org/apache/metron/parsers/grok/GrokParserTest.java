@@ -19,10 +19,13 @@ package org.apache.metron.parsers.grok;
 
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import java.nio.file.Paths;
+import org.apache.metron.test.utils.ResourceCopier;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,6 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class GrokParserTest {
+  @BeforeClass
+  public static void beforeClass() throws IOException {
+    ResourceCopier.copyResources(Paths.get("./src/main/resources"), Paths.get("./target"));
+  }
 
   @Test
   public void test() throws IOException, ParseException {
@@ -42,6 +49,10 @@ public abstract class GrokParserTest {
     parserConfig.put("timestampField", getTimestampField());
     parserConfig.put("dateFormat", getDateFormat());
     parserConfig.put("timeFields", getTimeFields());
+
+    Map<String, Object> globalConfig = new HashMap<>();
+    globalConfig.put("metron.apps.hdfs.dir","./target/");
+    parserConfig.put("globalConfig",globalConfig);
 
     GrokParser grokParser = new GrokParser();
     grokParser.configure(parserConfig);

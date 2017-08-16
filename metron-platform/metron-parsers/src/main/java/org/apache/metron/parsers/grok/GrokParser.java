@@ -52,10 +52,11 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
   protected List<String> timeFields = new ArrayList<>();
   protected String timestampField;
   protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S z");
-  protected String patternsCommonDir = "/patterns/common";
+  protected Map<String,Object> parserConfig;
 
   @Override
   public void configure(Map<String, Object> parserConfig) {
+    this.parserConfig = parserConfig;
     this.grokPath = (String) parserConfig.get("grokPath");
     this.patternLabel = (String) parserConfig.get("patternLabel");
     this.timestampField = (String) parserConfig.get("timestampField");
@@ -77,47 +78,10 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
     }
   }
 
-  public InputStream openInputStream(String streamName) throws IOException {
-    FileSystem fs = FileSystem.get(new Configuration());
-    Path path = new Path(streamName);
-    if(fs.exists(path)) {
-      return fs.open(path);
-    } else {
-      return getClass().getResourceAsStream(streamName);
-    }
-  }
-
   @Override
   public void init() {
-    grok = new Grok();
     try {
-      InputStream commonInputStream = openInputStream(patternsCommonDir);
-      LOG.debug("Grok parser loading common patterns from: {}", patternsCommonDir);
-
-      if (commonInputStream == null) {
-        throw new RuntimeException(
-                "Unable to initialize grok parser: Unable to load " + patternsCommonDir + " from either classpath or HDFS");
-      }
-
-      grok.addPatternFromReader(new InputStreamReader(commonInputStream));
-      LOG.debug("Loading parser-specific patterns from: {}", grokPath);
-
-      InputStream patterInputStream = openInputStream(grokPath);
-      if (patterInputStream == null) {
-        throw new RuntimeException("Grok parser unable to initialize grok parser: Unable to load " + grokPath
-                + " from either classpath or HDFS");
-      }
-      grok.addPatternFromReader(new InputStreamReader(patterInputStream));
-
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Grok parser set the following grok expression: {}", grok.getNamedRegexCollectionById(patternLabel));
-      }
-
-      String grokPattern = "%{" + patternLabel + "}";
-
-      grok.compile(grokPattern);
-      LOG.debug("Compiled grok pattern {}", grokPattern);
-
+      grok = new GrokBuilder().withParserConfiguration(parserConfig).build();
     } catch (Throwable e) {
       LOG.error(e.getMessage(), e);
       throw new RuntimeException("Grok parser Error: " + e.getMessage(), e);

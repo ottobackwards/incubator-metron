@@ -124,6 +124,10 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
       }
     }
 
+    if(getSensorParserConfig() != null) {
+      getSensorParserConfig().getParserConfig().put("globalConfig",globalConfig);
+    }
+
     parser.init();
 
     writer.init(stormConf, context, collector, getConfigurations());

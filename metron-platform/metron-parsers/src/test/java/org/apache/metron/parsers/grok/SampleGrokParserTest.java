@@ -70,7 +70,7 @@ public class SampleGrokParserTest extends GrokParserTest {
 
   @Override
   public String getGrokPath() {
-    return "../metron-integration-test/src/main/sample/patterns/test";
+    return "/patterns/test";
   }
 
   @Override

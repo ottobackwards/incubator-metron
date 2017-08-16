@@ -20,13 +20,16 @@ package org.apache.metron.parsers.integration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import org.apache.metron.TestConstants;
 import org.apache.metron.bundles.BundleClassLoaders;
+import org.apache.metron.bundles.ExtensionManager;
 import org.apache.metron.integration.BaseIntegrationTest;
 import org.apache.metron.integration.ProcessorResult;
 import org.apache.metron.integration.utils.TestUtils;
 import org.apache.metron.test.TestDataType;
+import org.apache.metron.test.utils.ResourceCopier;
 import org.apache.metron.test.utils.SampleDataUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,10 +41,14 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
   @AfterClass
   public static void after(){
     BundleClassLoaders.reset();
+    ExtensionManager.reset();
   }
   @BeforeClass
-  public static void before(){
+  public static void before() throws IOException {
+    ResourceCopier.copyResources(Paths.get("./src/main/resources"), Paths.get("./target"));
+
     BundleClassLoaders.reset();
+    ExtensionManager.reset();
   }
 
 
