@@ -95,9 +95,9 @@ public class ASABundleHDFSIntegrationTest extends BaseIntegrationTest {
 
       // we need to patch the properties file
       BundleProperties properties = BundleProperties.createBasicBundleProperties("./target/remote/zookeeper/bundle.properties",new HashMap<>());
-      properties.setProperty(BundleProperties.HDFS_PREFIX,configuration.get("fs.defaultFS"));
-      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, "/extension_lib/");
-      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt", "/extension_contrib_lib/");
+      String hdfsPrefix  = configuration.get("fs.defaultFS");
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, hdfsPrefix + "/extension_lib/");
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt", hdfsPrefix + "/extension_contrib_lib/");
       FileOutputStream fso = new FileOutputStream("./target/remote/zookeeper/bundle.properties");
       properties.storeProperties(fso,"HDFS UPDATE");
       fso.flush();
