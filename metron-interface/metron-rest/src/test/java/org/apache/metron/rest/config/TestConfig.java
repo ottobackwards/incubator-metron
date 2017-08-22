@@ -84,11 +84,18 @@ public class TestConfig {
     try {
       runner.start();
       File globalConfigFile = new File("src/test/resources/zookeeper/global.json");
+      File bundlePropertiesFile = new File("src/test/resources/zookeeper/bundle.properties");
       try(BufferedReader r = new BufferedReader(new FileReader(globalConfigFile))){
         String globalConfig = IOUtils.toString(r);
         ConfigurationsUtils.writeGlobalConfigToZookeeper(globalConfig.getBytes(), zkServerComponent.getConnectionString());
       } catch (Exception e) {
         throw new IllegalStateException("Unable to upload global config", e);
+      }
+      try(BufferedReader r = new BufferedReader(new FileReader(bundlePropertiesFile))){
+        String bundleProperties = IOUtils.toString(r);
+        ConfigurationsUtils.writeGlobalBundlePropertiesToZookeeper(bundleProperties.getBytes(), zkServerComponent.getConnectionString());
+      }catch(Exception e) {
+        throw new IllegalStateException("Unable to upload bundle properties");
       }
     } catch (UnableToStartException e) {
       e.printStackTrace();

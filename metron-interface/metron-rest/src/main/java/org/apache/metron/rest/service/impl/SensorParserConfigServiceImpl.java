@@ -22,6 +22,8 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.metron.bundles.BundleSystem;
+import org.apache.metron.bundles.NotInitializedException;
 import org.apache.metron.common.configuration.ConfigurationType;
 import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -55,11 +57,14 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
 
   private GrokService grokService;
 
+  private BundleSystem bundleSystem;
+
   @Autowired
-  public SensorParserConfigServiceImpl(ObjectMapper objectMapper, CuratorFramework client, GrokService grokService) {
+  public SensorParserConfigServiceImpl(ObjectMapper objectMapper, CuratorFramework client, GrokService grokService, BundleSystem bundleSystem) {
     this.objectMapper = objectMapper;
     this.client = client;
     this.grokService = grokService;
+    this.bundleSystem = bundleSystem;
   }
 
   private Map<String, String> availableParsers;
@@ -123,31 +128,37 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
   }
 
   @Override
-  public Map<String, String> getAvailableParsers() {
-    if (availableParsers == null) {
-      availableParsers = new HashMap<>();
-      Set<Class<? extends MessageParser>> parserClasses = getParserClasses();
-      parserClasses.forEach(parserClass -> {
-        if (!"BasicParser".equals(parserClass.getSimpleName())) {
-          availableParsers.put(parserClass.getSimpleName().replaceAll("Basic|Parser", ""), parserClass.getName());
-        }
-      });
+  public Map<String, String> getAvailableParsers() throws RestException {
+    try {
+      if (availableParsers == null) {
+        availableParsers = new HashMap<>();
+        Set<Class<? extends MessageParser>> parserClasses = getParserClasses();
+        parserClasses.forEach(parserClass -> {
+          if (!"BasicParser".equals(parserClass.getSimpleName())) {
+            availableParsers.put(parserClass.getSimpleName().replaceAll("Basic|Parser", ""),
+                parserClass.getName());
+          }
+        });
+      }
+      return availableParsers;
+    } catch (Exception e) {
+      throw new RestException(e);
     }
-    return availableParsers;
   }
 
   @Override
-  public Map<String, String> reloadAvailableParsers() {
+  public Map<String, String> reloadAvailableParsers() throws RestException {
     availableParsers = null;
     return getAvailableParsers();
   }
 
-  private Set<Class<? extends MessageParser>> getParserClasses() {
-    Reflections reflections = new Reflections("org.apache.metron.parsers");
-    return reflections.getSubTypesOf(MessageParser.class);
+  @SuppressWarnings("unchecked")
+  private Set<Class<? extends MessageParser>> getParserClasses() throws NotInitializedException {
+    return (Set<Class<? extends MessageParser>>) bundleSystem.getExtensionsClassesForExtensionType(MessageParser.class);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public JSONObject parseMessage(ParseMessageRequest parseMessageRequest) throws RestException {
     SensorParserConfig sensorParserConfig = parseMessageRequest.getSensorParserConfig();
     if (sensorParserConfig == null) {
@@ -157,8 +168,8 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
     } else {
       MessageParser<JSONObject> parser;
       try {
-        parser = (MessageParser<JSONObject>) Class.forName(sensorParserConfig.getParserClassName())
-            .newInstance();
+        parser = (MessageParser<JSONObject>) bundleSystem
+            .createInstance(sensorParserConfig.getParserClassName(), MessageParser.class);
 
         File temporaryGrokFile = null;
         if (isGrokConfig(sensorParserConfig)) {

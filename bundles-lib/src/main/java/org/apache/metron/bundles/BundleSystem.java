@@ -17,11 +17,14 @@
 
 package org.apache.metron.bundles;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.metron.bundles.bundle.Bundle;
@@ -178,6 +181,22 @@ public class BundleSystem {
       throws ClassNotFoundException, InstantiationException,
       NotInitializedException, IllegalAccessException {
     return BundleThreadContextClassLoader.createInstance(specificClassName, clazz, this.properties);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> Set<Class<? extends T>> getExtensionsClassesForExtensionType(final Class<T> extensionType)
+      throws NotInitializedException {
+    Set<Class<? extends T>> set = new HashSet<Class<? extends T>>();
+    ExtensionManager.getInstance().getExtensions(extensionType).forEach((x) -> {
+      set.add((Class<T>)x);
+    });
+    return set;
+  }
+
+  @VisibleForTesting()
+  public static void reset() {
+    BundleClassLoaders.reset();
+    ExtensionManager.reset();
   }
 
 }
