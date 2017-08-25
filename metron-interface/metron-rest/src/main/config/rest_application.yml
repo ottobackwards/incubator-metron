@@ -32,8 +32,6 @@ kafka:
     protocol: ${KAFKA_SECURITY_PROTOCOL}
 
 hdfs:
-  namenode:
-    url: ${HDFS_URL}
   metron:
     apps.root: ${METRON_HDFS_APPS_ROOT}
 

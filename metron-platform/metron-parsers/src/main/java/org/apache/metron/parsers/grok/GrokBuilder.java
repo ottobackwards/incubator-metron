@@ -141,11 +141,18 @@ public class GrokBuilder {
       if (parserConfiguration.containsKey("patternLabel")) {
         patternLabel = (String) parserConfiguration.get("patternLabel");
       }
-    } else {
-      if(StringUtils.isEmpty(grokPath) && readers.size() == 0) {
-       throw new IllegalArgumentException("missing required grokPath");
+      if (parserConfiguration.containsKey("readers")) {
+        List<Reader> configReaders = (List<Reader>) parserConfiguration.get("readers");
+        this.readers.addAll(configReaders);
       }
-      if(StringUtils.isEmpty(patternLabel) && readers.size() == 0) {
+      if (parserConfiguration.containsKey("loadCommon")) {
+        this.loadCommon = (Boolean) parserConfiguration.get("loadCommon");
+      }
+    } else {
+      if (StringUtils.isEmpty(grokPath) && readers.size() == 0) {
+        throw new IllegalArgumentException("missing required grokPath");
+      }
+      if (StringUtils.isEmpty(patternLabel) && readers.size() == 0) {
         throw new IllegalArgumentException("missing required patternLabel");
       }
     }
@@ -156,9 +163,9 @@ public class GrokBuilder {
       config = new HashMap<>();
     }
     Object globalObject = config.get("globalConfig");
-    Map<String,Object> globalConfig = null;
+    Map<String, Object> globalConfig = null;
     if (globalObject != null) {
-      globalConfig = (Map<String,Object>) globalObject;
+      globalConfig = (Map<String, Object>) globalObject;
     }
 
     try (ResourceLoader resourceLoader = new ResourceLoader.Builder()

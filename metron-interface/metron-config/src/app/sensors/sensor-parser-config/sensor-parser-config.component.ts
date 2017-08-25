@@ -306,7 +306,7 @@ export class SensorParserConfigComponent implements OnInit {
     this.sensorParserConfigService.post(sensorParserConfigSave).subscribe(
       sensorParserConfig => {
         if (this.isGrokParser(sensorParserConfig)) {
-            this.hdfsService.post(this.sensorParserConfig.parserConfig['grokPath'], this.grokStatement).subscribe(
+            this.grokValidationService.save(this.sensorParserConfig.parserConfig['grokPath'], this.grokStatement).subscribe(
                 response => {}, (error: RestError) => this.metronAlerts.showErrorMessage(error.message));
         }
         this.sensorEnrichmentConfigService.post(sensorParserConfig.sensorTopic, this.sensorEnrichmentConfig).subscribe(

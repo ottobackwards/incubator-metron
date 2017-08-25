@@ -30,6 +30,7 @@ import org.apache.metron.bundles.bundle.Bundle;
 import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.common.configuration.ConfigurationType;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.ParseMessageRequest;
 import org.apache.metron.rest.service.GrokService;
@@ -101,11 +102,16 @@ public class SensorParserConfigServiceImplTest {
     objectMapper = mock(ObjectMapper.class);
     curatorFramework = mock(CuratorFramework.class);
     grokService = mock(GrokService.class);
+    environment = mock(Environment.class);
+    when(environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT)).thenReturn("./target");
     try(FileInputStream fis = new FileInputStream(new File("src/test/resources/zookeeper/bundle.properties"))) {
       BundleProperties properties = BundleProperties.createBasicBundleProperties(fis, new HashMap<>());
       bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
-      sensorParserConfigService = new SensorParserConfigServiceImpl(objectMapper, curatorFramework,
-          grokService, bundleSystem);
+    //  sensorParserConfigService = new SensorParserConfigServiceImpl(objectMapper, curatorFramework,
+    //      grokService, bundleSystem);
+      sensorParserConfigService = new SensorParserConfigServiceImpl(environment, objectMapper, curatorFramework,
+          grokService);
+      ((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
     }
   }
 

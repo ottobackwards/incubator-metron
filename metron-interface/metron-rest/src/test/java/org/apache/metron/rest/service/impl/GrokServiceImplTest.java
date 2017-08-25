@@ -26,6 +26,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
+import org.apache.metron.rest.service.HdfsService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,11 +50,12 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({GrokServiceImpl.class, FileWriter.class})
+@PrepareForTest({GrokServiceImpl.class, FileWriter.class, HdfsServiceImpl.class, FileSystem.class})
 public class GrokServiceImplTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
@@ -61,12 +63,13 @@ public class GrokServiceImplTest {
   private Environment environment;
   private Grok grok;
   private GrokService grokService;
-
+  private HdfsService hdfsService;
   @Before
   public void setUp() throws Exception {
     environment = mock(Environment.class);
     grok = mock(Grok.class);
-    grokService = new GrokServiceImpl(environment, grok, new Configuration());
+    mockStatic(FileSystem.class);
+    grokService = new GrokServiceImpl(environment, grok, new Configuration(), hdfsService);
   }
 
   @Test

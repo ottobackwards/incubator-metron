@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 @RestController
 @RequestMapping("/api/v1/grok")
 public class GrokController {
@@ -42,6 +44,15 @@ public class GrokController {
     private GrokService grokService;
 
     @ApiOperation(value = "Applies a Grok statement to a sample message")
+    @ApiResponse(message = "Contents were written", code = 200)
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    ResponseEntity<Void> post(@ApiParam(name="path", value="Path for statement", required=true) @RequestParam String path,
+        @ApiParam(name="contents", value="Statement contents", required=true) @RequestBody String contents) throws RestException {
+        grokService.saveStatement(path,contents.getBytes(UTF_8));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Saves a Grok statement")
     @ApiResponse(message = "JSON results", code = 200)
     @RequestMapping(value = "/validate", method = RequestMethod.POST)
     ResponseEntity<GrokValidation> post(@ApiParam(name = "grokValidation", value = "Object containing Grok statement and sample message", required = true) @RequestBody GrokValidation grokValidation) throws RestException {

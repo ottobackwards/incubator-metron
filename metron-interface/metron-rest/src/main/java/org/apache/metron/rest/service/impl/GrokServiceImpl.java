@@ -18,6 +18,7 @@
 package org.apache.metron.rest.service.impl;
 
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import oi.thekraken.grok.api.Grok;
 import oi.thekraken.grok.api.Match;
@@ -32,6 +33,7 @@ import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
+import org.apache.metron.rest.service.HdfsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
@@ -54,12 +56,14 @@ public class GrokServiceImpl implements GrokService {
     private Grok commonGrok;
     private Configuration configuration;
     private Map<String,Object> configurationMap;
+    private HdfsService hdfsService;
 
     @Autowired
-    public GrokServiceImpl(Environment environment, Grok commonGrok, Configuration configuration) {
+    public GrokServiceImpl(Environment environment, Grok commonGrok, Configuration configuration, HdfsService hdfsService) {
         this.environment = environment;
         this.commonGrok = commonGrok;
         this.configuration = configuration;
+        this.hdfsService = hdfsService;
 
         configurationMap = new HashMap<>();
         configurationMap.put("metron.apps.hdfs.dir",environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT));
@@ -120,10 +124,22 @@ public class GrokServiceImpl implements GrokService {
         }
     }
 
+    @Override
+    public void saveStatement(String path, byte[] contents) throws RestException {
+        String root = (String)configurationMap.get("metron.apps.hdfs.dir");
+        if(!root.endsWith("/") && !path.startsWith("/")) {
+            root = root + "/";
+        }
+        Path rootedPath = new Path(root + path);
+        hdfsService.write(rootedPath, contents);
+    }
+
     private String getTemporaryGrokRootPath() {
-      String grokTempPath = environment.getProperty(GROK_TEMP_PATH_SPRING_PROPERTY);
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      return new Path(grokTempPath, authentication.getName()).toString();
+        String javaTmp = System.getProperty("java.io.tmpdir");
+        String grokTempPath = Paths
+            .get(javaTmp, environment.getProperty(GROK_TEMP_PATH_SPRING_PROPERTY)).toString();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return new Path(grokTempPath, authentication.getName()).toString();
     }
 
     public String getStatement(String path) throws RestException {

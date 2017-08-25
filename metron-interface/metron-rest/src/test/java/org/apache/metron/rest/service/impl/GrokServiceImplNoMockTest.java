@@ -26,6 +26,8 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
+import org.apache.metron.rest.service.HdfsService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,11 +62,28 @@ public class GrokServiceImplNoMockTest {
   private Grok grok;
   private GrokService grokService;
 
+  private Configuration configuration;
+  private HdfsService hdfsService;
+  private String testDir = "./target/hdfsUnitTest";
+
   @Before
-  public void setUp() throws Exception {
+  public void setup() throws IOException {
+    configuration = new Configuration();
+    hdfsService = new HdfsServiceImpl(configuration);
+    File file = new File(testDir);
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+    FileUtils.cleanDirectory(file);
     environment = mock(Environment.class);
     grok = mock(Grok.class);
-    grokService = new GrokServiceImpl(environment, grok, new Configuration());
+    grokService = new GrokServiceImpl(environment, grok, new Configuration(),hdfsService);
+  }
+
+  @After
+  public void teardown() throws IOException {
+    File file = new File(testDir);
+    FileUtils.cleanDirectory(file);
   }
 
 

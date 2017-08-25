@@ -32,6 +32,13 @@ export class GrokValidationService {
 
   }
 
+  public save(path: string, contents: string): Observable<Response> {
+    let params: URLSearchParams = new URLSearchParams();
+    params.set('path', path);
+    return this.http.post(this.url + '/save', contents, new RequestOptions({headers: new Headers(this.defaultHeaders), search: params}))
+    .catch(HttpUtil.handleError);
+  }
+
   public validate(grokValidation: GrokValidation): Observable<GrokValidation> {
     return this.http.post(this.url + '/validate', JSON.stringify(grokValidation),
       new RequestOptions({headers: new Headers(this.defaultHeaders)}))

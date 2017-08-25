@@ -33,4 +33,6 @@ public interface GrokService {
 
     String getStatement(String path) throws RestException;
 
+    void saveStatement(String path, byte[] contents) throws RestException;
+
 }
