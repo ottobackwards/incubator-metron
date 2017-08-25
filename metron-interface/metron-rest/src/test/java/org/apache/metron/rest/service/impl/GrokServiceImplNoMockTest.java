@@ -17,12 +17,14 @@
  */
 package org.apache.metron.rest.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import javax.security.auth.Subject;
 import oi.thekraken.grok.api.Grok;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.GrokValidation;
 import org.apache.metron.rest.service.GrokService;
@@ -64,7 +66,7 @@ public class GrokServiceImplNoMockTest {
 
   private Configuration configuration;
   private HdfsService hdfsService;
-  private String testDir = "./target/hdfsUnitTest";
+  private String testDir = "./target/hdfsUnitTest/";
 
   @Before
   public void setup() throws IOException {
@@ -76,6 +78,7 @@ public class GrokServiceImplNoMockTest {
     }
     FileUtils.cleanDirectory(file);
     environment = mock(Environment.class);
+    when(environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT)).thenReturn(testDir);
     grok = mock(Grok.class);
     grokService = new GrokServiceImpl(environment, grok, new Configuration(),hdfsService);
   }
@@ -86,6 +89,16 @@ public class GrokServiceImplNoMockTest {
     FileUtils.cleanDirectory(file);
   }
 
+  @Test
+  public void saveStatementShouldSaveStatement() throws Exception {
+    Authentication authentication = mock(Authentication.class);
+    when(authentication.getName()).thenReturn("user1");
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    String statement = "grok statement";
+    grokService.saveStatement("/patterns/test/test", statement.getBytes(StandardCharsets.UTF_8));
+    assertEquals(statement,grokService.getStatement("/patterns/test/test"));
+
+  }
 
   @Test
   public void getStatementFromClasspathShouldReturnStatement() throws Exception {

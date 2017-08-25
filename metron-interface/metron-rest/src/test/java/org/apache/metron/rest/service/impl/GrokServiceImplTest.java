@@ -211,9 +211,8 @@ public class GrokServiceImplTest {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     when(environment.getProperty(GROK_TEMP_PATH_SPRING_PROPERTY)).thenReturn("./target");
 
-    grokService.saveTemporary(statement, "squid");
+    File testFile = grokService.saveTemporary(statement, "squid");
 
-    File testFile = new File("./target/user1/squid");
     assertEquals(statement, FileUtils.readFileToString(testFile));
     testFile.delete();
   }
