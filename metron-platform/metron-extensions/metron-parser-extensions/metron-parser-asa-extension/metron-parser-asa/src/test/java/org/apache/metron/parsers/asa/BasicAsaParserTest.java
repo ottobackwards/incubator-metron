@@ -17,8 +17,10 @@
  */
 package org.apache.metron.parsers.asa;
 
+import java.nio.file.Paths;
 import org.apache.log4j.Level;
 import org.apache.metron.test.utils.UnitTestHelper;
+import org.apache.metron.test.utils.ResourceCopier;
 import org.json.simple.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -38,7 +40,11 @@ public class BasicAsaParserTest {
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
+        ResourceCopier.copyResources(Paths.get("./src/main/resources"),Paths.get("./target"));
         Map<String, Object> parserConfig = new HashMap<>();
+        Map<String, Object> globalConfig = new HashMap<>();
+        globalConfig.put("metron.apps.hdfs.dir","./target/");
+        parserConfig.put("globalConfig",globalConfig);
         asaParser = new BasicAsaParser();
         asaParser.configure(parserConfig);
         asaParser.init();
@@ -47,7 +53,11 @@ public class BasicAsaParserTest {
     @Test
     public void testConfigureDefault() {
         Map<String, Object> parserConfig = new HashMap<>();
+        Map<String, Object> globalConfig = new HashMap<>();
+        globalConfig.put("metron.apps.hdfs.dir","./target/");
+        parserConfig.put("globalConfig",globalConfig);
         BasicAsaParser testParser = new BasicAsaParser();
+
         testParser.configure(parserConfig);
         testParser.init();
         assertTrue(testParser.deviceClock.getZone().equals(ZoneOffset.UTC));
@@ -56,6 +66,9 @@ public class BasicAsaParserTest {
     @Test
     public void testConfigureTimeZoneOffset() {
         Map<String, Object> parserConfig = new HashMap<>();
+        Map<String, Object> globalConfig = new HashMap<>();
+        globalConfig.put("metron.apps.hdfs.dir","./target/");
+        parserConfig.put("globalConfig",globalConfig);
         parserConfig.put("deviceTimeZone", "UTC-05:00");
         BasicAsaParser testParser = new BasicAsaParser();
         testParser.configure(parserConfig);
@@ -68,6 +81,9 @@ public class BasicAsaParserTest {
     @Test
     public void testConfigureTimeZoneText() {
         Map<String, Object> parserConfig = new HashMap<>();
+        Map<String, Object> globalConfig = new HashMap<>();
+        globalConfig.put("metron.apps.hdfs.dir","./target/");
+        parserConfig.put("globalConfig",globalConfig);
         parserConfig.put("deviceTimeZone", "America/New_York");
         BasicAsaParser testParser = new BasicAsaParser();
         testParser.configure(parserConfig);
@@ -108,10 +124,15 @@ public class BasicAsaParserTest {
         ZonedDateTime fixedInstant =
                 ZonedDateTime.of(2016, 1, 6, 1, 30, 30, 0, ZoneOffset.UTC);
         Clock fixedClock = Clock.fixed(fixedInstant.toInstant(), fixedInstant.getZone());
-
+        Map<String, Object> parserConfig = new HashMap<>();
+        Map<String, Object> globalConfig = new HashMap<>();
+        globalConfig.put("metron.apps.hdfs.dir","./target/");
+        parserConfig.put("globalConfig",globalConfig);
         BasicAsaParser fixedClockParser = new BasicAsaParser();
+        fixedClockParser.configure(parserConfig);
         fixedClockParser.deviceClock = fixedClock;
         fixedClockParser.init();
+
 
         JSONObject asaJson = fixedClockParser.parse(rawMessage.getBytes()).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);

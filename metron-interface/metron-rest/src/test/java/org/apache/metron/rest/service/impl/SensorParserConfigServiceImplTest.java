@@ -18,20 +18,27 @@
 package org.apache.metron.rest.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.FileInputStream;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.DeleteBuilder;
 import org.apache.curator.framework.api.GetChildrenBuilder;
 import org.apache.curator.framework.api.GetDataBuilder;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.metron.bundles.BundleSystem;
+import org.apache.metron.bundles.bundle.Bundle;
+import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.common.configuration.ConfigurationType;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.model.ParseMessageRequest;
 import org.apache.metron.rest.service.GrokService;
 import org.apache.metron.rest.service.SensorParserConfigService;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,6 +69,7 @@ public class SensorParserConfigServiceImplTest {
   ObjectMapper objectMapper;
   CuratorFramework curatorFramework;
   GrokService grokService;
+  BundleSystem bundleSystem;
   SensorParserConfigService sensorParserConfigService;
 
   /**
@@ -90,11 +98,33 @@ public class SensorParserConfigServiceImplTest {
 
   @Before
   public void setUp() throws Exception {
+    BundleSystem.reset();
     objectMapper = mock(ObjectMapper.class);
     curatorFramework = mock(CuratorFramework.class);
     grokService = mock(GrokService.class);
-    sensorParserConfigService = new SensorParserConfigServiceImpl(objectMapper, curatorFramework, grokService);
+    environment = mock(Environment.class);
+    when(environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT)).thenReturn("./target");
+    try(FileInputStream fis = new FileInputStream(new File("src/test/resources/zookeeper/bundle.properties"))) {
+      BundleProperties properties = BundleProperties.createBasicBundleProperties(fis, new HashMap<>());
+      bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
+    //  sensorParserConfigService = new SensorParserConfigServiceImpl(objectMapper, curatorFramework,
+    //      grokService, bundleSystem);
+      sensorParserConfigService = new SensorParserConfigServiceImpl(environment, objectMapper, curatorFramework,
+          grokService);
+      ((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
+    }
   }
+
+  @After
+  public void tearDown() {
+    BundleSystem.reset();
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    BundleSystem.reset();
+  }
+
 
 
   @Test
