@@ -251,6 +251,20 @@ class MockGrokValidationService extends GrokValidationService {
     this.contents = contents;
   }
 
+  public save(path: string, contents: string): Observable<{}> {
+    if (this.contents === null) {
+      let error = new RestError();
+      error.message = 'HDFS post Error';
+      return Observable.throw(error);
+    }
+    this.path = path;
+    this.contents = contents;
+    return Observable.create(observer => {
+      observer.next(this.contents);
+      observer.complete();
+    });
+  }
+
   public list(): Observable<string[]> {
     return Observable.create(observer => {
       observer.next({
@@ -815,7 +829,7 @@ describe('Component: SensorParserConfig', () => {
     let sensorParserConfigSave: SensorParserConfig = new SensorParserConfig();
     sensorParserConfigSave.sensorTopic = 'squid';
     sensorParserConfigSave.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
-    sensorParserConfigSave.parserConfig['grokPath'] = '/apps/metron/patterns/squid';
+    sensorParserConfigSave.parserConfig['grokPath'] = '/patterns/squid';
     sensorParserConfigSave.fieldTransformations = [fieldTransformer];
     activatedRoute.setNameForTest('new');
     sensorParserConfigService.setThrowError(true);
@@ -825,7 +839,7 @@ describe('Component: SensorParserConfig', () => {
 
     component.sensorParserConfig.sensorTopic = 'squid';
     component.sensorParserConfig.parserClassName = 'org.apache.metron.parsers.grok.GrokParser';
-    component.sensorParserConfig.parserConfig['grokPath'] = '/apps/metron/patterns/squid';
+    component.sensorParserConfig.parserConfig['grokPath'] = '/patterns/squid';
     component.sensorParserConfig.fieldTransformations = [fieldTransformer];
 
     component.onSave();
@@ -835,7 +849,7 @@ describe('Component: SensorParserConfig', () => {
     component.sensorEnrichmentConfig = Object.assign(new SensorEnrichmentConfig(), squidSensorEnrichmentConfig);
     component.indexingConfigurations = Object.assign(new IndexingConfigurations(), squidIndexingConfigurations);
     sensorParserConfigService.setThrowError(false);
-    hdfsService.setContents('/apps/metron/patterns/squid', 'SQUID grok statement');
+    grokValidationService.save('/patterns/squid', 'SQUID grok statement');
     component.grokStatement = 'SQUID grok statement';
 
     component.onSave();
@@ -844,12 +858,15 @@ describe('Component: SensorParserConfig', () => {
         .toEqual(Object.assign(new SensorEnrichmentConfig(), squidSensorEnrichmentConfig));
     expect(sensorIndexingConfigService.getPostedIndexingConfigurations())
         .toEqual(Object.assign(new IndexingConfigurations(), squidIndexingConfigurations));
-    expect(hdfsService.getPostedContents()).toEqual('SQUID grok statement');
 
-    hdfsService.setContents('/apps/metron/patterns/squid', null);
+    grokValidationService.getStatement('patterns/squid').subscribe(result => {
+      expect(result).toEqual('SQUID grok statement');
+    }, error => console.log(error));
+
+    grokValidationService.setContents('/patterns/squid', null);
 
     component.onSave();
-    expect(metronAlerts.showErrorMessage['calls'].mostRecent().args[0]).toEqual('HDFS post Error');
+    console.log(expect(metronAlerts.showErrorMessage['calls'].mostRecent().args[0]).toEqual('HDFS post Error'));
 
     sensorEnrichmentConfigService.setThrowError(true);
 
