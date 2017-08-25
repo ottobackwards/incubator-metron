@@ -92,9 +92,8 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
 
   private BundleSystem getBundleSystem() {
     if (bundleSystem == null){
-      BundleSystemConfig config = new BundleSystemConfig(environment);
       try {
-        bundleSystem = config.bundleSystem(client);
+        bundleSystem = BundleSystemConfig.bundleSystem(client);
       } catch (Exception e) {
         LOG.error("Failed to create BundleSystem",e);
       }
