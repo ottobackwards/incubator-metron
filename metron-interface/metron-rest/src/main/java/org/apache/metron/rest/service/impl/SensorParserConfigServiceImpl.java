@@ -73,13 +73,11 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
   private Map<String,Object> configurationMap;
 
   @Autowired
-  //public SensorParserConfigServiceImpl(ObjectMapper objectMapper, CuratorFramework client, GrokService grokService, BundleSystem bundleSystem) {
   public SensorParserConfigServiceImpl(Environment environment,ObjectMapper objectMapper, CuratorFramework client, GrokService grokService) {
     this.objectMapper = objectMapper;
     this.client = client;
     this.grokService = grokService;
     this.environment = environment;
-    //this.bundleSystem = bundleSystem;
     configurationMap = new HashMap<>();
     configurationMap.put("metron.apps.hdfs.dir",environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT));
   }
@@ -185,7 +183,6 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
 
   @SuppressWarnings("unchecked")
   private Set<Class<? extends MessageParser>> getParserClasses() throws NotInitializedException {
-    //return (Set<Class<? extends MessageParser>>) bundleSystem.getExtensionsClassesForExtensionType(MessageParser.class);
     return (Set<Class<? extends MessageParser>>) getBundleSystem().getExtensionsClassesForExtensionType(MessageParser.class);
   }
 
@@ -200,16 +197,16 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
     } else {
       MessageParser<JSONObject> parser;
       try {
-        //parser = (MessageParser<JSONObject>) bundleSystem
-        //    .createInstance(sensorParserConfig.getParserClassName(), MessageParser.class);
-
         parser = (MessageParser<JSONObject>) getBundleSystem()
             .createInstance(sensorParserConfig.getParserClassName(), MessageParser.class);
 
         File temporaryGrokFile = null;
         if (isGrokConfig(sensorParserConfig)) {
           // NOTE: this parse will happen with the common grok file from the metron-parsers
-          // classloader
+          // classloader, it would be better to load all the groks correctly as the parser does
+          // /patterns/common
+          // /sensorName/commmon
+          // /sensorName/sensorName
           ArrayList<Reader> readers = new ArrayList<Reader>();
           readers.add(new InputStreamReader(GrokParser.class.getResourceAsStream("/patterns/common")));
           readers.add(new StringReader(parseMessageRequest.getGrokStatement()));
@@ -217,7 +214,7 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
           sensorParserConfig.getParserConfig().put("loadCommon",false);
         } else {
           // only inject the hdfs path for non - grok parsers, since as above they are loading
-          // from the local filesystem for this operation
+          // from the local filesystem for this operation and using the readers
           sensorParserConfig.getParserConfig().put("globalConfig", configurationMap);
         }
         parser.configure(sensorParserConfig.getParserConfig());
