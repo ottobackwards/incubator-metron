@@ -47,43 +47,44 @@ public class ResourceLoaderTest {
 
   @Test(expected = FileNotFoundException.class)
   public void testNonFileThrowsException() throws Exception {
-    ResourceLoader loader = new ResourceLoader.Builder().build();
-    loader.getResources("/usr/nope");
+    try (ResourceLoader loader = new ResourceLoader.Builder().build()) {
+      loader.getResources("/usr/nope");
+    }
   }
 
   @Test
   public void getResourcesShouldReturnResourceWithNoRootSet() throws Exception {
-    ResourceLoader loader = new ResourceLoader.Builder().build();
-
-    Map<String, InputStream> resources = loader.getResources("target/test");
-    Assert.assertNotNull(resources.get("target/test"));
+    try (ResourceLoader loader = new ResourceLoader.Builder().build()) {
+      Map<String, InputStream> resources = loader.getResources("target/test");
+      Assert.assertNotNull(resources.get("target/test"));
+    }
   }
 
   @Test
   public void getResourcesShouldReturnResourceWithRootSet() throws Exception {
     Map<String, Object> config = ImmutableMap.of("metron.apps.hdfs.dir", "./target/resdir/");
-    ResourceLoader loader = new ResourceLoader.Builder().withConfiguration(config).build();
-
-    Map<String, InputStream> resources = loader.getResources("/test1");
-    Assert.assertNotNull(resources.get("/test1"));
+    try (ResourceLoader loader = new ResourceLoader.Builder().withConfiguration(config).build()) {
+      Map<String, InputStream> resources = loader.getResources("/test1");
+      Assert.assertNotNull(resources.get("/test1"));
+    }
   }
 
   @Test
   public void getResourcesShouldReturnResourceWithNoRootSetAndExistingFSConfig() throws Exception {
-    ResourceLoader loader = new ResourceLoader.Builder()
-        .withFileSystemConfiguration(new Configuration()).build();
-
-    Map<String, InputStream> resources = loader.getResources("target/test");
-    Assert.assertNotNull(resources.get("target/test"));
+    try (ResourceLoader loader = new ResourceLoader.Builder()
+        .withFileSystemConfiguration(new Configuration()).build()) {
+      Map<String, InputStream> resources = loader.getResources("target/test");
+      Assert.assertNotNull(resources.get("target/test"));
+    }
   }
 
   @Test
   public void getResourcesShouldReturnResourceWithRootSetAndExistingFSConfig() throws Exception {
     Map<String, Object> config = ImmutableMap.of("metron.apps.hdfs.dir", "./target/resdir/");
-    ResourceLoader loader = new ResourceLoader.Builder().withConfiguration(config)
-        .withFileSystemConfiguration(new Configuration()).build();
-
-    Map<String, InputStream> resources = loader.getResources("/test1");
-    Assert.assertNotNull(resources.get("/test1"));
+    try (ResourceLoader loader = new ResourceLoader.Builder().withConfiguration(config)
+        .withFileSystemConfiguration(new Configuration()).build()) {
+      Map<String, InputStream> resources = loader.getResources("/test1");
+      Assert.assertNotNull(resources.get("/test1"));
+    }
   }
 }

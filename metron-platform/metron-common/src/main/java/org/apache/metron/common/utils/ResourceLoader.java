@@ -28,10 +28,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 
 /**
- * <p> The ResourceLoader loads resources, optionally using the Metron global configuration in a a
- * parser configuration if provided to resolve paths. If no global configuration is provided, the
- * defaults will be used. If the global configuration does not have a "metron.apps.hdfs.dir" setting
- * then the default will be used. </p>
+ * <p> The ResourceLoader loads resources from paths.  If configured, it will handle 'rooting' the
+ * paths to correctly reflect the current configuration. This means that a configured path
+ * '/foo/bar' can be correctly resolved to /some/hdfs/root/foo/bar or ./foo/bar through
+ * configuration of the current root.</p>
+ *
+ * <p> The ResourceLoader addresses issues that arise when the root path is a configuration option,
+ * but there are coded paths in configurations</p>
+ *
+ * If no configuration is provided, the defaults will be used. If the global configuration does
+ * not have a "metron.apps.hdfs.dir" setting then the default will be used. </p>
  * <p>This class implements {@link AutoCloseable} and should
  * ideally be used with a try with resources pattern</p>
  */
@@ -118,9 +124,18 @@ public class ResourceLoader implements AutoCloseable {
     }
     Path path = new Path(resourceLocation);
     if (!StringUtils.isEmpty(root) && !resourceLocation.startsWith(root)) {
-      Path rootPath = new Path(root);
+      // mergePaths does not handle merging and separators well
+      // as in merging '/root' and 'child/foo'  will result in
+      // a path of '/rootchild/foo'
+      // this is almost certainly not what you would expect
+      // we will fix this up here
+      String thisRoot = root;
+      if(!thisRoot.endsWith("/") && !resourceLocation.startsWith("/")) {
+        thisRoot = thisRoot + "/";
+      }
+      Path rootPath = new Path(thisRoot);
       if (!fileSystem.exists(rootPath)) {
-        throw new FileNotFoundException(root);
+        throw new FileNotFoundException(thisRoot);
       }
       path = Path.mergePaths(rootPath, path);
     }

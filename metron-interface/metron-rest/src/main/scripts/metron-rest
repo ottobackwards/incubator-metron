@@ -69,7 +69,7 @@ if [ $METRON_INDEX_CP ]; then
 else
     METRON_REST_CLASSPATH+=":$METRON_HOME/lib/metron-elasticsearch-$METRON_VERSION-uber.jar"
 fi
-METRON_JVMFLAGS+=" -cp $METRON_REST_CLASSPATH -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8888"
+
 DAEMON="$JAVA_HOME/bin/java $METRON_JVMFLAGS org.apache.metron.rest.MetronRestApplication $METRON_SPRING_OPTIONS"
 
 #
