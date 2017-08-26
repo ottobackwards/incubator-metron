@@ -17,6 +17,7 @@
  */
 package org.apache.metron.rest.config;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -33,15 +34,12 @@ import kafka.utils.ZKStringSerializer$;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.metron.common.configuration.ConfigurationsUtils;
-import org.apache.metron.hbase.mock.MockHBaseTableProvider;
-import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
+import org.apache.metron.hbase.mock.MockHBaseTableProvider;
 import org.apache.metron.integration.ComponentRunner;
 import org.apache.metron.integration.UnableToStartException;
 import org.apache.metron.integration.components.KafkaComponent;
@@ -57,13 +55,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import static org.apache.metron.rest.MetronRestConstants.TEST_PROFILE;
 
 
