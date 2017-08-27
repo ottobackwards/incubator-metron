@@ -344,7 +344,7 @@ public class SensorParserConfigControllerIntegrationTest {
             .andExpect(status().isInternalServerError())
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
             .andExpect(jsonPath("$.responseCode").value(500))
-            .andExpect(jsonPath("$.message").value("java.lang.ClassNotFoundException: badClass"));
+            .andExpect(jsonPath("$.message").value("java.lang.IllegalStateException: The specified implementation class 'badClass' is not known."));
 
     this.sensorParserConfigService.delete("jsonTest");
     this.sensorParserConfigService.delete("squidTest");

@@ -77,7 +77,7 @@ public class SquidParserTest extends GrokParserTest {
 
   @Override
   public String getGrokPath() {
-    return "src/main/resources/patterns/squid";
+    return "/patterns/squid";
   }
 
   @Override

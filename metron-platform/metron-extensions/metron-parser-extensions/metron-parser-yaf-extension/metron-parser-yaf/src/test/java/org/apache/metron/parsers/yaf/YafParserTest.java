@@ -71,7 +71,7 @@ public class YafParserTest extends GrokParserTest {
 
   @Override
   public String getGrokPath() {
-    return "src/main/resources/patterns/yaf";
+    return "/patterns/yaf";
   }
 
 

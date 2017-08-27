@@ -121,9 +121,9 @@ public class BundleMapperIntegrationTest {
     BundleProperties properties = loadSpecifiedProperties("/BundleMapper/conf/bundle.properties",
         EMPTY_MAP);
     // get the port we ended up with and set the paths
-    properties.setProperty(BundleProperties.HDFS_PREFIX, configuration.get("fs.defaultFS"));
-    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, "/lib/");
-    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt", "/lib2/");
+    String hdfsPrefix = configuration.get("fs.defaultFS");
+    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY, hdfsPrefix +"/lib/");
+    properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY_PREFIX + "alt", hdfsPrefix + "/lib2/");
     FileSystemManager fileSystemManager = FileSystemManagerFactory.createFileSystemManager(new String[] {properties.getArchiveExtension()});
     ArrayList<Class> classes = new ArrayList<>();
     classes.add(MessageParser.class);

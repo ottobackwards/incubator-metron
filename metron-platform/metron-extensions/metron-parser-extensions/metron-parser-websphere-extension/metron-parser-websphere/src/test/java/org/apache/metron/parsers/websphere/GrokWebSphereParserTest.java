@@ -18,9 +18,12 @@
 
 package org.apache.metron.parsers.websphere;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import org.apache.log4j.Level;
 import org.apache.metron.parsers.grok.GrokParser;
 import org.apache.metron.test.utils.UnitTestHelper;
+import org.apache.metron.test.utils.ResourceCopier;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,12 +43,16 @@ public class GrokWebSphereParserTest {
 	private Map<String, Object> parserConfig;
 
 	@Before
-	public void setup() {
+	public void setup() throws IOException {
+		ResourceCopier.copyResources(Paths.get("src/main/resources"), Paths.get("./target"));
 		parserConfig = new HashMap<>();
-		parserConfig.put("grokPath", "src/main/resources/patterns/websphere");
+		parserConfig.put("grokPath", "/patterns/websphere");
 		parserConfig.put("patternLabel", "WEBSPHERE");
 		parserConfig.put("timestampField", "timestamp_string");
 		parserConfig.put("dateFormat", "yyyy MMM dd HH:mm:ss");
+		Map<String, Object> globalConfig = new HashMap<>();
+		globalConfig.put("metron.apps.hdfs.dir","./target/");
+		parserConfig.put("globalConfig",globalConfig);
 	}
 	
 	@Test
