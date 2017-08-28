@@ -23,6 +23,7 @@ import org.apache.metron.test.utils.ResourceCopier;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +81,14 @@ public class ParserExtensionControllerIntegrationTest {
   private String extPath = "./target/remote/extension_contrib_lib/";
   private String fileContents = "file contents";
 
+  @BeforeClass
+  public static void beforeClass() throws Exception{
+    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
+  }
+
   @Before
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
-    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
-
   }
 
   @After

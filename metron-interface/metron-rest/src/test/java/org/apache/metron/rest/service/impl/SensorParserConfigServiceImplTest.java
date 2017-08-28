@@ -42,6 +42,7 @@ import org.apache.zookeeper.data.Stat;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -97,10 +98,14 @@ public class SensorParserConfigServiceImplTest {
    */
   @Multiline
   public static String jsonMapJson;
+  
+  @BeforeClass
+  public static void beforeClass() throws Exception{
+    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
+  }
 
   @Before
   public void setUp() throws Exception {
-    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
     BundleSystem.reset();
     objectMapper = mock(ObjectMapper.class);
     curatorFramework = mock(CuratorFramework.class);
