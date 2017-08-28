@@ -20,6 +20,7 @@ package org.apache.metron.bundles;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class BundleMapper {
 
-  private static final Logger logger = LoggerFactory.getLogger(BundleMapper.class);
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static String archiveExtension = BundleProperties.DEFAULT_ARCHIVE_EXTENSION;
   private final static String META_FMT = "META-INF/services/%s";
 

@@ -17,6 +17,7 @@
  */
 package org.apache.metron.bundles.util;
 
+import java.lang.invoke.MethodHandles;
 import org.apache.accumulo.start.classloader.vfs.UniqueFileReplicator;
 import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.cache.SoftRefFilesCache;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class FileSystemManagerFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(FileSystemManagerFactory.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * Create a FileSystem manager suitable for our purposes.

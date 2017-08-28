@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class ExtensionManager {
   private static volatile ExtensionManager extensionManager;
   private static volatile InitContext initContext;
 
-  private static final Logger logger = LoggerFactory.getLogger(ExtensionManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static final BundleCoordinates SYSTEM_BUNDLE_COORDINATE = new BundleCoordinates(
       BundleCoordinates.DEFAULT_GROUP, "system", BundleCoordinates.DEFAULT_VERSION);

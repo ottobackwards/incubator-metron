@@ -16,6 +16,7 @@
  */
 package org.apache.metron.bundles;
 
+import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import java.net.URLClassLoader;
  */
 public class InstanceClassLoader extends URLClassLoader {
 
-    private static final Logger logger = LoggerFactory.getLogger(InstanceClassLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String identifier;
     private final String instanceType;

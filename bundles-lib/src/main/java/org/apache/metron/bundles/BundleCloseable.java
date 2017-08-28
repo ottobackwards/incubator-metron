@@ -18,6 +18,7 @@ package org.apache.metron.bundles;
 
 import java.io.Closeable;
 
+import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BundleCloseable implements Closeable {
 
-    private static final Logger logger = LoggerFactory.getLogger(BundleCloseable.class);
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static BundleCloseable withBundleLoader() throws NotInitializedException{
         final ClassLoader current = Thread.currentThread().getContextClassLoader();

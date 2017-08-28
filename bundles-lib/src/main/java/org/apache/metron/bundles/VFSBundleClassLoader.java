@@ -18,6 +18,7 @@
 package org.apache.metron.bundles;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.Permission;
@@ -139,6 +140,7 @@ import org.slf4j.LoggerFactory;
  * @see FileSystemManager#createFileSystem
  */
 public class VFSBundleClassLoader extends SecureClassLoader {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static class Builder {
 
@@ -166,7 +168,6 @@ public class VFSBundleClassLoader extends SecureClassLoader {
     }
   }
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(VFSBundleClassLoader.class);
   private final ArrayList<FileObject> resources = new ArrayList<FileObject>();
   private FileObject nativeDir;
   public static final String DEPENDENCY_PATH = "META-INF/bundled-dependencies";

@@ -19,6 +19,7 @@ package org.apache.metron.bundles;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.lang.invoke.MethodHandles;
 import java.net.URISyntaxException;
 import java.util.*;
 
@@ -43,7 +44,7 @@ public final class BundleClassLoaders {
 
   private static volatile BundleClassLoaders bundleClassLoaders;
   private static volatile InitContext initContext;
-  private static final Logger logger = LoggerFactory.getLogger(BundleClassLoaders.class);
+  private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   /**
    * Holds the context from {@code BundleClassLoaders} initialization,

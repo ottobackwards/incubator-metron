@@ -18,6 +18,7 @@ package org.apache.metron.bundles;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -33,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BundleThreadContextClassLoader extends URLClassLoader {
-    static final Logger LOG = LoggerFactory.getLogger(BundleThreadContextClassLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     static final ContextSecurityManager contextSecurityManager = new ContextSecurityManager();
     private final ClassLoader forward = ClassLoader.getSystemClassLoader();
 
