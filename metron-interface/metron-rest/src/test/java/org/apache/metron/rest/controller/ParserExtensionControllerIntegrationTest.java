@@ -19,6 +19,7 @@ package org.apache.metron.rest.controller;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.metron.rest.service.HdfsService;
+import org.apache.metron.test.utils.ResourceCopier;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
@@ -82,6 +83,7 @@ public class ParserExtensionControllerIntegrationTest {
   @Before
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
+    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"));
 
   }
 

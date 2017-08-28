@@ -18,14 +18,12 @@
 package org.apache.metron.rest.config;
 
 
+import static org.apache.metron.rest.MetronRestConstants.TEST_PROFILE;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -33,12 +31,12 @@ import kafka.admin.AdminUtils$;
 import kafka.utils.ZKStringSerializer$;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.metron.enrichment.integration.components.ConfigUploadComponent;
+import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.hbase.mock.MockHBaseTableProvider;
 import org.apache.metron.integration.ComponentRunner;
 import org.apache.metron.integration.UnableToStartException;
@@ -53,9 +51,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.web.client.RestTemplate;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.apache.metron.rest.MetronRestConstants.TEST_PROFILE;
 
 
 @Configuration
@@ -83,7 +78,7 @@ public class TestConfig {
   }
 
   @Bean(destroyMethod = "stop")
-  public ComponentRunner componentRunner(ZKServerComponent zkServerComponent, KafkaComponent kafkaWithZKComponent) {
+  public ComponentRunner componentRunner(ZKServerComponent zkServerComponent, KafkaComponent kafkaWithZKComponent) throws IOException {
     ComponentRunner runner = new ComponentRunner.Builder()
       .withComponent("zk", zkServerComponent)
       .withCustomShutdownOrder(new String[]{"search", "zk"})
