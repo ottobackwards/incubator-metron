@@ -100,7 +100,7 @@ public class SensorParserConfigServiceImplTest {
 
   @Before
   public void setUp() throws Exception {
-    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"));
+    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
     BundleSystem.reset();
     objectMapper = mock(ObjectMapper.class);
     curatorFramework = mock(CuratorFramework.class);

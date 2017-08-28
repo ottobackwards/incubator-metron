@@ -83,7 +83,7 @@ public class ParserExtensionControllerIntegrationTest {
   @Before
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
-    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"));
+    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
 
   }
 
