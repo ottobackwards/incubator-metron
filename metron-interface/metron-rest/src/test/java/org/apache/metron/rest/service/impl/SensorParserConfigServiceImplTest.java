@@ -98,11 +98,6 @@ public class SensorParserConfigServiceImplTest {
    */
   @Multiline
   public static String jsonMapJson;
-  
-  @BeforeClass
-  public static void beforeClass() throws Exception{
-    ResourceCopier.copyResources(Paths.get("./src/test/resources"), Paths.get( "./target/remote"), false);
-  }
 
   @Before
   public void setUp() throws Exception {
@@ -114,6 +109,8 @@ public class SensorParserConfigServiceImplTest {
     when(environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT)).thenReturn("./target");
     try(FileInputStream fis = new FileInputStream(new File("src/test/resources/zookeeper/bundle.properties"))) {
       BundleProperties properties = BundleProperties.createBasicBundleProperties(fis, new HashMap<>());
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,"./target");
+      properties.unSetProperty("bundle.library.directory.alt");
       bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
       sensorParserConfigService = new SensorParserConfigServiceImpl(environment, objectMapper, curatorFramework,
           grokService);
