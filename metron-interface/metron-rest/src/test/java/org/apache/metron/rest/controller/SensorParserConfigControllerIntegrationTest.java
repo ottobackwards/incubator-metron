@@ -17,10 +17,15 @@
  */
 package org.apache.metron.rest.controller;
 
+import java.io.FileInputStream;
+import java.util.HashMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
+import org.apache.metron.bundles.BundleSystem;
+import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.rest.MetronRestConstants;
 import org.apache.metron.rest.service.SensorParserConfigService;
+import org.apache.metron.rest.service.impl.SensorParserConfigServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +44,8 @@ import java.io.IOException;
 
 import static org.apache.metron.rest.MetronRestConstants.TEST_PROFILE;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -164,6 +171,8 @@ public class SensorParserConfigControllerIntegrationTest {
   @Autowired
   private WebApplicationContext wac;
 
+  BundleSystem bundleSystem;
+
   private MockMvc mockMvc;
 
   private String sensorParserConfigUrl = "/api/v1/sensor/parser/config";
@@ -173,6 +182,14 @@ public class SensorParserConfigControllerIntegrationTest {
   @Before
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
+    BundleSystem.reset();
+    try(FileInputStream fis = new FileInputStream(new File("src/test/resources/zookeeper/bundle.properties"))) {
+      BundleProperties properties = BundleProperties.createBasicBundleProperties(fis, new HashMap<>());
+      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,"./target");
+      properties.unSetProperty("bundle.library.directory.alt");
+      bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
+      ((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
+    }
   }
 
   @Test
