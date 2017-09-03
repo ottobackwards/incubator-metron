@@ -75,13 +75,13 @@ export class ParserExtensionService {
       };
 
       for (let i = 0; i < parserExtensions.length; i++) {
-        this.delete(parserExtensions[i].extensionBundleName).subscribe(results => {
-          result.success.push(parserExtensions[i].extensionBundleName);
+        this.delete(parserExtensions[i].extensionIdentifier).subscribe(results => {
+          result.success.push(parserExtensions[i].extensionIdentifier);
           if (result.success.length + result.failure.length === parserExtensions.length) {
             completed();
           }
         }, error => {
-          result.failure.push(parserExtensions[i].extensionBundleName);
+          result.failure.push(parserExtensions[i].extensionIdentifier);
           if (result.success.length + result.failure.length === parserExtensions.length) {
             completed();
           }

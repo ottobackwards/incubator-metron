@@ -36,21 +36,23 @@
   <table class="table card-deck" metron-config-table #table (onSort)="onSort($event)">
     <thead>
     <tr>
+      <th> <metron-config-sorter [sortBy]="'extensionIdentifier'"> Name </metron-config-sorter> </th>
       <th> <metron-config-sorter [sortBy]="'extensionBundleName'"> Name </metron-config-sorter> </th>
-      <th> <metron-config-sorter [sortBy]="'extensionsBundleID'"> ID </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionBundleID'"> ID </metron-config-sorter> </th>
       <th> <metron-config-sorter [sortBy]="'extensionAssemblyName'"> Assembly Name </metron-config-sorter> </th>
-      <th> <metron-config-sorter [sortBy]="'extensionsBundleVersion'"> Version </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionBundleVersion'"> Version </metron-config-sorter> </th>
       <th style="width:100px"></th>
       <th style="width:50px"><input id="select-deselect-all" class="fontawesome-checkbox" type="checkbox" (click)="onSelectDeselectAll($event)"><label for="select-deselect-all"></label></th>
     </tr>
     </thead>
     <tbody>
     <tr *ngFor="let parserExtension of parserExtensions;" (click)="onParserExtensionRowSelect(parserExtension, $event)" [ngClass]="{'active': (selectedExtensions.indexOf(parserExtension) != -1 || parserExtensionService.getSelectedExtension() == parserExtension)}">
+      <td>{{ parserExtension.extensionIdentifier}}</td>
       <td>{{ parserExtension.extensionBundleName }}</td>
-      <td>{{ parserExtension.extensionsBundleID }}</td>
-      <td>{{ parserExtension.extensionsBundleVersion }}</td>
+      <td>{{ parserExtension.extensionBundleID }}</td>
+      <td>{{ parserExtension.extensionBundleVersion }}</td>
       <td>{{ parserExtension.extensionAssemblyName }}</td>
-      <td><input id="{{ parserExtension.extensionBundleName }}" class="fontawesome-checkbox" type="checkbox" name="{{parserExtension.extensionBundleName}}" (click)="onRowSelected(parserExtension, $event)"><label attr.for="{{ parserExtension.extensionBundleName }}"></label></td>
+      <td><input id="{{ parserExtension.extensionIdentifier }}" class="fontawesome-checkbox" type="checkbox" name="{{parserExtension.extensionIdentifier}}" (click)="onRowSelected(parserExtension, $event)"><label attr.for="{{ parserExtension.extensionIdentifier }}"></label></td>
     </tr>
     </tbody>
   </table>

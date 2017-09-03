@@ -68,10 +68,11 @@ export class ExtensionsParserListComponent implements OnInit {
 
   onSort($event: SortEvent) {
     switch ($event.sortBy) {
+      case 'extensionIdentifier':
+      case 'extensionAssemblyName':
       case 'extensionBundleName':
-      case 'extensionBundleName':
-      case 'extensionsBundleID':
-      case 'extensionsBundleVersion':
+      case 'extensionBundleID':
+      case 'extensionBundleVersion':
         this.parserExtensions.sort((obj1: ParserExtensionConfig, obj2: ParserExtensionConfig) => {
           if (!obj1[$event.sortBy] || !obj1[$event.sortBy]) {
             return 0;
@@ -108,7 +109,7 @@ export class ExtensionsParserListComponent implements OnInit {
 
   navigateToParserExtensionEdit(selectedExtension: ParserExtensionConfig, event) {
     this.parserExtensionService.setSeletedExtension(selectedExtension);
-    this.router.navigateByUrl('/extensions(dialog:extensions-parser-config/' + selectedExtension.extensionBundleName + ')');
+    this.router.navigateByUrl('/extensions(dialog:extensions-parser-config/' + selectedExtension.extensionIdentifier + ')');
     event.stopPropagation();
   }
 
@@ -144,7 +145,7 @@ export class ExtensionsParserListComponent implements OnInit {
       }
 
       this.parserExtensionService.setSeletedExtension(parserExtension);
-      this.router.navigateByUrl('/extensions(dialog:sensors-readonly/' + parserExtension.extensionBundleName + ')');
+      this.router.navigateByUrl('/extensions(dialog:sensors-readonly/' + parserExtension.extensionIdentifier + ')');
     }
   }
 
@@ -153,7 +154,7 @@ export class ExtensionsParserListComponent implements OnInit {
       $event.stopPropagation();
     }
 
-    let sensorNames = selectedParserExtensionsToDelete.map(sensor => { return sensor.extensionBundleName; });
+    let sensorNames = selectedParserExtensionsToDelete.map(sensor => { return sensor.extensionIdentifier; });
     let confirmationsMsg = 'Are you sure you want to delete extension(s) ' + sensorNames.join(', ') + ' ?';
 
     this.metronDialogBox.showConfirmationMessage(confirmationsMsg).subscribe(result => {

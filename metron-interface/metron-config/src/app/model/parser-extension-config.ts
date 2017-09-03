@@ -16,19 +16,20 @@
  * limitations under the License.
  */
 export class ParserExtensionConfig {
-  extensionAssemblyName : string;
-  extensionBundleName : string;
-  extensionsBundleID : string;
-  extensionsBundleVersion : string;
-  parserExtensionParserNames : string[];
+  extensionIdentifier: string;
+  extensionAssemblyName: string;
+  extensionBundleName: string;
+  extensionBundleID: string;
+  extensionBundleVersion: string;
+  parserExtensionParserNames: string[];
   // map -> string,sensorparserconfig
-  defaultParserConfigs : {};
+  defaultParserConfigs: {};
   // map -> string,sensorenrichmentconfig
-  defaultEnrichementConfigs : {};
+  defaultEnrichementConfigs: {};
   // map -> string map<s,o>
-  defaultIndexingConfigs : {};
+  defaultIndexingConfigs: {};
   // map -> string map<s,o>
-  defaultElasticSearchTemplates : {};
+  defaultElasticSearchTemplates: {};
 
   constructor() {
     this.parserExtensionParserNames = [];

@@ -91,7 +91,7 @@ class MockParserExtensionService extends ParserExtensionService {
     let result: {success: Array<string>, failure: Array<string>} = {success: [], failure: []};
     let observable = Observable.create((observer => {
       for (let i = 0; i < sensors.length; i++) {
-        result.success.push(sensors[i].extensionBundleName);
+        result.success.push(sensors[i].extensionIdentifier);
       }
       observer.next(result);
       observer.complete();
@@ -171,8 +171,8 @@ describe('Component: ExtensionsParserList', () => {
     let sensorParserConfig1 = new ParserExtensionConfig();
     let sensorParserConfig2 = new ParserExtensionConfig();
 
-    sensorParserConfig1.extensionBundleName = 'squid';
-    sensorParserConfig2.extensionBundleName = 'bro';
+    sensorParserConfig1.extensionIdentifier = 'squid';
+    sensorParserConfig2.extensionIdentifier = 'bro';
 
     parserExtensionService.setParserExtensionConfigForTest([sensorParserConfig1, sensorParserConfig2]);
 
@@ -199,7 +199,7 @@ describe('Component: ExtensionsParserList', () => {
     let component: ExtensionsParserListComponent = fixture.componentInstance;
 
     let sensorParserConfig1 = new ParserExtensionConfig();
-    sensorParserConfig1.extensionBundleName = 'squid';
+    sensorParserConfig1.extensionIdentifier = 'squid';
     component.navigateToParserExtensionEdit(sensorParserConfig1, event);
 
     let expectStr = router.navigateByUrl['calls'].argsFor(0);
@@ -231,7 +231,7 @@ describe('Component: ExtensionsParserList', () => {
 
     let sensorParserConfig = new ParserExtensionConfig();
 
-    sensorParserConfig.extensionBundleName = 'squid';
+    sensorParserConfig.extensionIdentifier = 'squid';
 
     component.onRowSelected(sensorParserConfig, event);
 
@@ -252,8 +252,8 @@ describe('Component: ExtensionsParserList', () => {
     let sensorParserConfig1 = new ParserExtensionConfig();
     let sensorParserConfig2 = new ParserExtensionConfig();
 
-    sensorParserConfig1.extensionBundleName = 'squid';
-    sensorParserConfig2.extensionBundleName = 'bro';
+    sensorParserConfig1.extensionIdentifier = 'squid';
+    sensorParserConfig2.extensionIdentifier = 'bro';
 
     component.parserExtensions.push(sensorParserConfig1);
     component.parserExtensions.push(sensorParserConfig2);
@@ -276,7 +276,7 @@ describe('Component: ExtensionsParserList', () => {
   it('onSensorRowSelect should change the url and updated the selected items stack', async(() => {
 
     let sensorParserConfig1 = new ParserExtensionConfig();
-    sensorParserConfig1.extensionBundleName = 'squid';
+    sensorParserConfig1.extensionIdentifier = 'squid';
 
     let component: ExtensionsParserListComponent = fixture.componentInstance;
     let event = {target: {type: 'div', parentElement: {firstChild: {type: 'div'}}}};
@@ -312,8 +312,8 @@ describe('Component: ExtensionsParserList', () => {
     let sensorParserConfig1 = new ParserExtensionConfig();
     let sensorParserConfig2 = new ParserExtensionConfig();
 
-    sensorParserConfig1.extensionBundleName = 'squid';
-    sensorParserConfig2.extensionBundleName = 'bro';
+    sensorParserConfig1.extensionIdentifier = 'squid';
+    sensorParserConfig2.extensionIdentifier = 'bro';
 
     component.selectedExtensions.push(sensorParserConfig1);
     component.selectedExtensions.push(sensorParserConfig2);
@@ -341,38 +341,38 @@ describe('Component: ExtensionsParserList', () => {
 
     component.parserExtensions = [
       Object.assign(new ParserExtensionConfig(), {
-        'extensionBundleName': "squid",
-        'extensionsBundleID': 'abc',
+        'extensionIdentifier': "squid",
+        'extensionBundleID': 'abc',
       }),
       Object.assign(new ParserExtensionConfig(), {
-        'extensionBundleName': 'bro',
-        'extensionsBundleID': 'plm',
+        'extensionIdentifier': 'bro',
+        'extensionBundleID': 'plm',
       }),
       Object.assign(new ParserExtensionConfig(), {
-        'extensionBundleName': 'asa',
-        'extensionsBundleID': 'xyz',
+        'extensionIdentifier': 'asa',
+        'extensionBundleID': 'xyz',
       })
     ];
 
-    component.onSort({sortBy: 'extensionBundleName', sortOrder: Sort.ASC});
-    expect(component.parserExtensions[0].extensionBundleName).toEqual('asa');
-    expect(component.parserExtensions[1].extensionBundleName).toEqual('bro');
-    expect(component.parserExtensions[2].extensionBundleName).toEqual('squid');
+    component.onSort({sortBy: 'extensionIdentifier', sortOrder: Sort.ASC});
+    expect(component.parserExtensions[0].extensionIdentifier).toEqual('asa');
+    expect(component.parserExtensions[1].extensionIdentifier).toEqual('bro');
+    expect(component.parserExtensions[2].extensionIdentifier).toEqual('squid');
 
-    component.onSort({sortBy: 'extensionBundleName', sortOrder: Sort.DSC});
-    expect(component.parserExtensions[0].extensionBundleName).toEqual('squid');
-    expect(component.parserExtensions[1].extensionBundleName).toEqual('bro');
-    expect(component.parserExtensions[2].extensionBundleName).toEqual('asa');
+    component.onSort({sortBy: 'extensionIdentifier', sortOrder: Sort.DSC});
+    expect(component.parserExtensions[0].extensionIdentifier).toEqual('squid');
+    expect(component.parserExtensions[1].extensionIdentifier).toEqual('bro');
+    expect(component.parserExtensions[2].extensionIdentifier).toEqual('asa');
 
-    component.onSort({sortBy: 'extensionsBundleID', sortOrder: Sort.ASC});
-    expect(component.parserExtensions[0].extensionsBundleID).toEqual('abc');
-    expect(component.parserExtensions[1].extensionsBundleID).toEqual('plm');
-    expect(component.parserExtensions[2].extensionsBundleID).toEqual('xyz');
+    component.onSort({sortBy: 'extensionBundleID', sortOrder: Sort.ASC});
+    expect(component.parserExtensions[0].extensionBundleID).toEqual('abc');
+    expect(component.parserExtensions[1].extensionBundleID).toEqual('plm');
+    expect(component.parserExtensions[2].extensionBundleID).toEqual('xyz');
 
-    component.onSort({sortBy: 'extensionsBundleID', sortOrder: Sort.DSC});
-    expect(component.parserExtensions[0].extensionsBundleID).toEqual('xyz');
-    expect(component.parserExtensions[1].extensionsBundleID).toEqual('plm');
-    expect(component.parserExtensions[2].extensionsBundleID).toEqual('abc');
+    component.onSort({sortBy: 'extensionBundleID', sortOrder: Sort.DSC});
+    expect(component.parserExtensions[0].extensionBundleID).toEqual('xyz');
+    expect(component.parserExtensions[1].extensionBundleID).toEqual('plm');
+    expect(component.parserExtensions[2].extensionBundleID).toEqual('abc');
   }));
 
 });

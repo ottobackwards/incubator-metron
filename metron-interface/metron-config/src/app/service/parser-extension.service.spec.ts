@@ -62,10 +62,11 @@ describe('ParserExtensionService', () => {
     let parserExtensionConfig = new ParserExtensionConfig();
     let extensionName = 'extension-name';
     let contents = 'file contents';
-    parserExtensionConfig.extensionAssemblyName = "extension-name";
-    parserExtensionConfig.extensionBundleName = "extension.bundle";
-    parserExtensionConfig.extensionsBundleID = "org.apache.extension.name";
-    parserExtensionConfig.extensionsBundleVersion = "1.0.0";
+    parserExtensionConfig.extensionAssemblyName = 'extension-name';
+    parserExtensionConfig.extensionBundleName = 'extension.bundle';
+    parserExtensionConfig.extensionIdentifier = 'extension.identifier';
+    parserExtensionConfig.extensionBundleID = 'org.apache.extension.name';
+    parserExtensionConfig.extensionBundleVersion = "1.0.0";
     let parserExtensionResponse: Response;
     let parserExtensionsResponse: Response;
     let deleteResponse: Response;
