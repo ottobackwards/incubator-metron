@@ -36,11 +36,11 @@
   <table class="table card-deck" metron-config-table #table (onSort)="onSort($event)">
     <thead>
     <tr>
-      <th> <metron-config-sorter [sortBy]="'extensionIdentifier'"> Name </metron-config-sorter> </th>
-      <th> <metron-config-sorter [sortBy]="'extensionBundleName'"> Name </metron-config-sorter> </th>
-      <th> <metron-config-sorter [sortBy]="'extensionBundleID'"> ID </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionIdentifier'"> Identifier </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionBundleName'"> Bundle Name </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionBundleID'"> Bundle ID </metron-config-sorter> </th>
       <th> <metron-config-sorter [sortBy]="'extensionAssemblyName'"> Assembly Name </metron-config-sorter> </th>
-      <th> <metron-config-sorter [sortBy]="'extensionBundleVersion'"> Version </metron-config-sorter> </th>
+      <th> <metron-config-sorter [sortBy]="'extensionBundleVersion'"> Bundle Version </metron-config-sorter> </th>
       <th style="width:100px"></th>
       <th style="width:50px"><input id="select-deselect-all" class="fontawesome-checkbox" type="checkbox" (click)="onSelectDeselectAll($event)"><label for="select-deselect-all"></label></th>
     </tr>
@@ -52,6 +52,7 @@
       <td>{{ parserExtension.extensionBundleID }}</td>
       <td>{{ parserExtension.extensionBundleVersion }}</td>
       <td>{{ parserExtension.extensionAssemblyName }}</td>
+      <td>{{ parserExtension.parserExtensionParserNames }}</td>
       <td><input id="{{ parserExtension.extensionIdentifier }}" class="fontawesome-checkbox" type="checkbox" name="{{parserExtension.extensionIdentifier}}" (click)="onRowSelected(parserExtension, $event)"><label attr.for="{{ parserExtension.extensionIdentifier }}"></label></td>
     </tr>
     </tbody>
