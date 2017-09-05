@@ -98,14 +98,9 @@ export class ExtensionsParserListComponent implements OnInit {
   }
 
   addAddParserExtension() {
-    this.router.navigateByUrl('/extensions(dialog:extensions-parser-install)');
+    this.router.navigateByUrl('/extensions(dialog:extensions-install)');
   }
 
-  navigateToParserExtensionEdit(selectedExtension: ParserExtensionConfig, event) {
-    this.parserExtensionService.setSeletedExtension(selectedExtension);
-    this.router.navigateByUrl('/extensions(dialog:extensions-parser-install/' + selectedExtension.extensionIdentifier + ')');
-    event.stopPropagation();
-  }
 
   onRowSelected(parserExtension: ParserExtensionConfig, $event) {
     if ($event.target.checked) {

@@ -21,5 +21,5 @@ import {ExtensionsParserListComponent} from './extensions-parser-list.component'
 import {AuthGuard} from '../../shared/auth-guard';
 
 export const routing: ModuleWithProviders = RouterModule.forChild([
-  { path: '', component: ExtensionsParserListComponent, canActivate: [AuthGuard]}
+  { path: 'extensions', component: ExtensionsParserListComponent, canActivate: [AuthGuard]}
 ]);
