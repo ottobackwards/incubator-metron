@@ -61,7 +61,8 @@ describe('ParserExtensionService', () => {
     let mockBackend: MockBackend;
     let parserExtensionConfig = new ParserExtensionConfig();
     let extensionName = 'extension-name';
-    let contents = 'file contents';
+    let contents = new FormData();
+    contents.append("file[]","content");
     parserExtensionConfig.extensionAssemblyName = 'extension-name';
     parserExtensionConfig.extensionBundleName = 'extension.bundle';
     parserExtensionConfig.extensionIdentifier = 'extension.identifier';

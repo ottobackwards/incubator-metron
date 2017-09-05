@@ -37,10 +37,10 @@ export class ParserExtensionService {
 
   }
 
-  public post(extensionTgz: string, contents: string): Observable<Response> {
+  public post(extensionTgz: string, formData: FormData): Observable<Response> {
     let params: URLSearchParams = new URLSearchParams();
     params.set('extensionTgz', extensionTgz);
-    return this.http.post(this.url, contents, new RequestOptions({headers: new Headers(this.defaultHeaders), search: params}))
+    return this.http.post(this.url, formData, new RequestOptions({headers: new Headers(this.defaultHeaders), search: params}))
     .catch(HttpUtil.handleError);
   }
 

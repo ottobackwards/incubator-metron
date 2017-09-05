@@ -17,19 +17,16 @@
  */
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {routing} from './sensor-parser-config.routing';
-import {SensorParserConfigComponent} from './sensor-parser-config.component';
+import {routing} from './extensions-parser-install.routing';
 import {SharedModule} from '../../shared/shared.module';
 import {NumberSpinnerModule} from '../../shared/number-spinner/number-spinner.module';
 import {AdvancedConfigFormModule} from '../../shared/advanced-config-form/advanced-config-form.module';
-import {SensorGrokModule} from '../sensor-grok/sensor-grok.module';
-import {SensorFieldSchemaModule} from '../sensor-field-schema/sensor-field-schema.module';
-import {SensorRawJsonModule} from '../sensor-raw-json/sensor-raw-json.module';
-import {SensorThreatTriageModule} from '../sensor-threat-triage/sensor-threat-triage.module';
+import {ExtensionsParserInstallComponent} from "./extensions-parser-install.component";
+import {ExtensionsUploadComponent} from "./extensions-upload.component";
 
 @NgModule ({
   imports: [ routing, ReactiveFormsModule, SharedModule, NumberSpinnerModule, AdvancedConfigFormModule,
-                SensorGrokModule, SensorFieldSchemaModule, SensorRawJsonModule, SensorThreatTriageModule ],
-  declarations: [ SensorParserConfigComponent ]
+                ],
+  declarations: [ ExtensionsParserInstallComponent, ExtensionsUploadComponent ]
 })
-export class SensorParserConfigModule { }
+export class ExtensionsParserInstallModule { }

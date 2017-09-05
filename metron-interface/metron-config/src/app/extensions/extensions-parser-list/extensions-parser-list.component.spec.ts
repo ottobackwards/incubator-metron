@@ -62,7 +62,7 @@ class MockParserExtensionService extends ParserExtensionService {
     super(http2, config2);
   }
 
-  public post(extensionTgz: string, contents: string): Observable<Response> {
+  public post(extensionTgz: string, contents: FormData): Observable<Response> {
     return Observable.create(observer => {
       observer.next(new Response(new ResponseOptions({status:201})))
       observer.complete();

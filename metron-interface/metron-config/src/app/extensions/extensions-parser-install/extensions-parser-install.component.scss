@@ -113,8 +113,3 @@
   background-color: $edit-background-border;
 }
 
-metron-config-sensor-grok, metron-config-sensor-raw-json, metron-config-sensor-field-schema,
-metron-config-sensor-threat-triage, metron-config-sensor-threat-triage
-{
-  @extend .flexbox-row-reverse;
-}

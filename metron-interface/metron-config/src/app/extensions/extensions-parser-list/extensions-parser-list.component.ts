@@ -17,16 +17,10 @@
  */
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Router, NavigationStart} from '@angular/router';
-import {SensorParserConfig} from '../../model/sensor-parser-config';
-import {SensorParserConfigService} from '../../service/sensor-parser-config.service';
 import {MetronAlerts} from '../../shared/metron-alerts';
 import {MetronDialogBox} from '../../shared/metron-dialog-box';
 import {Sort} from '../../util/enums';
 import {SortEvent} from '../../shared/metron-table/metron-table.directive';
-import {StormService} from '../../service/storm.service';
-import {TopologyStatus} from '../../model/topology-status';
-import {SensorParserConfigHistory} from '../../model/sensor-parser-config-history';
-import {SensorParserConfigHistoryService} from '../../service/sensor-parser-config-history.service';
 import {ParserExtensionConfig} from "../../model/parser-extension-config";
 import {ParserExtensionService} from "../../service/parser-extension.service";
 
@@ -104,12 +98,12 @@ export class ExtensionsParserListComponent implements OnInit {
   }
 
   addAddParserExtension() {
-    this.router.navigateByUrl('/extensions(dialog:extensions-parser-config/new)');
+    this.router.navigateByUrl('/extensions(dialog:extensions-parser-install)');
   }
 
   navigateToParserExtensionEdit(selectedExtension: ParserExtensionConfig, event) {
     this.parserExtensionService.setSeletedExtension(selectedExtension);
-    this.router.navigateByUrl('/extensions(dialog:extensions-parser-config/' + selectedExtension.extensionIdentifier + ')');
+    this.router.navigateByUrl('/extensions(dialog:extensions-parser-install/' + selectedExtension.extensionIdentifier + ')');
     event.stopPropagation();
   }
 
