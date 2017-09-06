@@ -20,6 +20,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import {ParserExtensionService} from "../../service/parser-extension.service";
 import {MetronAlerts} from "../../shared/metron-alerts";
 import {RestError} from "../../model/rest-error";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'extensions-upload',
@@ -28,7 +29,12 @@ import {RestError} from "../../model/rest-error";
 export class ExtensionsUploadComponent {
   @ViewChild('fileInput') inputEl: ElementRef;
 
-  constructor(private parserExtensionService: ParserExtensionService, private metronAlerts:  MetronAlerts) {}
+  constructor(private parserExtensionService: ParserExtensionService, private metronAlerts:  MetronAlerts, private router: Router) {}
+
+  goBack() {
+    this.router.navigateByUrl('/extensions');
+    return false;
+  }
 
   upload() {
     let inputEl: HTMLInputElement = this.inputEl.nativeElement;
@@ -40,6 +46,7 @@ export class ExtensionsUploadComponent {
           result => {
             if (result.status == 201) {
               this.metronAlerts.showSuccessMessage('Installed Parser Extension: ' + inputEl.files[0].name);
+              this.goBack();
             } else {
               this.metronAlerts.showErrorMessage('Unable to Install Parser Extension: ' + inputEl.files[0].name);
             }
