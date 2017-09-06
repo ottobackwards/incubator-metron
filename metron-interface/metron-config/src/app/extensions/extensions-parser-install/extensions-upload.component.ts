@@ -23,10 +23,9 @@ import {RestError} from "../../model/rest-error";
 
 @Component({
   selector: 'extensions-upload',
-  template: '<input type="file" [multiple]="multiple" #fileInput>'
+  template: '<input type="file"#fileInput>'
 })
 export class ExtensionsUploadComponent {
-  @Input() url: string;
   @ViewChild('fileInput') inputEl: ElementRef;
 
   constructor(private parserExtensionService: ParserExtensionService, private metronAlerts:  MetronAlerts) {}
@@ -36,7 +35,7 @@ export class ExtensionsUploadComponent {
     let fileCount: number = inputEl.files.length;
     let formData = new FormData();
     if (fileCount > 0) {
-      formData.append('file[]', inputEl.files.item(0));
+      formData.append('extensionTgz', inputEl.files.item(0));
       this.parserExtensionService.post(inputEl.files.item(0).name, formData).subscribe(
           result => {
             if (result.status == 201) {

@@ -46,11 +46,12 @@ import {SensorIndexingConfigService} from './service/sensor-indexing-config.serv
 import {HdfsService} from './service/hdfs.service';
 import {ExtensionsParserListModule} from "./extensions/extensions-parser-list/extensions-parser-list.module";
 import {ParserExtensionService} from './service/parser-extension.service'
+import {ExtensionsParserInstallModule} from './extensions/extensions-parser-install/extensions-parser-install.module';
 
 
 @NgModule({
   imports: [ BrowserModule, routing, FormsModule, ReactiveFormsModule, HttpModule, SensorParserListModule,
-    SensorParserConfigModule, SensorParserConfigReadonlyModule, ExtensionsParserListModule, GeneralSettingsModule ],
+    SensorParserConfigModule, SensorParserConfigReadonlyModule, ExtensionsParserListModule,ExtensionsParserInstallModule, GeneralSettingsModule ],
   declarations: [ AppComponent, LoginComponent, NavbarComponent, VerticalNavbarComponent ],
   providers: [  AuthenticationService, AuthGuard, LoginGuard, SensorParserConfigService,ParserExtensionService,
     SensorParserConfigHistoryService, SensorEnrichmentConfigService, SensorIndexingConfigService,

@@ -28,6 +28,7 @@ import {ParserExtensionConfig} from "../model/parser-extension-config";
 export class ParserExtensionService {
   url = this.config.apiEndpoint + '/ext/parsers';
   defaultHeaders = {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'};
+  postHeaders = {'X-Requested-With': 'XMLHttpRequest'};
   selectedParserExtensionConfig: ParserExtensionConfig;
 
   dataChangedSource = new Subject<ParserExtensionConfig[]>();
@@ -39,8 +40,9 @@ export class ParserExtensionService {
 
   public post(extensionTgz: string, formData: FormData): Observable<Response> {
     let params: URLSearchParams = new URLSearchParams();
-    params.set('extensionTgz', extensionTgz);
-    return this.http.post(this.url, formData, new RequestOptions({headers: new Headers(this.defaultHeaders), search: params}))
+    //params.set('extensionTgz', extensionTgz);
+
+    return this.http.post(this.url, formData, new RequestOptions({headers: new Headers(this.postHeaders), search: params }))
     .catch(HttpUtil.handleError);
   }
 

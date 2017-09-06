@@ -17,7 +17,10 @@
         <div style="height:100%">
             <div class="form-title">Install Parser Extensions</div>
             <i class="fa fa-times pull-right main close-button" aria-hidden="true" (click)="goBack()"></i>
-            <extensions-upload #extensions-upload (change)="extensions-upload.upload()" [multiple]=false></extensions-upload>
+            <extensions-upload #extensionsUpload ></extensions-upload>
+            <div class="buttons-bar">
+                <button class="save-button" (click)="extensionsUpload.upload()">Install</button>
+            </div>
         </div>
     </div>
 </metron-config-metron-modal>
