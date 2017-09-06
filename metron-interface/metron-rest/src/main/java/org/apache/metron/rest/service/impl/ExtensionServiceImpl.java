@@ -18,6 +18,7 @@
 package org.apache.metron.rest.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.lang.invoke.MethodHandles;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
@@ -34,6 +35,8 @@ import org.apache.metron.guava.io.Files;
 import org.apache.metron.rest.RestException;
 import org.apache.metron.rest.service.*;
 import org.apache.zookeeper.KeeperException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -49,6 +52,8 @@ import static org.apache.metron.rest.MetronRestConstants.GROK_DEFAULT_PATH_SPRIN
 
 @Service
 public class ExtensionServiceImpl implements ExtensionService{
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   final static int BUFFER_SIZ = 2048;
   final static String[] CONFIG_EXT = {"json"};
   final static String[] BUNDLE_EXT = {"bundle"};
@@ -92,8 +97,10 @@ public class ExtensionServiceImpl implements ExtensionService{
     try {
       parserExtensionConfig = ConfigurationsUtils.readParserExtensionConfigFromZookeeper(name, client);
     } catch (KeeperException.NoNodeException e) {
+      LOG.error("No Node reading ParserExtensionConfig from Zookeeper", e);
       return null;
     } catch (Exception e) {
+      LOG.error("Error reading ParserExtensionConfig from Zookeeper", e);
       throw new RestException(e);
     }
     return parserExtensionConfig;
@@ -113,8 +120,10 @@ public class ExtensionServiceImpl implements ExtensionService{
     try {
       types = client.getChildren().forPath(ConfigurationType.PARSER_EXTENSION.getZookeeperRoot());
     } catch (KeeperException.NoNodeException e) {
+      LOG.error("No Node reading Parser Extension Types from Zookeeper", e);
       types = new ArrayList<>();
     } catch (Exception e) {
+      LOG.error("Error reading Parser Extension Types from Zookeeper", e);
       throw new RestException(e);
     }
     return types;
