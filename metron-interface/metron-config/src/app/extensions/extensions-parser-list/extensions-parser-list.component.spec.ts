@@ -190,26 +190,6 @@ describe('Component: ExtensionsParserList', () => {
     fixture.destroy();
   }));
 
-  it('navigateToSensorEdit should set selected sensor and change url', async(() => {
-    let event = new Event('mouse');
-    event.stopPropagation = jasmine.createSpy('stopPropagation');
-
-    spyOn(router, 'navigateByUrl');
-
-    let component: ExtensionsParserListComponent = fixture.componentInstance;
-
-    let sensorParserConfig1 = new ParserExtensionConfig();
-    sensorParserConfig1.extensionIdentifier = 'squid';
-    component.navigateToParserExtensionEdit(sensorParserConfig1, event);
-
-    let expectStr = router.navigateByUrl['calls'].argsFor(0);
-    expect(expectStr).toEqual(['/extensions(dialog:extensions-parser-config/squid)']);
-
-    expect(event.stopPropagation).toHaveBeenCalled();
-
-    fixture.destroy();
-  }));
-
   it('addAddSensor should change the URL', async(() => {
     spyOn(router, 'navigateByUrl');
 
@@ -218,7 +198,7 @@ describe('Component: ExtensionsParserList', () => {
     component.addAddParserExtension();
 
     let expectStr = router.navigateByUrl['calls'].argsFor(0);
-    expect(expectStr).toEqual(['/extensions(dialog:extensions-parser-config/new)']);
+    expect(expectStr).toEqual(['/extensions(dialog:extensions-install)']);
 
     fixture.destroy();
   }));
