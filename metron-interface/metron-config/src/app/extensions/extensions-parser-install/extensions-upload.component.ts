@@ -46,6 +46,7 @@ export class ExtensionsUploadComponent {
           result => {
             if (result.status == 201) {
               this.metronAlerts.showSuccessMessage('Installed Parser Extension: ' + inputEl.files[0].name);
+              (this).parserExtensionService.dataChangedSource.next();
               this.goBack();
             } else {
               this.metronAlerts.showErrorMessage('Unable to Install Parser Extension: ' + inputEl.files[0].name);
