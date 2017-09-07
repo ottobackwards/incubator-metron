@@ -97,7 +97,6 @@ public class ExtensionServiceImpl implements ExtensionService{
     try {
       parserExtensionConfig = ConfigurationsUtils.readParserExtensionConfigFromZookeeper(name, client);
     } catch (KeeperException.NoNodeException e) {
-      LOG.error("No Node reading ParserExtensionConfig from Zookeeper", e);
       return null;
     } catch (Exception e) {
       LOG.error("Error reading ParserExtensionConfig from Zookeeper", e);
@@ -120,7 +119,6 @@ public class ExtensionServiceImpl implements ExtensionService{
     try {
       types = client.getChildren().forPath(ConfigurationType.PARSER_EXTENSION.getZookeeperRoot());
     } catch (KeeperException.NoNodeException e) {
-      LOG.error("No Node reading Parser Extension Types from Zookeeper", e);
       types = new ArrayList<>();
     } catch (Exception e) {
       LOG.error("Error reading Parser Extension Types from Zookeeper", e);
