@@ -495,7 +495,7 @@ public class ExtensionServiceImpl implements ExtensionService{
     org.apache.hadoop.fs.Path patternPath = new org.apache.hadoop.fs.Path(hdfsPatternsPath);
     for(String parserName : parserNames) {
       org.apache.hadoop.fs.Path parserRulePath = new org.apache.hadoop.fs.Path(patternPath, parserName);
-      hdfsService.delete(patternPath,true);
+      hdfsService.delete(parserRulePath,true);
     }
   }
 
@@ -504,7 +504,7 @@ public class ExtensionServiceImpl implements ExtensionService{
     org.apache.hadoop.fs.Path patternPath = new org.apache.hadoop.fs.Path(hdfsPatternsPath);
     for(String parserName : context.extensionParserNames) {
       org.apache.hadoop.fs.Path parserRulePath = new org.apache.hadoop.fs.Path(patternPath, parserName);
-      hdfsService.delete(patternPath,true);
+      hdfsService.delete(parserRulePath,true);
     }
   }
 
