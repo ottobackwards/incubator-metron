@@ -134,7 +134,6 @@ export class ExtensionsParserListComponent implements OnInit {
       }
 
       this.parserExtensionService.setSeletedExtension(parserExtension);
-      this.router.navigateByUrl('/extensions(dialog:sensors-readonly/' + parserExtension.extensionIdentifier + ')');
     }
   }
 
