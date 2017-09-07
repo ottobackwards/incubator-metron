@@ -456,10 +456,8 @@ public class ExtensionServiceImpl implements ExtensionService{
     BundleProperties props = optionalProperties.get();
     org.apache.hadoop.fs.Path altPath = new org.apache.hadoop.fs.Path(props.getProperty("bundle.library.directory.alt"));
 
-    if(hdfsService.list(altPath).contains(bundleName)){
-      org.apache.hadoop.fs.Path targetPath = new org.apache.hadoop.fs.Path(altPath, bundleName);
-      hdfsService.delete(targetPath, false);
-    }
+    org.apache.hadoop.fs.Path targetPath = new org.apache.hadoop.fs.Path(altPath, bundleName);
+    hdfsService.delete(targetPath, false);
   }
 
 
@@ -473,7 +471,6 @@ public class ExtensionServiceImpl implements ExtensionService{
     String hdfsPatternsPath = environment.getProperty(GROK_DEFAULT_PATH_SPRING_PROPERTY);
 
     org.apache.hadoop.fs.Path patternPath = new org.apache.hadoop.fs.Path(hdfsPatternsPath);
-    hdfsService.ensureDirectory(patternPath);
     List<org.apache.hadoop.fs.Path> paths = new ArrayList<>();
     for(String parserName : context.extensionParserNames) {
       org.apache.hadoop.fs.Path parserRulePath = new org.apache.hadoop.fs.Path(patternPath, parserName);
@@ -489,7 +486,6 @@ public class ExtensionServiceImpl implements ExtensionService{
   private void deletePatternsFromHdfs(Collection<String> parserNames )throws Exception{
     String hdfsPatternsPath = environment.getProperty(GROK_DEFAULT_PATH_SPRING_PROPERTY);
     org.apache.hadoop.fs.Path patternPath = new org.apache.hadoop.fs.Path(hdfsPatternsPath);
-    hdfsService.ensureDirectory(patternPath);
     for(String parserName : parserNames) {
       org.apache.hadoop.fs.Path parserRulePath = new org.apache.hadoop.fs.Path(patternPath, parserName);
       hdfsService.delete(patternPath,true);
@@ -499,7 +495,6 @@ public class ExtensionServiceImpl implements ExtensionService{
   private void rollBackPatternsFromHdfs(InstallContext context) throws Exception{
     String hdfsPatternsPath = environment.getProperty(GROK_DEFAULT_PATH_SPRING_PROPERTY);
     org.apache.hadoop.fs.Path patternPath = new org.apache.hadoop.fs.Path(hdfsPatternsPath);
-    hdfsService.ensureDirectory(patternPath);
     for(String parserName : context.extensionParserNames) {
       org.apache.hadoop.fs.Path parserRulePath = new org.apache.hadoop.fs.Path(patternPath, parserName);
       hdfsService.delete(patternPath,true);
