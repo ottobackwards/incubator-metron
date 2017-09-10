@@ -15,6 +15,8 @@
 
 package org.apache.metron.rest.config;
 
+import static org.apache.metron.rest.MetronRestConstants.TEST_PROFILE;
+
 import java.io.ByteArrayInputStream;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
@@ -29,24 +31,32 @@ import org.apache.metron.bundles.util.FileSystemManagerFactory;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.rest.MetronRestConstants;
+import org.apache.metron.rest.service.HdfsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 
+@Configuration
+@Profile("!" + TEST_PROFILE)
 public class BundleSystemConfig {
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 
+  private HdfsService hdfsService;
+
   public BundleSystemConfig() {}
 
-  public static BundleSystem bundleSystem(CuratorFramework client) throws Exception {
+  @Bean
+  public  BundleSystem bundleSystem(CuratorFramework client, HdfsService hdfsService) throws Exception {
     Optional<BundleProperties> properties = getBundleProperties(client);
     if (!properties.isPresent()) {
       throw new IllegalStateException("BundleProperties are not available");
     }
+    this.hdfsService = hdfsService;
     return new BundleSystem.Builder().withBundleProperties(properties.get()).build();
   }
 

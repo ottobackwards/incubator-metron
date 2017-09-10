@@ -101,7 +101,6 @@ public class SensorParserConfigServiceImplTest {
 
   @Before
   public void setUp() throws Exception {
-    BundleSystem.reset();
     objectMapper = mock(ObjectMapper.class);
     curatorFramework = mock(CuratorFramework.class);
     grokService = mock(GrokService.class);
@@ -112,9 +111,11 @@ public class SensorParserConfigServiceImplTest {
       properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,"./target");
       properties.unSetProperty("bundle.library.directory.alt");
       bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
+      //sensorParserConfigService = new SensorParserConfigServiceImpl(environment, objectMapper, curatorFramework,
+      //    grokService);
       sensorParserConfigService = new SensorParserConfigServiceImpl(environment, objectMapper, curatorFramework,
-          grokService);
-      ((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
+          grokService, bundleSystem);
+      //((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
     }
   }
 

@@ -73,29 +73,31 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
   private Map<String,Object> configurationMap;
 
   @Autowired
-  public SensorParserConfigServiceImpl(Environment environment,ObjectMapper objectMapper, CuratorFramework client, GrokService grokService) {
+  //public SensorParserConfigServiceImpl(Environment environment,ObjectMapper objectMapper, CuratorFramework client, GrokService grokService) {
+  public SensorParserConfigServiceImpl(Environment environment,ObjectMapper objectMapper, CuratorFramework client, GrokService grokService, BundleSystem bundleSystem) {
     this.objectMapper = objectMapper;
     this.client = client;
     this.grokService = grokService;
     this.environment = environment;
+    this.bundleSystem = bundleSystem;
     configurationMap = new HashMap<>();
     configurationMap.put("metron.apps.hdfs.dir",environment.getProperty(MetronRestConstants.HDFS_METRON_APPS_ROOT));
   }
 
   private Map<String, String> availableParsers;
 
-  public void setBundleSystem(BundleSystem bundleSystem) {
-    this.bundleSystem = bundleSystem;
-  }
+ // public void setBundleSystem(BundleSystem bundleSystem) {
+ //   this.bundleSystem = bundleSystem;
+ // }
 
   private BundleSystem getBundleSystem() {
-    if (bundleSystem == null){
+   /* if (bundleSystem == null){
       try {
         bundleSystem = BundleSystemConfig.bundleSystem(client);
       } catch (Exception e) {
         LOG.error("Failed to create BundleSystem",e);
       }
-    }
+    }*/
     return bundleSystem;
   }
   @Override
@@ -183,7 +185,8 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
 
   @SuppressWarnings("unchecked")
   private Set<Class<? extends MessageParser>> getParserClasses() throws NotInitializedException {
-    return (Set<Class<? extends MessageParser>>) getBundleSystem().getExtensionsClassesForExtensionType(MessageParser.class);
+    //return (Set<Class<? extends MessageParser>>) getBundleSystem().getExtensionsClassesForExtensionType(MessageParser.class);
+    return (Set<Class<? extends MessageParser>>) bundleSystem.getExtensionsClassesForExtensionType(MessageParser.class);
   }
 
   @Override
@@ -197,7 +200,9 @@ public class SensorParserConfigServiceImpl implements SensorParserConfigService 
     } else {
       MessageParser<JSONObject> parser;
       try {
-        parser = (MessageParser<JSONObject>) getBundleSystem()
+        //parser = (MessageParser<JSONObject>) getBundleSystem()
+        //    .createInstance(sensorParserConfig.getParserClassName(), MessageParser.class);
+        parser = (MessageParser<JSONObject>) bundleSystem
             .createInstance(sensorParserConfig.getParserClassName(), MessageParser.class);
 
         File temporaryGrokFile = null;

@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.metron.bundles.BundleSystem;
 import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.ConfigurationType;
@@ -71,6 +72,8 @@ public class ExtensionServiceImpl implements ExtensionService{
   SensorParserConfigService sensorParserConfigService;
   @Autowired
   StormAdminService stormAdminService;
+  @Autowired
+  BundleSystem bundleSystem;
 
   private CuratorFramework client;
   private Environment environment;
@@ -180,6 +183,7 @@ public class ExtensionServiceImpl implements ExtensionService{
         deployGrokRulesToHdfs(context);
         deployBundleToHdfs(context);
         writeExtensionConfiguration(context);
+        addBundlesToBundleSystem(context);
     }catch(Exception e){
       for(String name : loadedEnrichementConfigs){
         sensorEnrichmentConfigService.delete(name);
@@ -446,13 +450,30 @@ public class ExtensionServiceImpl implements ExtensionService{
     if(bundlePaths == null || bundlePaths.size() == 0){
       return;
     }
+    for(Path bundlePath: bundlePaths) {
+      BundleProperties props = context.bundleProperties.get();
+      org.apache.hadoop.fs.Path altPath = new org.apache.hadoop.fs.Path(
+          props.getProperty("bundle.library.directory.alt"));
+      org.apache.hadoop.fs.Path targetPath = new org.apache.hadoop.fs.Path(altPath,
+          bundlePath.toFile().getName());
+      hdfsService.write(targetPath, FileUtils.readFileToByteArray(bundlePath.toFile()));
+    }
+  }
 
-    Path bundlePath = bundlePaths.get(0);
-
-    BundleProperties props = context.bundleProperties.get();
-    org.apache.hadoop.fs.Path altPath = new org.apache.hadoop.fs.Path(props.getProperty("bundle.library.directory.alt"));
-    org.apache.hadoop.fs.Path targetPath = new org.apache.hadoop.fs.Path(altPath, bundlePath.toFile().getName());
-    hdfsService.write(targetPath,FileUtils.readFileToByteArray(bundlePath.toFile()));
+  private void addBundlesToBundleSystem(InstallContext context) {
+    List<Path> bundlePaths = context.pathContext.get(Paths.BUNDLE);
+    if (bundlePaths == null || bundlePaths.size() == 0) {
+      return;
+    }
+    for (Path bundlePath : bundlePaths) {
+      try {
+        bundleSystem.addBundle(bundlePath.toFile().getName());
+        sensorParserConfigService.reloadAvailableParsers();
+      } catch (Exception e) {
+        LOG.warn("Error installing bundle to the rest service local BundleSystem.  The bundle is "
+            + "installed into metron however", e);
+      }
+    }
   }
 
   private void deleteBundleFromHdfs(String bundleName) throws Exception{

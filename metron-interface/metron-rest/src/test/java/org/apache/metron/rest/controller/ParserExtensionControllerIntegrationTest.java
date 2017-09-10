@@ -18,10 +18,12 @@
 package org.apache.metron.rest.controller;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.metron.bundles.BundleSystem;
 import org.apache.metron.rest.service.HdfsService;
 import org.apache.metron.test.utils.ResourceCopier;
 import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,6 +33,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -92,9 +96,15 @@ public class ParserExtensionControllerIntegrationTest {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
   }
 
-  @After
-  public void takeDown() throws Exception {
 
+  @After
+  public void tearDown() {
+    BundleSystem.reset();
+  }
+
+  @AfterClass
+  public static void afterClass() {
+    BundleSystem.reset();
   }
 
   @Test
@@ -110,6 +120,7 @@ public class ParserExtensionControllerIntegrationTest {
   }
 
   @Test
+  @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
   public void test() throws Exception {
     final File bundle = new File("./target/remote/metron-parser-test-assembly-0.4.0-archive.tar.gz");
     final MockMultipartFile multipartFile = new MockMultipartFile("extensionTgz","metron-parser-test-assembly-0.4.0-archive.tar.gz","", new FileInputStream(bundle));
@@ -146,7 +157,7 @@ public class ParserExtensionControllerIntegrationTest {
     // GET ALL
     this.mockMvc.perform(get(parserExtUrl).with(httpBasic(user,password)))
             .andExpect(status().isOk())
-            .andDo((r) -> System.out.println(r.getResponse().getContentAsString()))
+            //.andDo((r) -> System.out.println(r.getResponse().getContentAsString()))
             .andExpect(content().contentType(MediaType.parseMediaType("application/json;charset=UTF-8")))
             .andExpect(jsonPath("$[?(@.extensionAssemblyName == 'metron-parser-test-assembly-0_4_0-archive' && " +
                     "@.extensionIdentifier == 'metron-parser-test-assembly-0_4_0' && " +

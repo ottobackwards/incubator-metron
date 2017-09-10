@@ -182,14 +182,6 @@ public class SensorParserConfigControllerIntegrationTest {
   @Before
   public void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).apply(springSecurity()).build();
-    BundleSystem.reset();
-    try(FileInputStream fis = new FileInputStream(new File("src/test/resources/zookeeper/bundle.properties"))) {
-      BundleProperties properties = BundleProperties.createBasicBundleProperties(fis, new HashMap<>());
-      properties.setProperty(BundleProperties.BUNDLE_LIBRARY_DIRECTORY,"./target");
-      properties.unSetProperty("bundle.library.directory.alt");
-      bundleSystem = new BundleSystem.Builder().withBundleProperties(properties).build();
-      ((SensorParserConfigServiceImpl)sensorParserConfigService).setBundleSystem(bundleSystem);
-    }
   }
 
   @Test
