@@ -58,14 +58,33 @@ public class StellarCompiler extends StellarBaseListener {
   private final NumberLiteralEvaluator numberLiteralEvaluator;
   private final ComparisonExpressionWithOperatorEvaluator comparisonExpressionWithOperatorEvaluator;
 
-  public interface ShortCircuitOp {}
+  public interface ShortCircuitOp {
+    Integer getLevel();
+    void setLevel(Integer level);
+  }
+
+  public static class BaseShortCircuitOp implements ShortCircuitOp{
+    private Integer level;
+
+    @Override
+    public Integer getLevel() {
+      System.out.println("Getting " + level.toString());
+      return level;
+    }
+
+    @Override
+    public void setLevel(Integer level) {
+      System.out.println("Setting " + level.toString());
+      this.level = level;
+    }
+  }
 
   public static class ShortCircuitFrame {}
-  public static class BooleanArg implements ShortCircuitOp {}
-  public static class IfExpr implements ShortCircuitOp {}
-  public static class ThenExpr implements ShortCircuitOp {}
-  public static class ElseExpr implements ShortCircuitOp {}
-  public static class EndConditional implements ShortCircuitOp {}
+  public static class BooleanArg extends BaseShortCircuitOp {}
+  public static class IfExpr extends BaseShortCircuitOp {}
+  public static class ThenExpr extends BaseShortCircuitOp {}
+  public static class ElseExpr extends BaseShortCircuitOp {}
+  public static class EndConditional extends BaseShortCircuitOp {}
 
   public static class ExpressionState {
     Context context;
@@ -85,16 +104,42 @@ public class StellarCompiler extends StellarBaseListener {
     final Deque<Token<?>> tokenDeque;
     final Deque<FrameContext.Context> multiArgumentState;
     final Set<String> variablesUsed;
+    final Map<Class<? extends BaseShortCircuitOp>, Integer> shortCircuitLevels;
+
     public Expression(Deque<Token<?>> tokenDeque) {
       this.tokenDeque = tokenDeque;
       this.variablesUsed = new HashSet<>();
       this.multiArgumentState = new ArrayDeque<>();
+      this.shortCircuitLevels = new HashMap<>();
     }
 
     public void clear() {
       tokenDeque.clear();
       variablesUsed.clear();
       multiArgumentState.clear();
+      shortCircuitLevels.clear();
+    }
+
+    public Integer enterShortCircuitLevel(Class<? extends BaseShortCircuitOp> shortCircuitOpClass) {
+      return shortCircuitLevels.compute(shortCircuitOpClass,(k,v) -> {
+        if( v == null){
+          return 0;
+        }
+        return ++v;
+      });
+    }
+
+    public void exitShortCircuitLevel(Class<? extends BaseShortCircuitOp> shortCircuitOpClass) {
+      shortCircuitLevels.compute(shortCircuitOpClass,(k,v) -> {
+        if(v == null || v == 0) {
+          return null;
+        }
+        return --v;
+      });
+    }
+
+    public Integer getShortCircuitLevel(Class<? extends BaseShortCircuitOp> shortCircuitOpClass) {
+      return shortCircuitLevels.get(shortCircuitOpClass);
     }
 
     public Deque<Token<?>> getTokenDeque() {
@@ -110,10 +155,14 @@ public class StellarCompiler extends StellarBaseListener {
           token = it.next();
           //if we've skipped an else previously, then we need to skip the deferred tokens associated with the else.
           if(skipElse && token.getUnderlyingType() == ElseExpr.class) {
+            ShortCircuitOp op = (ShortCircuitOp)token.getValue();
             while(it.hasNext()) {
               token = it.next();
               if(token.getUnderlyingType() == EndConditional.class) {
-                break;
+                ShortCircuitOp endConditionalOp = (ShortCircuitOp)token.getValue();
+                if(endConditionalOp.getLevel().equals(op.getLevel())) {
+                  break;
+                }
               }
             }
             skipElse = false;
@@ -127,6 +176,7 @@ public class StellarCompiler extends StellarBaseListener {
            && curr.getValue() != null && curr.getValue() instanceof Boolean
            && ShortCircuitOp.class.isAssignableFrom(token.getUnderlyingType())
                   ) {
+            ShortCircuitOp op = (ShortCircuitOp)token.getValue();
             //if we have a boolean as the current value and the next non-contextual token is a short circuit op
             //then we need to short circuit possibly
             if(token.getUnderlyingType() == BooleanArg.class) {
@@ -158,7 +208,10 @@ public class StellarCompiler extends StellarBaseListener {
                 while(it.hasNext()) {
                   Token<?> t = it.next();
                   if(t.getUnderlyingType() == ElseExpr.class) {
-                    break;
+                    ShortCircuitOp elseOp = (ShortCircuitOp)t.getValue();
+                    if(elseOp.getLevel().equals(op.getLevel())) {
+                      break;
+                    }
                   }
                 }
               }
@@ -195,7 +248,7 @@ public class StellarCompiler extends StellarBaseListener {
       while (it.hasNext()) {
         Token<?> token = it.next();
         if (token.getUnderlyingType() == ShortCircuitFrame.class && token.getMultiArgContext() == context) {
-          break;
+            break;
         }
       }
     }
@@ -314,22 +367,31 @@ public class StellarCompiler extends StellarBaseListener {
 
   @Override
   public void exitIf_expr(StellarParser.If_exprContext ctx) {
-    expression.tokenDeque.push(new Token<>(new IfExpr(), IfExpr.class, getArgContext()));
+    IfExpr ifExpr = new IfExpr();
+    ifExpr.setLevel(expression.enterShortCircuitLevel(IfExpr.class));
+    expression.tokenDeque.push(new Token<>(ifExpr, IfExpr.class, getArgContext()));
   }
 
   @Override
   public void enterThen_expr(StellarParser.Then_exprContext ctx) {
-    expression.tokenDeque.push(new Token<>(new ThenExpr(), ThenExpr.class, getArgContext()));
+    ThenExpr thenExpr = new ThenExpr();
+    thenExpr.setLevel(expression.getShortCircuitLevel(IfExpr.class));
+    expression.tokenDeque.push(new Token<>(thenExpr, ThenExpr.class, getArgContext()));
   }
 
   @Override
   public void enterElse_expr(StellarParser.Else_exprContext ctx) {
-    expression.tokenDeque.push(new Token<>(new ElseExpr(), ElseExpr.class, getArgContext()));
+    ElseExpr elseExpr = new ElseExpr();
+    elseExpr.setLevel(expression.getShortCircuitLevel(IfExpr.class));
+    expression.tokenDeque.push(new Token<>(elseExpr, ElseExpr.class, getArgContext()));
   }
 
   @Override
   public void exitElse_expr(StellarParser.Else_exprContext ctx) {
-    expression.tokenDeque.push(new Token<>(new EndConditional(), EndConditional.class, getArgContext()));
+    EndConditional end = new EndConditional();
+    end.setLevel(expression.getShortCircuitLevel(IfExpr.class));
+    expression.tokenDeque.push(new Token<>(end, EndConditional.class, getArgContext()));
+    expression.exitShortCircuitLevel(IfExpr.class);
   }
 
   @Override
@@ -423,7 +485,9 @@ public class StellarCompiler extends StellarBaseListener {
       )
     {
       //we want to know when the argument to the boolean expression is complete
-      expression.tokenDeque.push(new Token<>(new BooleanArg(), BooleanArg.class, getArgContext()));
+      BooleanArg op = new BooleanArg();
+      op.setLevel(expression.enterShortCircuitLevel(BooleanArg.class));
+      expression.tokenDeque.push(new Token<>(op, BooleanArg.class, getArgContext()));
     }
   }
 

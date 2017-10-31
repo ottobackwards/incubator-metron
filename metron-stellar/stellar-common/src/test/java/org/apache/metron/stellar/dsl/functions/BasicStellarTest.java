@@ -908,6 +908,10 @@ public class BasicStellarTest {
   }
 
   @Test
+  public void testNestedIf(){
+    Assert.assertEquals(true, run("RET_TRUE(if true then if true 'foo' else THROW('inner') else THROW('outer'))", new HashMap<>()));
+  }
+  @Test
   public void testShortCircuit_boolean() throws Exception {
     Assert.assertTrue(runPredicate("'metron' in ['metron', 'metronicus', 'mortron'] or (true or THROW('exception'))", new DefaultVariableResolver(x -> null,x -> false)));
     Assert.assertTrue(runPredicate("true or (true or THROW('exception'))", new DefaultVariableResolver(x -> null,x -> false)));
