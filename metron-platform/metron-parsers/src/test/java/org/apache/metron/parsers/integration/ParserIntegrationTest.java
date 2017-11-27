@@ -92,7 +92,16 @@ public abstract class ParserIntegrationTest extends BaseIntegrationTest {
     }
   }
 
-  abstract String getSensorType();
-  abstract List<ParserValidation> getValidations();
+  protected String getSampleDataPath() throws Exception{
+    return SampleDataUtils.getSampleDataPath(0,getSensorType(), TestDataType.RAW);
+  }
+
+
+  abstract public String getSensorType();
+  abstract public List<ParserValidation> getValidations();
+
+  protected String getGlobalConfigPath() throws Exception{
+    return TestConstants.SAMPLE_CONFIG_PATH;
+  }
 
 }

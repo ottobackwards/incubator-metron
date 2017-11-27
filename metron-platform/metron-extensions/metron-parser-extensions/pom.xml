@@ -10,21 +10,20 @@
 	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
 	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
   the specific language governing permissions and limitations under the License.
-  -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.apache.metron</groupId>
-	<artifactId>metron-platform</artifactId>
-	<packaging>pom</packaging>
-	<name>metron-platform</name>
 	<parent>
 		<groupId>org.apache.metron</groupId>
-		<artifactId>Metron</artifactId>
-		<version>0.4.3</version>
+		<artifactId>metron-extensions</artifactId>
+		<version>0.4.2</version>
 	</parent>
-	<description>Stream analytics for Metron</description>
+	<groupId>org.apache.metron</groupId>
+	<artifactId>metron-parser-extensions</artifactId>
+	<packaging>pom</packaging>
+	<name>metron-parser-extensions</name>
+	<version>0.4.2</version>
+
+	<description>Parser Extensions for Metron</description>
 	<url>https://metron.apache.org/</url>
 	<scm>
 		<connection>scm:git:https://git-wip-us.apache.org/repos/asf/metron.git</connection>
@@ -41,38 +40,21 @@
 		</license>
 	</licenses>
 	<modules>
-		<module>metron-hbase-client</module>
-		<module>metron-common</module>
-		<module>metron-enrichment</module>
-		<module>metron-solr</module>
-		<module>metron-parsers</module>
-		<module>metron-pcap-backend</module>
-		<module>metron-data-management</module>
-		<module>metron-pcap</module>
-		<module>metron-integration-test</module>
-		<module>metron-extensions</module>
-		<module>metron-test-utilities</module>
-		<module>metron-api</module>
-		<module>metron-indexing</module>
-		<module>metron-management</module>
-		<module>metron-writer</module>
-		<module>metron-hbase</module>
-		<module>elasticsearch-shaded</module>
-		<module>metron-elasticsearch</module>
-		<module>metron-storm-kafka</module>
-		<module>metron-storm-kafka-override</module>
-		<module>metron-zookeeper</module>
-	</modules>
+		<module>metron-parser-extensions-testing</module>
+    <module>metron-parser-bro-extension</module>
+  </modules>
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${global_slf4j_version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${global_slf4j_version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

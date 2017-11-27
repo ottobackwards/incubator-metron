@@ -17,21 +17,32 @@
  */
 package org.apache.metron.parsers.integration;
 
+import org.apache.metron.parsers.integration.validation.PathedSampleDataValidation;
 import org.apache.metron.parsers.integration.validation.SampleDataValidation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class YafIntegrationTest extends ParserIntegrationTest {
+public class BroIntegrationTest extends ParserIntegrationTest {
   @Override
   public String getSensorType() {
-    return "yaf";
+    return "bro";
   }
 
   @Override
   public List<ParserValidation> getValidations() {
     return new ArrayList<ParserValidation>() {{
-      add(new SampleDataValidation());
+      add(new PathedSampleDataValidation("src/test/resources/data/parsed/test.parsed"));
     }};
+  }
+
+  @Override
+
+  protected String getGlobalConfigPath() throws Exception{
+    return "../../../../metron-integration-test/src/main/config/zookeeper/";
+  }
+  @Override
+  protected String getSampleDataPath() throws Exception {
+    return "src/test/resources/data/raw/test.raw";
   }
 }
