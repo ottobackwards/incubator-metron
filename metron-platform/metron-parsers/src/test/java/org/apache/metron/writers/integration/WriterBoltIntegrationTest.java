@@ -78,6 +78,7 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
     public void initialize(Map<String, Object> validationConfig, Map<String, Object> globalConfig) {
     }
   }
+
   /**
    {
     "fieldValidations" : [
