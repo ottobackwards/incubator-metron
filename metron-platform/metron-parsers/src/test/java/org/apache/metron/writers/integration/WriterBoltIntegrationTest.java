@@ -20,8 +20,12 @@ package org.apache.metron.writers.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import java.io.ByteArrayOutputStream;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.metron.TestConstants;
+import org.apache.metron.bundles.BundleSystem;
+import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.stellar.dsl.Context;
@@ -38,7 +42,9 @@ import org.apache.metron.parsers.integration.components.ParserTopologyComponent;
 import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -47,6 +53,16 @@ import java.util.*;
 
 public class WriterBoltIntegrationTest extends BaseIntegrationTest {
   private static final String ERROR_TOPIC = "parser_error";
+
+  @BeforeClass
+  public static void before() {
+    BundleSystem.reset();
+  }
+
+  @AfterClass
+  public static void after() {
+    BundleSystem.reset();
+  }
 
   public static class MockValidator implements FieldValidation{
 
@@ -109,10 +125,18 @@ public class WriterBoltIntegrationTest extends BaseIntegrationTest {
     }});
     topologyProperties.setProperty("kafka.broker", kafkaComponent.getBrokerList());
 
+    // we need to patch the properties file
+    BundleProperties properties = BundleProperties.createBasicBundleProperties(
+        TestConstants.SAMPLE_CONFIG_PATH + "/bundle.properties",new HashMap<>());
+    ByteArrayOutputStream fso = new ByteArrayOutputStream();
+    properties.storeProperties(fso,"WriteBoltIntegrationTest");
+    fso.flush();
+
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
             .withGlobalConfig(globalConfig)
-            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class));
+            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class))
+            .withBundleProperties(fso.toByteArray());
 
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
             .withSensorType(sensorType)

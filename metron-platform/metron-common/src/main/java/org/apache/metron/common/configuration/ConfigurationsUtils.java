@@ -82,6 +82,17 @@ public class ConfigurationsUtils {
     writeToZookeeper(GLOBAL.getZookeeperRoot(), globalConfig, client);
   }
 
+  public static void writeGlobalBundlePropertiesToZookeeper(byte[] bundleProperties, String zookeeperUrl) throws Exception{
+    try(CuratorFramework client = getClient(zookeeperUrl)){
+      client.start();
+      writeGlobalBundlePropertiesToZookeeper(bundleProperties,client);
+    }
+  }
+
+  public static void writeGlobalBundlePropertiesToZookeeper(byte[] bundleProperties, CuratorFramework client) throws Exception{
+    writeToZookeeper(Constants.ZOOKEEPER_ROOT + "/bundle.properties", bundleProperties, client);
+  }
+
   public static void writeProfilerConfigToZookeeper(byte[] config, CuratorFramework client) throws Exception {
     PROFILER.deserialize(new String(config));
     writeToZookeeper(PROFILER.getZookeeperRoot(), config, client);
@@ -398,6 +409,10 @@ public class ConfigurationsUtils {
         setupStellarStatically(client, Optional.of(new String(globalConfig)));
         ConfigurationsUtils.writeGlobalConfigToZookeeper(readGlobalConfigFromFile(globalConfigPath), client);
       }
+      final byte[] globalBundleProperties = readBundlePropertiesFromFile(globalConfigPath);
+      if (globalBundleProperties.length > 0){
+        ConfigurationsUtils.writeGlobalBundlePropertiesToZookeeper(globalBundleProperties, client);
+      }
     }
 
     // parsers
@@ -476,6 +491,15 @@ public class ConfigurationsUtils {
       globalConfig = Files.readAllBytes(configPath.toPath());
     }
     return globalConfig;
+  }
+
+  public static byte[] readBundlePropertiesFromFile(String rootPath) throws IOException {
+    byte[] bundleProperties = new byte[0];
+    File configPath = new File(rootPath,"bundle.properties");
+    if(configPath.exists()){
+      bundleProperties = Files.readAllBytes(configPath.toPath());
+    }
+    return bundleProperties;
   }
 
   public static Map<String, byte[]> readSensorParserConfigsFromFile(String rootPath) throws IOException {
@@ -567,7 +591,6 @@ public class ConfigurationsUtils {
    * Starts up curatorclient based on zookeeperUrl.
    *
    * @param configurationType GLOBAL, PARSER, etc.
-   * @param configName e.g. bro, yaf, snort
    * @param patchData a JSON patch in the format specified by RFC 6902
    * @param zookeeperUrl configs are here
    */

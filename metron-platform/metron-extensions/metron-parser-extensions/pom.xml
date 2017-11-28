@@ -42,6 +42,7 @@
 	<modules>
 		<module>metron-parser-extensions-testing</module>
     <module>metron-parser-bro-extension</module>
+		<module>metron-parser-bundle-tests</module>
   </modules>
 	<dependencies>
 		<dependency>

@@ -17,11 +17,11 @@
  */
 package org.apache.metron.parsers.interfaces;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import org.atteo.classindex.IndexSubclasses;
 
+@IndexSubclasses
 public interface MessageParser<T> extends Configurable {
   /**
    * Initialize the message parser.  This is done once.

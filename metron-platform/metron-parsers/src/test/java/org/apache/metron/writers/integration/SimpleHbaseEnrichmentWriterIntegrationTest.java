@@ -19,10 +19,13 @@
 package org.apache.metron.writers.integration;
 
 import com.google.common.collect.ImmutableList;
+import java.io.ByteArrayOutputStream;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.TestConstants;
+import org.apache.metron.bundles.BundleSystem;
+import org.apache.metron.bundles.util.BundleProperties;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.enrichment.converter.EnrichmentConverter;
@@ -36,7 +39,9 @@ import org.apache.metron.integration.*;
 import org.apache.metron.integration.components.KafkaComponent;
 import org.apache.metron.integration.components.ZKServerComponent;
 import org.apache.metron.parsers.integration.components.ParserTopologyComponent;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -67,6 +72,16 @@ public class SimpleHbaseEnrichmentWriterIntegrationTest extends BaseIntegrationT
   @Multiline
   public static String parserConfig;
 
+  @BeforeClass
+  public static void before(){
+    BundleSystem.reset();
+  }
+
+  @AfterClass
+  public static void after() {
+    BundleSystem.reset();
+  }
+
   @Test
   public void test() throws UnableToStartException, IOException {
     final String sensorType = "dummy";
@@ -83,11 +98,17 @@ public class SimpleHbaseEnrichmentWriterIntegrationTest extends BaseIntegrationT
     }});
     topologyProperties.setProperty("kafka.broker", kafkaComponent.getBrokerList());
 
+    // we need to patch the properties file
+    BundleProperties properties = BundleProperties.createBasicBundleProperties(TestConstants.SAMPLE_CONFIG_PATH + "/bundle.properties",new HashMap<>());
+    ByteArrayOutputStream fso = new ByteArrayOutputStream();
+    properties.storeProperties(fso,"WriteBoltIntegrationTest");
+    fso.flush();
+
     ConfigUploadComponent configUploadComponent = new ConfigUploadComponent()
             .withTopologyProperties(topologyProperties)
             .withGlobalConfigsPath(TestConstants.SAMPLE_CONFIG_PATH)
-            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class));
-
+            .withParserSensorConfig(sensorType, JSONUtils.INSTANCE.load(parserConfig, SensorParserConfig.class))
+            .withBundleProperties(fso.toByteArray());
     ParserTopologyComponent parserTopologyComponent = new ParserTopologyComponent.Builder()
             .withSensorType(sensorType)
             .withTopologyProperties(topologyProperties)
