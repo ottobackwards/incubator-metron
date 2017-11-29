@@ -18,12 +18,12 @@
   <parent>
     <groupId>org.apache.metron</groupId>
     <artifactId>metron-parser-extensions</artifactId>
-    <version>0.4.2</version>
+    <version>0.4.3</version>
   </parent>
   <artifactId>metron-parser-bundle-tests</artifactId>
   <packaging>jar</packaging>
   <name>metron-parser-bundle-tests</name>
-  <version>0.4.2</version>
+  <version>${project.parent.version}</version>
   <description>Parser Extension bundle tests</description>
   <dependencies>
     <dependency>

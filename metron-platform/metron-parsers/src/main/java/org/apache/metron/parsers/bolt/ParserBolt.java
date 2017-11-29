@@ -46,6 +46,7 @@ import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.parsers.filters.Filters;
 import org.apache.metron.parsers.interfaces.MessageFilter;
 import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.parsers.loader.ParserLoader;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.apache.storm.task.OutputCollector;
@@ -106,7 +107,8 @@ public class ParserBolt extends ConfiguredParserBolt implements Serializable {
     this.collector = collector;
 
     if(this.parser == null) {
-      Optional<MessageParser<JSONObject>> optParser = ParserLoader.loadParser(stormConf, client, getSensorParserConfig());
+      Optional<MessageParser<JSONObject>> optParser = ParserLoader
+          .loadParser(client, getSensorParserConfig());
       if (optParser.isPresent()) {
         this.parser = optParser.get();
         this.parser.configure(getSensorParserConfig().getParserConfig());
