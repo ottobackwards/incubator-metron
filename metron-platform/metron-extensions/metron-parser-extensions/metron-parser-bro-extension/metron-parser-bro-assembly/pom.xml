@@ -23,7 +23,7 @@
 
     <groupId>org.apache.metron</groupId>
     <artifactId>metron-parser-bro-assembly</artifactId>
-    <version>${project.parent.version}</version>
+    <version>0.4.3</version>
     <packaging>pom</packaging>
     <name>metron-parser-bro-assembly</name>
 

@@ -22,7 +22,7 @@
     </parent>
 
     <artifactId>metron-parser-bro-bundle</artifactId>
-    <version>${project.parent.version}</version>
+    <version>0.4.3</version>
     <name>metron-parser-bro-bundle</name>
     <packaging>bundle</packaging>
     <properties>

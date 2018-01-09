@@ -23,6 +23,7 @@
 	<groupId>org.apache.metron</groupId>
 	<artifactId>metron-extensions</artifactId>
 	<packaging>pom</packaging>
+	<version>0.4.3</version>
 	<name>metron-extensions</name>
 
 	<description>Extensions for Metron</description>
