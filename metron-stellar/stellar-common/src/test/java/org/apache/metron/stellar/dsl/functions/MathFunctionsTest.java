@@ -205,10 +205,27 @@ public class MathFunctionsTest {
   }
 
   @Test
+  public void boyerMoore_calculates_plurality_from_list_of_values_o() throws Exception {
+    List<Integer> items = Arrays.asList(1, 1, 1,1, 2,2,2,3,3,3,4,4,4,4,4,4);
+    BoyerMooreState state = null;
+    for (Integer item : items) {
+      state = (BoyerMooreState) new BoyerMooreAdd().apply(Arrays.asList(state, item));
+    }
+    Assert.assertThat(new BoyerMoorePlurality().apply(ImmutableList.of(state)), CoreMatchers.equalTo(1));
+  }
+
+  @Test
   public void boyerMoore_calculates_plurality_from_list_of_mixed_objects() throws Exception {
     List<Object> items = Arrays.asList(1, 1, "orange", "orange", "jello", "jello", "jello");
     BoyerMooreState state = (BoyerMooreState) new BoyerMooreAdd().apply(Arrays.asList(null, items));
     Assert.assertThat(new BoyerMoorePlurality().apply(ImmutableList.of(state)), CoreMatchers.equalTo("jello"));
+  }
+
+  @Test
+  public void boyerMoore_calculates_plurality_from_list_of_mixed_objects_o() throws Exception {
+    List<Object> items = Arrays.asList(1,1,1,1, "orange", "orange", "jello", "jello", "jello");
+    BoyerMooreState state = (BoyerMooreState) new BoyerMooreAdd().apply(Arrays.asList(null, items));
+    Assert.assertThat(new BoyerMoorePlurality().apply(ImmutableList.of(state)), CoreMatchers.equalTo(1));
   }
 
   @Test
